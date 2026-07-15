@@ -8,7 +8,9 @@
     "build": "tsc",
     "start": "node dist/server.js",
     "typecheck": "tsc --noEmit",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+        "db:test": "PGPASSWORD=postgres psql -h postgres -U postgres -d clinic_booking -f src/database/tests/database_validation.sql",
+    "db:cleanup": "PGPASSWORD=postgres psql -h postgres -U postgres -d clinic_booking -f src/database/tests/cleanup.sql"
   },
   "keywords": [],
   "author": "",
