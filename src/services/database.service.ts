@@ -1,12 +1,12 @@
 import pg from "pg";
-
+import { database } from "../config/index.js";
 
 export const pool = new pg.Pool({
-  host: process.env.DB_HOST,
-  port: Number(process.env.DB_PORT),
-  database: process.env.DB_NAME,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
+  host: database.host,
+  port: database.port,
+  database: database.name,
+  user: database.user,
+  password: database.password,
 });
 
 pool.on("error", (err) => {

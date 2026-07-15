@@ -9,7 +9,7 @@
     "start": "node dist/server.js",
     "typecheck": "tsc --noEmit",
     "test": "echo \"Error: no test specified\" && exit 1",
-        "db:test": "PGPASSWORD=postgres psql -h postgres -U postgres -d clinic_booking -f src/database/tests/database_validation.sql",
+    "db:test": "PGPASSWORD=postgres psql -h postgres -U postgres -d clinic_booking -f src/database/tests/database_validation.sql",
     "db:cleanup": "PGPASSWORD=postgres psql -h postgres -U postgres -d clinic_booking -f src/database/tests/cleanup.sql"
   },
   "keywords": [],
@@ -18,7 +18,8 @@
   "dependencies": {
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
-    "pg": "^8.22.0"
+    "pg": "^8.22.0",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@types/express": "^5.0.6",
