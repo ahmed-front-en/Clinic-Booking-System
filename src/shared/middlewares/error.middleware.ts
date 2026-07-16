@@ -2,6 +2,7 @@ import type { Request, Response, NextFunction } from "express";
 import { AppError } from "../errors/app-error.js";
 import { HttpStatus } from "../constants/http-status.js";
 import { ApiResponse } from "../services/api-response.service.js";
+import { server } from "../../config/server.js";
 
 export function errorMiddleware(
   err: Error,
@@ -15,5 +16,10 @@ export function errorMiddleware(
   }
 
   console.error("Unhandled error:", err);
-  ApiResponse.error(res, HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred");
+
+  const message = server.nodeEnv === "production"
+    ? "An unexpected error occurred"
+    : err.message;
+
+  ApiResponse.error(res, HttpStatus.INTERNAL_SERVER_ERROR, message);
 }

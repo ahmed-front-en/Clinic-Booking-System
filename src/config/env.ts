@@ -1,5 +1,6 @@
 import dotenv from "dotenv";
 import { z } from "zod";
+import type { StringValue } from "ms";
 
 dotenv.config();
 
@@ -12,9 +13,9 @@ const envSchema = z.object({
   DB_USER: z.string().min(1),
   DB_PASSWORD: z.string().min(1),
   JWT_SECRET: z.string().min(32),
-  JWT_EXPIRES_IN: z.string().min(1),
+  JWT_EXPIRES_IN: z.string().min(1).pipe(z.custom<StringValue>()),
   JWT_REFRESH_SECRET: z.string().min(32),
-  JWT_REFRESH_EXPIRES_IN: z.string().min(1),
+  JWT_REFRESH_EXPIRES_IN: z.string().min(1).pipe(z.custom<StringValue>()),
 });
 
 export const env = envSchema.parse(process.env);
