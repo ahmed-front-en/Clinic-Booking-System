@@ -21,7 +21,7 @@ export class AuthService {
     const user = await authRepository.create({
       email: dto.email,
       passwordHash,
-      role: dto.role ?? "patient",
+      role: "patient",
     });
 
     const accessToken = jwt.sign(
@@ -40,19 +40,43 @@ export class AuthService {
   }
 
   async login(dto: LoginDto): Promise<AuthTokens> {
-    throw new Error("Not implemented");
+    const user = await authRepository.findByEmail(dto.email);
+
+    if (!user) {
+      throw new AppError(HttpStatus.UNAUTHORIZED, "Invalid email or password");
+    }
+
+    const passwordValid = await bcrypt.compare(dto.password, user.passwordHash);
+
+    if (!passwordValid) {
+      throw new AppError(HttpStatus.UNAUTHORIZED, "Invalid email or password");
+    }
+
+    const accessToken = jwt.sign(
+      { sub: user.id, role: user.role },
+      jwtConfig.secret,
+      { expiresIn: jwtConfig.expiresIn },
+    );
+
+    const refreshToken = jwt.sign(
+      { sub: user.id },
+      jwtConfig.refreshSecret,
+      { expiresIn: jwtConfig.refreshExpiresIn },
+    );
+
+    return { accessToken, refreshToken };
   }
 
-  async refreshToken(refreshToken: string): Promise<AuthTokens> {
-    throw new Error("Not implemented");
+  async refreshToken(_refreshToken: string): Promise<AuthTokens> {
+    throw new AppError(HttpStatus.NOT_IMPLEMENTED, "Not implemented");
   }
 
-  async logout(userId: UUID): Promise<void> {
-    throw new Error("Not implemented");
+  async logout(_userId: UUID): Promise<void> {
+    throw new AppError(HttpStatus.NOT_IMPLEMENTED, "Not implemented");
   }
 
-  async me(userId: UUID): Promise<UserRecord> {
-    throw new Error("Not implemented");
+  async me(_userId: UUID): Promise<UserRecord> {
+    throw new AppError(HttpStatus.NOT_IMPLEMENTED, "Not implemented");
   }
 }
 
