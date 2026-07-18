@@ -42,4 +42,16 @@ export abstract class BaseRepository {
       this.client = null;
     }
   }
+
+  async transaction<T>(fn: () => Promise<T>): Promise<T> {
+    await this.beginTransaction();
+    try {
+      const result = await fn();
+      await this.commit();
+      return result;
+    } catch (error) {
+      await this.rollback();
+      throw error;
+    }
+  }
 }
