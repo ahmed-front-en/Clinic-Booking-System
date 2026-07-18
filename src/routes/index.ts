@@ -6,6 +6,7 @@ import { specialtyRouter } from "../modules/specialties/index.js";
 import { doctorRouter } from "../modules/doctors/index.js";
 import { doctorScheduleRouter } from "../modules/doctor-schedules/index.js";
 import { appointmentSlotRouter } from "../modules/appointment-slots/index.js";
+import { appointmentRouter } from "../modules/appointments/index.js";
 
 const router = Router();
 
@@ -16,5 +17,6 @@ router.use("/admin/specialties", specialtyRouter);
 router.use("/admin/doctors", doctorRouter);
 router.use("/admin/doctor-schedules", doctorScheduleRouter);
 router.use("/admin/appointment-slots", appointmentSlotRouter);
+router.use("/admin/appointments", appointmentRouter);
 
 export default router;
