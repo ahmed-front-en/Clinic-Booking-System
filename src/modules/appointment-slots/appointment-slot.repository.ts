@@ -42,6 +42,7 @@ export class AppointmentSlotRepository extends BaseRepository {
     const result = await this.query<AppointmentSlotRecord>(
       `SELECT ${this.selectFields}
        FROM appointment_slots
+       WHERE deleted_at IS NULL
        ORDER BY slot_date, start_time`,
     );
     return result.rows;
@@ -51,7 +52,7 @@ export class AppointmentSlotRepository extends BaseRepository {
     const result = await this.query<AppointmentSlotRecord>(
       `SELECT ${this.selectFields}
        FROM appointment_slots
-       WHERE id = $1`,
+       WHERE id = $1 AND deleted_at IS NULL`,
       [id],
     );
     return result.rows[0] ?? null;
@@ -61,7 +62,7 @@ export class AppointmentSlotRepository extends BaseRepository {
     const result = await this.query<AppointmentSlotRecord>(
       `SELECT ${this.selectFields}
        FROM appointment_slots
-       WHERE doctor_id = $1
+       WHERE doctor_id = $1 AND deleted_at IS NULL
        ORDER BY slot_date, start_time`,
       [doctorId],
     );
@@ -72,7 +73,7 @@ export class AppointmentSlotRepository extends BaseRepository {
     const result = await this.query<AppointmentSlotRecord>(
       `SELECT ${this.selectFields}
        FROM appointment_slots
-       WHERE slot_date = $1::date
+       WHERE slot_date = $1::date AND deleted_at IS NULL
        ORDER BY start_time`,
       [slotDate],
     );
@@ -80,7 +81,7 @@ export class AppointmentSlotRepository extends BaseRepository {
   }
 
   async findAvailable(filters?: { doctorId?: UUID; date?: string }): Promise<AppointmentSlotRecord[]> {
-    const conditions: string[] = ["status = 'available'"];
+    const conditions: string[] = ["status = 'available'", "deleted_at IS NULL"];
     const values: unknown[] = [];
     let paramIndex = 1;
 
@@ -111,7 +112,7 @@ export class AppointmentSlotRepository extends BaseRepository {
     const result = await this.query<AppointmentSlotRecord>(
       `SELECT ${this.selectFields}
        FROM appointment_slots
-       WHERE doctor_id = $1 AND slot_date = $2::date AND start_time = $3::time`,
+       WHERE doctor_id = $1 AND slot_date = $2::date AND start_time = $3::time AND deleted_at IS NULL`,
       [doctorId, slotDate, startTime],
     );
     return result.rows[0] ?? null;
@@ -171,7 +172,7 @@ export class AppointmentSlotRepository extends BaseRepository {
     const result = await this.query<AppointmentSlotRecord>(
       `UPDATE appointment_slots
        SET ${sets.join(", ")}
-       WHERE id = $${paramIndex}
+       WHERE id = $${paramIndex} AND deleted_at IS NULL
        RETURNING ${this.selectFields}`,
       values,
     );
@@ -180,7 +181,9 @@ export class AppointmentSlotRepository extends BaseRepository {
 
   async delete(id: UUID): Promise<boolean> {
     const result = await this.query(
-      `DELETE FROM appointment_slots WHERE id = $1`,
+      `UPDATE appointment_slots
+       SET deleted_at = NOW(), updated_at = NOW()
+       WHERE id = $1 AND deleted_at IS NULL`,
       [id],
     );
     return (result.rowCount ?? 0) > 0;

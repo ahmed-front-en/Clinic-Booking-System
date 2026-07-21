@@ -72,7 +72,7 @@ export class AppointmentRepository extends BaseRepository {
       `SELECT a.id, a.patient_id AS "patientId", a.slot_id AS "slotId", a.status, a.notes
        FROM appointments a
        JOIN appointment_slots s ON a.slot_id = s.id
-       WHERE s.doctor_id = $1
+       WHERE s.doctor_id = $1 AND s.deleted_at IS NULL
        ORDER BY a.id`,
       [doctorId],
     );
@@ -91,7 +91,7 @@ export class AppointmentRepository extends BaseRepository {
     const result = await this.query<SlotStatusRow>(
       `SELECT id, status, deleted_at AS "deletedAt"
        FROM appointment_slots
-       WHERE id = $1`,
+       WHERE id = $1 AND deleted_at IS NULL`,
       [id],
     );
     return result.rows[0] ?? null;
@@ -107,7 +107,7 @@ export class AppointmentRepository extends BaseRepository {
 
   async updateSlotStatus(slotId: UUID, status: string): Promise<void> {
     await this.query(
-      `UPDATE appointment_slots SET status = $1, updated_at = NOW() WHERE id = $2`,
+      `UPDATE appointment_slots SET status = $1, updated_at = NOW() WHERE id = $2 AND deleted_at IS NULL`,
       [status, slotId],
     );
   }

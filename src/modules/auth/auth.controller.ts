@@ -32,7 +32,7 @@ export class AuthController extends BaseController {
 
   logout = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      // TODO: implement when authService.logout is ready
+      await authService.logout(req.body.refreshToken);
       this.noContent(res);
     } catch (error) {
       next(error);
@@ -41,8 +41,8 @@ export class AuthController extends BaseController {
 
   me = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      // TODO: implement when authService.me is ready
-      this.noContent(res);
+      const user = await authService.me(req.user!.sub);
+      this.ok(res, user);
     } catch (error) {
       next(error);
     }

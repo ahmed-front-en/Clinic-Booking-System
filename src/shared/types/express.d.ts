@@ -1,9 +1,8 @@
-/* eslint-disable @typescript-eslint/no-empty-interface */
 import "express";
+import type { AuthenticatedUser } from "./user.types.js";
 
 declare module "express" {
   export interface Request {
-    /** Authenticated user payload — populated by auth middleware. */
-    user?: Record<string, unknown>;
+    user?: AuthenticatedUser;
   }
 }
