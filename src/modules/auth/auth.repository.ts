@@ -27,10 +27,10 @@ deleted_at AS "deletedAt"
 
   async create(data: CreateUserInput): Promise<UserRecord> {
     const result = await this.query<UserRecord>(
-      `INSERT INTO users (email, password_hash, role)
-       VALUES ($1, $2, $3)
+      `INSERT INTO users (email, password_hash, role, is_verified)
+       VALUES ($1, $2, $3, $4)
        RETURNING ${this.selectFields}`,
-      [data.email, data.passwordHash, data.role],
+      [data.email, data.passwordHash, data.role, data.isVerified ?? false],
     );
     return result.rows[0];
   }
