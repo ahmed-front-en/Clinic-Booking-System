@@ -1,7 +1,17 @@
+import crypto from "node:crypto";
 import { BaseRepository } from "../../shared/repositories/base.repository.js";
 import { pool } from "../../services/database.service.js";
 import type { UserRecord, CreateUserInput } from "./auth.interfaces.js";
 import type { UUID } from "../../shared/types/common.types.js";
+
+interface RefreshTokenRow {
+  id: UUID;
+  user_id: UUID;
+  token_hash: string;
+  expires_at: Date;
+  revoked_at: Date | null;
+  created_at: Date;
+}
 
 export class AuthRepository extends BaseRepository {
   private readonly selectFields = `
@@ -45,6 +55,45 @@ deleted_at AS "deletedAt"
       [id],
     );
     return result.rows[0] ?? null;
+  }
+
+  async createPatient(userId: UUID, fullName: string): Promise<void> {
+    await this.query(
+      `INSERT INTO patients (user_id, full_name)
+       VALUES ($1, $2)`,
+      [userId, fullName],
+    );
+  }
+
+  async saveRefreshToken(userId: UUID, tokenHash: string, expiresAt: Date): Promise<void> {
+    await this.query(
+      `INSERT INTO refresh_tokens (user_id, token_hash, expires_at)
+       VALUES ($1, $2, $3)`,
+      [userId, tokenHash, expiresAt],
+    );
+  }
+
+  async findRefreshToken(tokenHash: string): Promise<RefreshTokenRow | null> {
+    const result = await this.query<RefreshTokenRow>(
+      `SELECT id, user_id, token_hash, expires_at, revoked_at, created_at
+       FROM refresh_tokens
+       WHERE token_hash = $1
+       AND revoked_at IS NULL
+       AND expires_at > NOW()`,
+      [tokenHash],
+    );
+    return result.rows[0] ?? null;
+  }
+
+  async revokeRefreshToken(tokenHash: string): Promise<void> {
+    await this.query(
+      `UPDATE refresh_tokens SET revoked_at = NOW() WHERE token_hash = $1 AND revoked_at IS NULL`,
+      [tokenHash],
+    );
+  }
+
+  hashToken(token: string): string {
+    return crypto.createHash("sha256").update(token).digest("hex");
   }
 }
 

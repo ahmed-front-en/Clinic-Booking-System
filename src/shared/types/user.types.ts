@@ -12,3 +12,18 @@ export interface UserRecord {
   updatedAt: Date;
   deletedAt: Date | null;
 }
+
+export interface UserPublic {
+  id: UUID;
+  email: string;
+  role: UserRole;
+  isVerified: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  deletedAt: Date | null;
+}
+
+export interface AuthenticatedUser {
+  sub: UUID;
+  role: UserRole;
+}

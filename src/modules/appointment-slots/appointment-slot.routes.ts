@@ -1,17 +1,18 @@
 import { Router } from "express";
 import { validate } from "../../shared/middlewares/validation.middleware.js";
+import { authenticate, authorize } from "../../shared/middlewares/auth.middleware.js";
 import { createAppointmentSlotSchema, updateAppointmentSlotSchema } from "./appointment-slot.validation.js";
 import { appointmentSlotController } from "./appointment-slot.controller.js";
 
 const router = Router();
 
-router.post("/", validate(createAppointmentSlotSchema), appointmentSlotController.create);
-router.get("/", appointmentSlotController.findAll);
-router.get("/available", appointmentSlotController.findAvailable);
-router.get("/doctor/:doctorId", appointmentSlotController.findByDoctorId);
-router.get("/date/:slotDate", appointmentSlotController.findByDate);
-router.get("/:id", appointmentSlotController.findById);
-router.patch("/:id", validate(updateAppointmentSlotSchema), appointmentSlotController.update);
-router.delete("/:id", appointmentSlotController.delete);
+router.post("/", authenticate, authorize("admin"), validate(createAppointmentSlotSchema), appointmentSlotController.create);
+router.get("/", authenticate, authorize("admin"), appointmentSlotController.findAll);
+router.get("/available", authenticate, appointmentSlotController.findAvailable);
+router.get("/doctor/:doctorId", authenticate, appointmentSlotController.findByDoctorId);
+router.get("/date/:slotDate", authenticate, appointmentSlotController.findByDate);
+router.get("/:id", authenticate, authorize("admin"), appointmentSlotController.findById);
+router.patch("/:id", authenticate, authorize("admin"), validate(updateAppointmentSlotSchema), appointmentSlotController.update);
+router.delete("/:id", authenticate, authorize("admin"), appointmentSlotController.delete);
 
 export { router as appointmentSlotRouter };
