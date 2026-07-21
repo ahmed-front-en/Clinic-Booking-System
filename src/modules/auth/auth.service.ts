@@ -1,9 +1,9 @@
 import crypto from "node:crypto";
-import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import ms from "ms";
 import { authRepository } from "./auth.repository.js";
 import { jwt as jwtConfig } from "../../config/index.js";
+import { hashPassword, comparePassword } from "../../shared/utils/password.js";
 import { AppError } from "../../shared/errors/app-error.js";
 import { HttpStatus } from "../../shared/constants/http-status.js";
 import type { RegisterDto, LoginDto, AuthTokens } from "./auth.types.js";
@@ -40,7 +40,7 @@ export class AuthService {
       throw new AppError(HttpStatus.CONFLICT, "Email already exists");
     }
 
-    const passwordHash = await bcrypt.hash(dto.password, 12);
+    const passwordHash = await hashPassword(dto.password);
 
     const user = await authRepository.transaction(async () => {
       const u = await authRepository.create({
@@ -67,7 +67,7 @@ export class AuthService {
       throw new AppError(HttpStatus.UNAUTHORIZED, "Invalid email or password");
     }
 
-    const passwordValid = await bcrypt.compare(dto.password, user.passwordHash);
+    const passwordValid = await comparePassword(dto.password, user.passwordHash);
 
     if (!passwordValid) {
       throw new AppError(HttpStatus.UNAUTHORIZED, "Invalid email or password");

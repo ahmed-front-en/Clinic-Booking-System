@@ -7,4 +7,5 @@ export interface CreateUserInput {
   email: string;
   passwordHash: string;
   role: UserRole;
+  isVerified?: boolean;
 }
