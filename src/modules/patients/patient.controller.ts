@@ -3,6 +3,24 @@ import { BaseController } from "../../shared/controllers/base.controller.js";
 import { patientService } from "./patient.service.js";
 
 export class PatientController extends BaseController {
+  findMyProfile = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const patient = await patientService.findByUserId(req.user!.sub);
+      this.ok(res, patient);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  updateMyProfile = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const patient = await patientService.updateMyProfile(req.user!.sub, req.body);
+      this.ok(res, patient, "Profile updated successfully");
+    } catch (error) {
+      next(error);
+    }
+  };
+
   create = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const patient = await patientService.create(req.body);

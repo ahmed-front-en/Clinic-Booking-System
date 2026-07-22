@@ -1,0 +1,57 @@
+export const Permissions = {
+  MANAGE_USERS: "manageUsers",
+  MANAGE_PATIENTS: "managePatients",
+  MANAGE_DOCTORS: "manageDoctors",
+  MANAGE_CLINICS: "manageClinics",
+  MANAGE_SPECIALTIES: "manageSpecialties",
+  MANAGE_SCHEDULES: "manageSchedules",
+  MANAGE_SLOTS: "manageSlots",
+  MANAGE_APPOINTMENTS: "manageAppointments",
+  MANAGE_PAYMENTS: "managePayments",
+  MANAGE_REVIEWS: "manageReviews",
+  MANAGE_NOTIFICATIONS: "manageNotifications",
+  VIEW_OWN_PROFILE: "viewOwnProfile",
+  MANAGE_OWN_PROFILE: "manageOwnProfile",
+  VIEW_OWN_SCHEDULE: "viewOwnSchedule",
+  BOOK_APPOINTMENT: "bookAppointment",
+  MANAGE_OWN_APPOINTMENTS: "manageOwnAppointments",
+  PAY_APPOINTMENT: "payAppointment",
+  MANAGE_OWN_REVIEWS: "manageOwnReviews",
+  VIEW_OWN_REVIEWS: "viewOwnReviews",
+  MANAGE_OWN_NOTIFICATIONS: "manageOwnNotifications",
+} as const;
+
+export type Permission = (typeof Permissions)[keyof typeof Permissions];
+
+export const RolePermissions: Record<string, Permission[]> = {
+  admin: [
+    Permissions.MANAGE_USERS,
+    Permissions.MANAGE_PATIENTS,
+    Permissions.MANAGE_DOCTORS,
+    Permissions.MANAGE_CLINICS,
+    Permissions.MANAGE_SPECIALTIES,
+    Permissions.MANAGE_SCHEDULES,
+    Permissions.MANAGE_SLOTS,
+    Permissions.MANAGE_APPOINTMENTS,
+    Permissions.MANAGE_PAYMENTS,
+    Permissions.MANAGE_REVIEWS,
+    Permissions.MANAGE_NOTIFICATIONS,
+  ],
+  doctor: [
+    Permissions.VIEW_OWN_PROFILE,
+    Permissions.MANAGE_OWN_PROFILE,
+    Permissions.VIEW_OWN_SCHEDULE,
+    Permissions.MANAGE_OWN_APPOINTMENTS,
+    Permissions.VIEW_OWN_REVIEWS,
+    Permissions.MANAGE_OWN_NOTIFICATIONS,
+  ],
+  patient: [
+    Permissions.VIEW_OWN_PROFILE,
+    Permissions.MANAGE_OWN_PROFILE,
+    Permissions.BOOK_APPOINTMENT,
+    Permissions.MANAGE_OWN_APPOINTMENTS,
+    Permissions.PAY_APPOINTMENT,
+    Permissions.MANAGE_OWN_REVIEWS,
+    Permissions.MANAGE_OWN_NOTIFICATIONS,
+  ],
+} as const;

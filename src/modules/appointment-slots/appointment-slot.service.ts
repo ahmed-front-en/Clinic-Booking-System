@@ -26,6 +26,16 @@ export class AppointmentSlotService {
       throw new AppError(HttpStatus.CONFLICT, "Appointment slot already exists for this doctor on this date and start time");
     }
 
+    const overlapping = await appointmentSlotRepository.findOverlapping(
+      dto.doctorId,
+      dto.slotDate,
+      dto.startTime,
+      dto.endTime,
+    );
+    if (overlapping) {
+      throw new AppError(HttpStatus.CONFLICT, "Appointment slot overlaps with an existing slot");
+    }
+
     return appointmentSlotRepository.create({
       doctorId: dto.doctorId,
       doctorScheduleId: dto.doctorScheduleId,
@@ -92,9 +102,10 @@ export class AppointmentSlotService {
       throw new AppError(HttpStatus.BAD_REQUEST, "No fields provided for update");
     }
 
-    if (dto.startTime !== undefined || dto.slotDate !== undefined) {
+    if (dto.startTime !== undefined || dto.slotDate !== undefined || dto.endTime !== undefined) {
       const checkDate = dto.slotDate ?? slot.slotDate;
       const checkStartTime = dto.startTime ?? slot.startTime;
+      const checkEndTime = dto.endTime ?? slot.endTime;
 
       const existing = await appointmentSlotRepository.findDuplicate(
         slot.doctorId,
@@ -103,6 +114,17 @@ export class AppointmentSlotService {
       );
       if (existing && existing.id !== id) {
         throw new AppError(HttpStatus.CONFLICT, "Appointment slot already exists for this doctor on this date and start time");
+      }
+
+      const overlapping = await appointmentSlotRepository.findOverlapping(
+        slot.doctorId,
+        checkDate,
+        checkStartTime,
+        checkEndTime,
+        id,
+      );
+      if (overlapping) {
+        throw new AppError(HttpStatus.CONFLICT, "Appointment slot overlaps with an existing slot");
       }
     }
 

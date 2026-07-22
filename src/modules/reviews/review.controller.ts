@@ -3,6 +3,24 @@ import { BaseController } from "../../shared/controllers/base.controller.js";
 import { reviewService } from "./review.service.js";
 
 export class ReviewController extends BaseController {
+  createAsPatient = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const review = await reviewService.createAsPatient(req.user!.sub, req.body);
+      this.created(res, review, "Review created successfully");
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  findMyReviews = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const reviews = await reviewService.findMyReviews(req.user!.sub, req.user!.role);
+      this.ok(res, reviews);
+    } catch (error) {
+      next(error);
+    }
+  };
+
   create = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const review = await reviewService.create(req.body);

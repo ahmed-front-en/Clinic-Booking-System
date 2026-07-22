@@ -6,6 +6,14 @@ import type { DoctorScheduleRecord } from "./doctor-schedule.interfaces.js";
 import type { UUID } from "../../shared/types/common.types.js";
 
 export class DoctorScheduleService {
+  async findMySchedule(userId: UUID): Promise<DoctorScheduleRecord[]> {
+    const doctor = await doctorScheduleRepository.findDoctorByUserId(userId);
+    if (!doctor) {
+      throw AppError.notFound("Doctor profile not found");
+    }
+    return doctorScheduleRepository.findByDoctorId(doctor.id);
+  }
+
   async create(dto: CreateDoctorScheduleDto): Promise<DoctorScheduleRecord> {
     const doctor = await doctorScheduleRepository.findDoctorById(dto.doctorId);
     if (!doctor) {

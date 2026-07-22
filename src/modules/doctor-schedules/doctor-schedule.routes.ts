@@ -1,18 +1,19 @@
 import { Router } from "express";
 import { validate } from "../../shared/middlewares/validation.middleware.js";
 import { authenticate, authorize } from "../../shared/middlewares/auth.middleware.js";
+import { Permissions } from "../../shared/constants/permissions.js";
 import { createDoctorScheduleSchema, updateDoctorScheduleSchema } from "./doctor-schedule.validation.js";
 import { doctorScheduleController } from "./doctor-schedule.controller.js";
 
 const router = Router();
 
-router.use(authenticate, authorize("admin"));
+router.get("/me", authenticate, authorize(Permissions.VIEW_OWN_SCHEDULE), doctorScheduleController.findMySchedule);
 
-router.post("/", validate(createDoctorScheduleSchema), doctorScheduleController.create);
-router.get("/", doctorScheduleController.findAll);
-router.get("/doctor/:doctorId", doctorScheduleController.findByDoctorId);
-router.get("/:id", doctorScheduleController.findById);
-router.patch("/:id", validate(updateDoctorScheduleSchema), doctorScheduleController.update);
-router.delete("/:id", doctorScheduleController.delete);
+router.get("/doctor/:doctorId", authenticate, authorize(Permissions.MANAGE_SCHEDULES), doctorScheduleController.findByDoctorId);
+router.get("/", authenticate, authorize(Permissions.MANAGE_SCHEDULES), doctorScheduleController.findAll);
+router.get("/:id", authenticate, authorize(Permissions.MANAGE_SCHEDULES), doctorScheduleController.findById);
+router.post("/", authenticate, authorize(Permissions.MANAGE_SCHEDULES), validate(createDoctorScheduleSchema), doctorScheduleController.create);
+router.patch("/:id", authenticate, authorize(Permissions.MANAGE_SCHEDULES), validate(updateDoctorScheduleSchema), doctorScheduleController.update);
+router.delete("/:id", authenticate, authorize(Permissions.MANAGE_SCHEDULES), doctorScheduleController.delete);
 
 export { router as doctorScheduleRouter };

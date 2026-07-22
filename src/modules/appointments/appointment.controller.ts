@@ -3,6 +3,33 @@ import { BaseController } from "../../shared/controllers/base.controller.js";
 import { appointmentService } from "./appointment.service.js";
 
 export class AppointmentController extends BaseController {
+  createAsPatient = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const appointment = await appointmentService.createAsPatient(req.user!.sub, req.body);
+      this.created(res, appointment, "Appointment created successfully");
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  findMyAppointments = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const appointments = await appointmentService.findMyAppointments(req.user!.sub, req.user!.role);
+      this.ok(res, appointments);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  cancelMyAppointment = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const appointment = await appointmentService.cancelMyAppointment(req.user!.sub, req.user!.role, req.params.id as string);
+      this.ok(res, appointment, "Appointment cancelled successfully");
+    } catch (error) {
+      next(error);
+    }
+  };
+
   create = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const appointment = await appointmentService.create(req.body);

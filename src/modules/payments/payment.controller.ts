@@ -3,6 +3,24 @@ import { BaseController } from "../../shared/controllers/base.controller.js";
 import { paymentService } from "./payment.service.js";
 
 export class PaymentController extends BaseController {
+  createAsPatient = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const payment = await paymentService.createAsPatient(req.user!.sub, req.body);
+      this.created(res, payment, "Payment created successfully");
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  findMyPayments = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const payments = await paymentService.findMyPayments(req.user!.sub);
+      this.ok(res, payments);
+    } catch (error) {
+      next(error);
+    }
+  };
+
   create = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const payment = await paymentService.create(req.body);

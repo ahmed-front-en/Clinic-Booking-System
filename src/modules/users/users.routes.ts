@@ -1,9 +1,13 @@
 import { Router } from "express";
 import { validate } from "../../shared/middlewares/validation.middleware.js";
+import { authenticate, authorize } from "../../shared/middlewares/auth.middleware.js";
+import { Permissions } from "../../shared/constants/permissions.js";
 import { updateUserSchema, userFilterSchema } from "./users.validation.js";
 import { usersController } from "./users.controller.js";
 
 const router = Router();
+
+router.use(authenticate, authorize(Permissions.MANAGE_USERS));
 
 router.get("/", validate(userFilterSchema), usersController.findAll);
 router.get("/:id", usersController.findById);

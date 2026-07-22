@@ -6,6 +6,14 @@ import type { PatientRecord } from "./patient.interfaces.js";
 import type { UUID } from "../../shared/types/common.types.js";
 
 export class PatientService {
+  async updateMyProfile(userId: UUID, dto: UpdatePatientDto): Promise<PatientRecord> {
+    const patient = await patientRepository.findByUserId(userId);
+    if (!patient) {
+      throw AppError.notFound("Patient profile not found");
+    }
+    return this.update(patient.id, dto);
+  }
+
   async create(dto: CreatePatientDto): Promise<PatientRecord> {
     const user = await patientRepository.findUserById(dto.userId);
     if (!user) {

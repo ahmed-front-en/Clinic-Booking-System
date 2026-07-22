@@ -4,8 +4,66 @@ import { HttpStatus } from "../../shared/constants/http-status.js";
 import type { CreateAppointmentDto, UpdateAppointmentDto } from "./appointment.types.js";
 import type { AppointmentRecord } from "./appointment.interfaces.js";
 import type { UUID } from "../../shared/types/common.types.js";
+import type { UserRole } from "../../shared/types/user.types.js";
 
 export class AppointmentService {
+  async createAsPatient(userId: UUID, dto: CreateAppointmentDto): Promise<AppointmentRecord> {
+    const patient = await appointmentRepository.findPatientByUserId(userId);
+    if (!patient) {
+      throw AppError.notFound("Patient profile not found");
+    }
+    return this.create({ ...dto, patientId: patient.id });
+  }
+
+  async findMyAppointments(userId: UUID, role: UserRole): Promise<AppointmentRecord[]> {
+    if (role === "patient") {
+      const patient = await appointmentRepository.findPatientByUserId(userId);
+      if (!patient) return [];
+      return this.findByPatientId(patient.id);
+    }
+    if (role === "doctor") {
+      const doctor = await appointmentRepository.findDoctorByUserId(userId);
+      if (!doctor) return [];
+      return this.findByDoctorId(doctor.id);
+    }
+    return [];
+  }
+
+  async cancelMyAppointment(userId: UUID, role: UserRole, appointmentId: UUID): Promise<AppointmentRecord> {
+    const appointment = await this.findById(appointmentId);
+
+    if (role === "patient") {
+      const patient = await appointmentRepository.findPatientByUserId(userId);
+      if (!patient || appointment.patientId !== patient.id) {
+        throw AppError.forbidden("You can only cancel your own appointments");
+      }
+      const slot = await appointmentRepository.findSlotTimeInfo(appointment.slotId);
+      if (slot) {
+        const appointmentDateTime = new Date(`${slot.slotDate}T${slot.startTime}`);
+        if (new Date() >= appointmentDateTime) {
+          throw new AppError(HttpStatus.BAD_REQUEST, "Cannot cancel past appointments");
+        }
+      }
+    }
+
+    if (role === "doctor") {
+      const doctor = await appointmentRepository.findDoctorByUserId(userId);
+      if (!doctor) {
+        throw AppError.forbidden("Doctor profile not found");
+      }
+      const slot = await appointmentRepository.findSlotTimeInfo(appointment.slotId);
+      if (!slot || slot.doctorId !== doctor.id) {
+        throw AppError.forbidden("You can only cancel appointments assigned to you");
+      }
+    }
+
+    const cancelled = await appointmentRepository.cancelIfSchedulable(appointmentId, appointment.slotId);
+    if (!cancelled) {
+      throw new AppError(HttpStatus.BAD_REQUEST, "Can only cancel scheduled or confirmed appointments");
+    }
+    return cancelled;
+  }
+
   async create(dto: CreateAppointmentDto): Promise<AppointmentRecord> {
     const patient = await appointmentRepository.findPatientById(dto.patientId);
     if (!patient) {

@@ -9,10 +9,23 @@ import { appointmentRouter } from "../modules/appointments/index.js";
 import { paymentRouter } from "../modules/payments/index.js";
 import { reviewRouter } from "../modules/reviews/index.js";
 import { patientRouter } from "../modules/patients/index.js";
+import { usersRouter } from "../modules/users/index.js";
 
 const router = Router();
 
 router.use("/auth", authRouter);
+
+router.use("/clinics", clinicRouter);
+router.use("/specialties", specialtyRouter);
+router.use("/doctors", doctorRouter);
+router.use("/appointment-slots", appointmentSlotRouter);
+
+router.use("/appointments", appointmentRouter);
+router.use("/payments", paymentRouter);
+router.use("/reviews", reviewRouter);
+router.use("/patients", patientRouter);
+router.use("/doctor-schedules", doctorScheduleRouter);
+
 router.use("/admin/clinics", clinicRouter);
 router.use("/admin/specialties", specialtyRouter);
 router.use("/admin/doctors", doctorRouter);
@@ -22,5 +35,6 @@ router.use("/admin/appointments", appointmentRouter);
 router.use("/admin/payments", paymentRouter);
 router.use("/admin/reviews", reviewRouter);
 router.use("/admin/patients", patientRouter);
+router.use("/admin/users", usersRouter);
 
 export default router;
