@@ -5,5 +5,4 @@ export { usersRepository } from "./users.repository.js";
 
 export { updateUserSchema, userFilterSchema } from "./users.validation.js";
 export type { UpdateUserDto, UserFilter } from "./users.types.js";
-export type { UpdateUserInput } from "./users.interfaces.js";
-export type { UserRecord } from "../../shared/types/user.types.js";
+export type { UpdateUserInput, UserRecord } from "./users.interfaces.js";

@@ -138,8 +138,16 @@ export class AppointmentService {
 
     return appointmentRepository.transaction(async () => {
       if (dto.status !== undefined) {
-        if (dto.status === "cancelled") {
+        const newStatus = dto.status;
+        const currentStatus = appointment.status;
+
+        if (newStatus === "cancelled" && currentStatus !== "cancelled") {
           await appointmentRepository.updateSlotStatus(appointment.slotId, "available");
+        } else if (
+          (newStatus === "scheduled" || newStatus === "confirmed") &&
+          currentStatus === "cancelled"
+        ) {
+          await appointmentRepository.updateSlotStatus(appointment.slotId, "booked");
         }
       }
 

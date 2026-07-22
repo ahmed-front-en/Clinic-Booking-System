@@ -5,13 +5,18 @@ import { Permissions } from "../../shared/constants/permissions.js";
 import { createClinicSchema, updateClinicSchema } from "./clinic.validation.js";
 import { clinicController } from "./clinic.controller.js";
 
-const router = Router();
+const publicRouter = Router();
+const adminRouter = Router();
 
-router.get("/", clinicController.findAll);
-router.get("/:id", clinicController.findById);
+publicRouter.get("/", clinicController.findAll);
+publicRouter.get("/:id", clinicController.findById);
 
-router.post("/", authenticate, authorize(Permissions.MANAGE_CLINICS), validate(createClinicSchema), clinicController.create);
-router.patch("/:id", authenticate, authorize(Permissions.MANAGE_CLINICS), validate(updateClinicSchema), clinicController.update);
-router.delete("/:id", authenticate, authorize(Permissions.MANAGE_CLINICS), clinicController.delete);
+adminRouter.use(authenticate, authorize(Permissions.MANAGE_CLINICS));
 
-export { router as clinicRouter };
+adminRouter.get("/", clinicController.findAll);
+adminRouter.get("/:id", clinicController.findById);
+adminRouter.post("/", validate(createClinicSchema), clinicController.create);
+adminRouter.patch("/:id", validate(updateClinicSchema), clinicController.update);
+adminRouter.delete("/:id", clinicController.delete);
+
+export { publicRouter as clinicRouter, adminRouter as clinicAdminRouter };

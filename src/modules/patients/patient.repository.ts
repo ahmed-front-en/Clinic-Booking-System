@@ -64,7 +64,7 @@ export class PatientRepository extends BaseRepository {
 
   async findUserById(id: UUID): Promise<IdRow | null> {
     const result = await this.query<IdRow>(
-      `SELECT id FROM users WHERE id = $1`,
+      `SELECT id FROM users WHERE id = $1 AND deleted_at IS NULL`,
       [id],
     );
     return result.rows[0] ?? null;

@@ -1,4 +1,4 @@
-export { clinicRouter } from "./clinic.routes.js";
+export { clinicRouter, clinicAdminRouter } from "./clinic.routes.js";
 export { clinicController } from "./clinic.controller.js";
 export { clinicService } from "./clinic.service.js";
 export { clinicRepository } from "./clinic.repository.js";

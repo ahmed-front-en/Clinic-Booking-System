@@ -2,12 +2,12 @@ import { Router } from "express";
 import { validate } from "../../shared/middlewares/validation.middleware.js";
 import { authenticate, authorize } from "../../shared/middlewares/auth.middleware.js";
 import { Permissions } from "../../shared/constants/permissions.js";
-import { createAppointmentSchema, updateAppointmentSchema } from "./appointment.validation.js";
+import { createAppointmentSchema, createAppointmentSelfSchema, updateAppointmentSchema } from "./appointment.validation.js";
 import { appointmentController } from "./appointment.controller.js";
 
 const router = Router();
 
-router.post("/", authenticate, authorize(Permissions.BOOK_APPOINTMENT, Permissions.MANAGE_OWN_APPOINTMENTS), validate(createAppointmentSchema), appointmentController.createAsPatient);
+router.post("/", authenticate, authorize(Permissions.BOOK_APPOINTMENT, Permissions.MANAGE_OWN_APPOINTMENTS), validate(createAppointmentSelfSchema), appointmentController.createAsPatient);
 router.get("/mine", authenticate, authorize(Permissions.MANAGE_OWN_APPOINTMENTS), appointmentController.findMyAppointments);
 router.patch("/mine/:id", authenticate, authorize(Permissions.MANAGE_OWN_APPOINTMENTS), appointmentController.cancelMyAppointment);
 

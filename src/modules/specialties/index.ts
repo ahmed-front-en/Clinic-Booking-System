@@ -1,4 +1,4 @@
-export { specialtyRouter } from "./specialty.routes.js";
+export { specialtyRouter, specialtyAdminRouter } from "./specialty.routes.js";
 export { specialtyController } from "./specialty.controller.js";
 export { specialtyService } from "./specialty.service.js";
 export { specialtyRepository } from "./specialty.repository.js";

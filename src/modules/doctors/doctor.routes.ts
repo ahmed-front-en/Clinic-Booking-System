@@ -5,13 +5,18 @@ import { Permissions } from "../../shared/constants/permissions.js";
 import { createDoctorSchema, updateDoctorSchema } from "./doctor.validation.js";
 import { doctorController } from "./doctor.controller.js";
 
-const router = Router();
+const publicRouter = Router();
+const adminRouter = Router();
 
-router.get("/", doctorController.findAll);
-router.get("/:id", doctorController.findById);
+publicRouter.get("/", doctorController.findAll);
+publicRouter.get("/:id", doctorController.findById);
 
-router.post("/", authenticate, authorize(Permissions.MANAGE_DOCTORS), validate(createDoctorSchema), doctorController.create);
-router.patch("/:id", authenticate, authorize(Permissions.MANAGE_DOCTORS), validate(updateDoctorSchema), doctorController.update);
-router.delete("/:id", authenticate, authorize(Permissions.MANAGE_DOCTORS), doctorController.delete);
+adminRouter.use(authenticate, authorize(Permissions.MANAGE_DOCTORS));
 
-export { router as doctorRouter };
+adminRouter.get("/", doctorController.findAll);
+adminRouter.get("/:id", doctorController.findById);
+adminRouter.post("/", validate(createDoctorSchema), doctorController.create);
+adminRouter.patch("/:id", validate(updateDoctorSchema), doctorController.update);
+adminRouter.delete("/:id", doctorController.delete);
+
+export { publicRouter as doctorRouter, adminRouter as doctorAdminRouter };
