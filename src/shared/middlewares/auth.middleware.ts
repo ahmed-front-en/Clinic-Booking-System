@@ -3,7 +3,8 @@ import jwt from "jsonwebtoken";
 import { jwt as jwtConfig } from "../../config/jwt.js";
 import { AppError } from "../errors/app-error.js";
 import { HttpStatus } from "../constants/http-status.js";
-import type { AuthenticatedUser, UserRole } from "../types/user.types.js";
+import { RolePermissions, type Permission } from "../constants/permissions.js";
+import type { AuthenticatedUser } from "../types/user.types.js";
 
 export function authenticate(req: Request, _res: Response, next: NextFunction): void {
   const header = req.headers.authorization;
@@ -29,13 +30,21 @@ export function authenticate(req: Request, _res: Response, next: NextFunction): 
   }
 }
 
-export function authorize(...roles: UserRole[]) {
+export function authorize(...permissions: Permission[]) {
   return (req: Request, _res: Response, next: NextFunction): void => {
     if (!req.user) {
       throw new AppError(HttpStatus.UNAUTHORIZED, "Authentication required");
     }
 
-    if (!roles.includes(req.user.role)) {
+    const userPermissions = RolePermissions[req.user.role];
+
+    if (!userPermissions) {
+      throw new AppError(HttpStatus.FORBIDDEN, "Insufficient permissions");
+    }
+
+    const hasPermission = permissions.some((p) => userPermissions.includes(p));
+
+    if (!hasPermission) {
       throw new AppError(HttpStatus.FORBIDDEN, "Insufficient permissions");
     }
 

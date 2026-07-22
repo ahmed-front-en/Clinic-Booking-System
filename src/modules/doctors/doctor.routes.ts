@@ -1,17 +1,17 @@
 import { Router } from "express";
 import { validate } from "../../shared/middlewares/validation.middleware.js";
 import { authenticate, authorize } from "../../shared/middlewares/auth.middleware.js";
+import { Permissions } from "../../shared/constants/permissions.js";
 import { createDoctorSchema, updateDoctorSchema } from "./doctor.validation.js";
 import { doctorController } from "./doctor.controller.js";
 
 const router = Router();
 
-router.use(authenticate, authorize("admin"));
-
-router.post("/", validate(createDoctorSchema), doctorController.create);
 router.get("/", doctorController.findAll);
 router.get("/:id", doctorController.findById);
-router.patch("/:id", validate(updateDoctorSchema), doctorController.update);
-router.delete("/:id", doctorController.delete);
+
+router.post("/", authenticate, authorize(Permissions.MANAGE_DOCTORS), validate(createDoctorSchema), doctorController.create);
+router.patch("/:id", authenticate, authorize(Permissions.MANAGE_DOCTORS), validate(updateDoctorSchema), doctorController.update);
+router.delete("/:id", authenticate, authorize(Permissions.MANAGE_DOCTORS), doctorController.delete);
 
 export { router as doctorRouter };

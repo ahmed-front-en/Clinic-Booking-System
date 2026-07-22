@@ -118,6 +118,28 @@ export class AppointmentSlotRepository extends BaseRepository {
     return result.rows[0] ?? null;
   }
 
+  async findOverlapping(
+    doctorId: UUID,
+    slotDate: string,
+    startTime: string,
+    endTime: string,
+    excludeId?: UUID,
+  ): Promise<AppointmentSlotRecord | null> {
+    const result = await this.query<AppointmentSlotRecord>(
+      `SELECT ${this.selectFields}
+       FROM appointment_slots
+       WHERE doctor_id = $1
+         AND slot_date = $2::date
+         AND start_time < $4::time
+         AND end_time > $3::time
+         AND deleted_at IS NULL
+         AND ($5::uuid IS NULL OR id != $5)
+       LIMIT 1`,
+      [doctorId, slotDate, startTime, endTime, excludeId ?? null],
+    );
+    return result.rows[0] ?? null;
+  }
+
   async findDoctorById(id: UUID): Promise<IdRow | null> {
     const result = await this.query<IdRow>(
       `SELECT id FROM doctors WHERE id = $1`,

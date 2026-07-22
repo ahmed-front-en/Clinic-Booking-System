@@ -6,6 +6,36 @@ import type { PaymentRecord } from "./payment.interfaces.js";
 import type { UUID } from "../../shared/types/common.types.js";
 
 export class PaymentService {
+  async createAsPatient(userId: UUID, dto: CreatePaymentDto): Promise<PaymentRecord> {
+    const patient = await paymentRepository.findPatientByUserId(userId);
+    if (!patient) {
+      throw AppError.notFound("Patient profile not found");
+    }
+
+    const appointment = await paymentRepository.findAppointmentPatientId(dto.appointmentId);
+    if (!appointment) {
+      throw AppError.notFound("Appointment not found");
+    }
+    if (appointment.patientId !== patient.id) {
+      throw AppError.forbidden("You can only pay for your own appointments");
+    }
+    if (appointment.status === "cancelled") {
+      throw new AppError(HttpStatus.BAD_REQUEST, "Cannot pay for a cancelled appointment");
+    }
+    if (appointment.status === "completed") {
+      throw new AppError(HttpStatus.BAD_REQUEST, "Cannot pay for a completed appointment");
+    }
+
+    return this.create(dto);
+  }
+
+  async findMyPayments(userId: UUID): Promise<PaymentRecord[]> {
+    const patient = await paymentRepository.findPatientByUserId(userId);
+    if (!patient) return [];
+
+    return paymentRepository.findByPatientId(patient.id);
+  }
+
   async create(dto: CreatePaymentDto): Promise<PaymentRecord> {
     const appointment = await paymentRepository.findAppointmentById(dto.appointmentId);
     if (!appointment) {

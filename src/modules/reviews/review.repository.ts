@@ -7,6 +7,19 @@ interface IdRow {
   id: UUID;
 }
 
+interface AppointmentInfoRow {
+  id: UUID;
+  patientId: UUID;
+  status: string;
+}
+
+interface ReviewWithDoctorRow {
+  id: UUID;
+  appointmentId: UUID;
+  rating: number;
+  comment: string | null;
+}
+
 export class ReviewRepository extends BaseRepository {
   private readonly selectFields = `
     id,
@@ -64,6 +77,55 @@ export class ReviewRepository extends BaseRepository {
       [id],
     );
     return result.rows[0] ?? null;
+  }
+
+  async findAppointmentInfo(id: UUID): Promise<AppointmentInfoRow | null> {
+    const result = await this.query<AppointmentInfoRow>(
+      `SELECT id, patient_id AS "patientId", status FROM appointments WHERE id = $1`,
+      [id],
+    );
+    return result.rows[0] ?? null;
+  }
+
+  async findPatientByUserId(userId: UUID): Promise<IdRow | null> {
+    const result = await this.query<IdRow>(
+      `SELECT id FROM patients WHERE user_id = $1`,
+      [userId],
+    );
+    return result.rows[0] ?? null;
+  }
+
+  async findDoctorByUserId(userId: UUID): Promise<IdRow | null> {
+    const result = await this.query<IdRow>(
+      `SELECT id FROM doctors WHERE user_id = $1`,
+      [userId],
+    );
+    return result.rows[0] ?? null;
+  }
+
+  async findReviewsByPatientId(patientId: UUID): Promise<ReviewRecord[]> {
+    const result = await this.query<ReviewRecord>(
+      `SELECT r.id, r.appointment_id AS "appointmentId", r.rating, r.comment
+       FROM reviews r
+       JOIN appointments a ON r.appointment_id = a.id
+       WHERE a.patient_id = $1
+       ORDER BY r.id`,
+      [patientId],
+    );
+    return result.rows;
+  }
+
+  async findReviewsByDoctorId(doctorId: UUID): Promise<ReviewRecord[]> {
+    const result = await this.query<ReviewRecord>(
+      `SELECT r.id, r.appointment_id AS "appointmentId", r.rating, r.comment
+       FROM reviews r
+       JOIN appointments a ON r.appointment_id = a.id
+       JOIN appointment_slots s ON a.slot_id = s.id
+       WHERE s.doctor_id = $1
+       ORDER BY r.id`,
+      [doctorId],
+    );
+    return result.rows;
   }
 
   async existsForAppointment(appointmentId: UUID): Promise<boolean> {

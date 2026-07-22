@@ -13,6 +13,13 @@ interface SlotStatusRow {
   deletedAt: Date | null;
 }
 
+interface SlotTimeInfo {
+  id: UUID;
+  doctorId: UUID;
+  slotDate: string;
+  startTime: string;
+}
+
 export class AppointmentRepository extends BaseRepository {
   private readonly selectFields = `
     id,
@@ -105,6 +112,32 @@ export class AppointmentRepository extends BaseRepository {
     return result.rows[0] ?? null;
   }
 
+  async findPatientByUserId(userId: UUID): Promise<IdRow | null> {
+    const result = await this.query<IdRow>(
+      `SELECT id FROM patients WHERE user_id = $1`,
+      [userId],
+    );
+    return result.rows[0] ?? null;
+  }
+
+  async findDoctorByUserId(userId: UUID): Promise<IdRow | null> {
+    const result = await this.query<IdRow>(
+      `SELECT id FROM doctors WHERE user_id = $1`,
+      [userId],
+    );
+    return result.rows[0] ?? null;
+  }
+
+  async findSlotTimeInfo(slotId: UUID): Promise<SlotTimeInfo | null> {
+    const result = await this.query<SlotTimeInfo>(
+      `SELECT id, doctor_id AS "doctorId", slot_date AS "slotDate", start_time AS "startTime"
+       FROM appointment_slots
+       WHERE id = $1 AND deleted_at IS NULL`,
+      [slotId],
+    );
+    return result.rows[0] ?? null;
+  }
+
   async updateSlotStatus(slotId: UUID, status: string): Promise<void> {
     await this.query(
       `UPDATE appointment_slots SET status = $1, updated_at = NOW() WHERE id = $2 AND deleted_at IS NULL`,
@@ -143,6 +176,23 @@ export class AppointmentRepository extends BaseRepository {
       values,
     );
     return result.rows[0] ?? null;
+  }
+
+  async cancelIfSchedulable(id: UUID, slotId: UUID): Promise<AppointmentRecord | null> {
+    return this.transaction(async () => {
+      const result = await this.query<AppointmentRecord>(
+        `UPDATE appointments
+         SET status = 'cancelled'
+         WHERE id = $1 AND status IN ('scheduled', 'confirmed')
+         RETURNING ${this.selectFields}`,
+        [id],
+      );
+      const appointment = result.rows[0] ?? null;
+      if (appointment) {
+        await this.updateSlotStatus(slotId, "available");
+      }
+      return appointment;
+    });
   }
 
   async delete(id: UUID): Promise<boolean> {

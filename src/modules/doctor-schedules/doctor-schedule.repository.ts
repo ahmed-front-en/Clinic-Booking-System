@@ -85,6 +85,14 @@ export class DoctorScheduleRepository extends BaseRepository {
     return result.rows[0] ?? null;
   }
 
+  async findDoctorByUserId(userId: UUID): Promise<IdRow | null> {
+    const result = await this.query<IdRow>(
+      `SELECT id FROM doctors WHERE user_id = $1`,
+      [userId],
+    );
+    return result.rows[0] ?? null;
+  }
+
   async update(
     id: UUID,
     data: {

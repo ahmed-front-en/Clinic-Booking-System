@@ -7,6 +7,12 @@ interface IdRow {
   id: UUID;
 }
 
+interface AppointmentPatientRow {
+  id: UUID;
+  patientId: UUID;
+  status: string;
+}
+
 export class PaymentRepository extends BaseRepository {
   private readonly selectFields = `
     id,
@@ -68,6 +74,34 @@ export class PaymentRepository extends BaseRepository {
       [id],
     );
     return result.rows[0] ?? null;
+  }
+
+  async findAppointmentPatientId(id: UUID): Promise<AppointmentPatientRow | null> {
+    const result = await this.query<AppointmentPatientRow>(
+      `SELECT id, patient_id AS "patientId", status FROM appointments WHERE id = $1`,
+      [id],
+    );
+    return result.rows[0] ?? null;
+  }
+
+  async findPatientByUserId(userId: UUID): Promise<IdRow | null> {
+    const result = await this.query<IdRow>(
+      `SELECT id FROM patients WHERE user_id = $1`,
+      [userId],
+    );
+    return result.rows[0] ?? null;
+  }
+
+  async findByPatientId(patientId: UUID): Promise<PaymentRecord[]> {
+    const result = await this.query<PaymentRecord>(
+      `SELECT p.id, p.appointment_id AS "appointmentId", p.amount, p.method, p.status, p.transaction_reference AS "transactionReference"
+       FROM payments p
+       JOIN appointments a ON p.appointment_id = a.id
+       WHERE a.patient_id = $1
+       ORDER BY p.id`,
+      [patientId],
+    );
+    return result.rows;
   }
 
   async existsForAppointment(appointmentId: UUID): Promise<boolean> {

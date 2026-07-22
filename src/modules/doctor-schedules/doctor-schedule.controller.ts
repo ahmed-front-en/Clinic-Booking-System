@@ -3,6 +3,15 @@ import { BaseController } from "../../shared/controllers/base.controller.js";
 import { doctorScheduleService } from "./doctor-schedule.service.js";
 
 export class DoctorScheduleController extends BaseController {
+  findMySchedule = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const schedules = await doctorScheduleService.findMySchedule(req.user!.sub);
+      this.ok(res, schedules);
+    } catch (error) {
+      next(error);
+    }
+  };
+
   create = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const schedule = await doctorScheduleService.create(req.body);
