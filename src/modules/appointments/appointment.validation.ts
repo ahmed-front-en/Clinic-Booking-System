@@ -7,6 +7,10 @@ export const createAppointmentSchema = z.object({
   notes: z.string().max(500).nullable().optional(),
 });
 
+export const createAppointmentSelfSchema = z.object({
+  slotId: z.string().uuid(),
+});
+
 export const updateAppointmentSchema = z.object({
   status: z.enum(["scheduled", "confirmed", "completed", "cancelled", "no_show"]).optional(),
   notes: z.string().max(500).nullable().optional(),

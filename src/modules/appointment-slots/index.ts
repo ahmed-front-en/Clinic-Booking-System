@@ -1,4 +1,4 @@
-export { appointmentSlotRouter } from "./appointment-slot.routes.js";
+export { appointmentSlotRouter, appointmentSlotAdminRouter } from "./appointment-slot.routes.js";
 export { appointmentSlotController } from "./appointment-slot.controller.js";
 export { appointmentSlotService } from "./appointment-slot.service.js";
 export { appointmentSlotRepository } from "./appointment-slot.repository.js";

@@ -5,17 +5,22 @@ import { Permissions } from "../../shared/constants/permissions.js";
 import { createAppointmentSlotSchema, updateAppointmentSlotSchema } from "./appointment-slot.validation.js";
 import { appointmentSlotController } from "./appointment-slot.controller.js";
 
-const router = Router();
+const publicRouter = Router();
+const adminRouter = Router();
 
-router.get("/available", appointmentSlotController.findAvailable);
-router.get("/doctor/:doctorId", appointmentSlotController.findByDoctorId);
-router.get("/date/:slotDate", appointmentSlotController.findByDate);
+publicRouter.get("/available", appointmentSlotController.findAvailable);
+publicRouter.get("/doctor/:doctorId", appointmentSlotController.findByDoctorId);
+publicRouter.get("/date/:slotDate", appointmentSlotController.findByDate);
 
-router.get("/", authenticate, authorize(Permissions.MANAGE_SLOTS), appointmentSlotController.findAll);
-router.get("/:id", authenticate, authorize(Permissions.MANAGE_SLOTS), appointmentSlotController.findById);
+adminRouter.use(authenticate, authorize(Permissions.MANAGE_SLOTS));
 
-router.post("/", authenticate, authorize(Permissions.MANAGE_SLOTS), validate(createAppointmentSlotSchema), appointmentSlotController.create);
-router.patch("/:id", authenticate, authorize(Permissions.MANAGE_SLOTS), validate(updateAppointmentSlotSchema), appointmentSlotController.update);
-router.delete("/:id", authenticate, authorize(Permissions.MANAGE_SLOTS), appointmentSlotController.delete);
+adminRouter.get("/available", appointmentSlotController.findAvailable);
+adminRouter.get("/doctor/:doctorId", appointmentSlotController.findByDoctorId);
+adminRouter.get("/date/:slotDate", appointmentSlotController.findByDate);
+adminRouter.get("/", appointmentSlotController.findAll);
+adminRouter.get("/:id", appointmentSlotController.findById);
+adminRouter.post("/", validate(createAppointmentSlotSchema), appointmentSlotController.create);
+adminRouter.patch("/:id", validate(updateAppointmentSlotSchema), appointmentSlotController.update);
+adminRouter.delete("/:id", appointmentSlotController.delete);
 
-export { router as appointmentSlotRouter };
+export { publicRouter as appointmentSlotRouter, adminRouter as appointmentSlotAdminRouter };

@@ -5,13 +5,18 @@ import { Permissions } from "../../shared/constants/permissions.js";
 import { createSpecialtySchema, updateSpecialtySchema } from "./specialty.validation.js";
 import { specialtyController } from "./specialty.controller.js";
 
-const router = Router();
+const publicRouter = Router();
+const adminRouter = Router();
 
-router.get("/", specialtyController.findAll);
-router.get("/:id", specialtyController.findById);
+publicRouter.get("/", specialtyController.findAll);
+publicRouter.get("/:id", specialtyController.findById);
 
-router.post("/", authenticate, authorize(Permissions.MANAGE_SPECIALTIES), validate(createSpecialtySchema), specialtyController.create);
-router.patch("/:id", authenticate, authorize(Permissions.MANAGE_SPECIALTIES), validate(updateSpecialtySchema), specialtyController.update);
-router.delete("/:id", authenticate, authorize(Permissions.MANAGE_SPECIALTIES), specialtyController.delete);
+adminRouter.use(authenticate, authorize(Permissions.MANAGE_SPECIALTIES));
 
-export { router as specialtyRouter };
+adminRouter.get("/", specialtyController.findAll);
+adminRouter.get("/:id", specialtyController.findById);
+adminRouter.post("/", validate(createSpecialtySchema), specialtyController.create);
+adminRouter.patch("/:id", validate(updateSpecialtySchema), specialtyController.update);
+adminRouter.delete("/:id", specialtyController.delete);
+
+export { publicRouter as specialtyRouter, adminRouter as specialtyAdminRouter };

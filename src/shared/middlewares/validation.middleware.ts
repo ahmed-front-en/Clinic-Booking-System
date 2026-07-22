@@ -5,7 +5,7 @@ import { HttpStatus } from "../constants/http-status.js";
 
 export function validate<T>(schema: z.ZodType<T>) {
   return (req: Request, res: Response, next: NextFunction): void => {
-    const result = schema.safeParse(req.body);
+    const result = schema.safeParse(req.body ?? {});
 
     if (!result.success) {
       ApiResponse.error(res, HttpStatus.BAD_REQUEST, "Validation failed", result.error.issues);

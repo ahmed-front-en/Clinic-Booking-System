@@ -1,4 +1,4 @@
-export { doctorRouter } from "./doctor.routes.js";
+export { doctorRouter, doctorAdminRouter } from "./doctor.routes.js";
 export { doctorController } from "./doctor.controller.js";
 export { doctorService } from "./doctor.service.js";
 export { doctorRepository } from "./doctor.repository.js";
