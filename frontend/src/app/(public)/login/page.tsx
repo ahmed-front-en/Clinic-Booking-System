@@ -14,7 +14,8 @@ import { Label } from "@/components/ui/label";
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectTo = searchParams.get("redirect") || "/";
+  const redirectRaw = searchParams.get("redirect") || "/dashboard";
+  const redirectTo = redirectRaw.startsWith("/") ? redirectRaw : "/dashboard";
   const { submit, isPending, error } = useLogin();
 
   const {
@@ -43,18 +44,20 @@ function LoginForm() {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <Input
               id="email"
               type="email"
               placeholder="you@example.com"
+              autoComplete="email"
               hasError={!!errors.email}
+              aria-describedby={errors.email ? "email-error" : undefined}
               {...register("email")}
             />
             {errors.email && (
-              <p className="text-xs text-destructive">{errors.email.message}</p>
+              <p id="email-error" className="text-xs text-destructive" role="alert">{errors.email.message}</p>
             )}
           </div>
 
@@ -64,16 +67,18 @@ function LoginForm() {
               id="password"
               type="password"
               placeholder="Enter your password"
+              autoComplete="current-password"
               hasError={!!errors.password}
+              aria-describedby={errors.password ? "password-error" : undefined}
               {...register("password")}
             />
             {errors.password && (
-              <p className="text-xs text-destructive">{errors.password.message}</p>
+              <p id="password-error" className="text-xs text-destructive" role="alert">{errors.password.message}</p>
             )}
           </div>
 
           {error && (
-            <p className="text-sm text-destructive">{error}</p>
+            <p className="text-sm text-destructive" role="alert">{error}</p>
           )}
 
           <Button type="submit" disabled={isPending} className="w-full">
