@@ -1,11 +1,13 @@
 import { z } from "zod";
+import { APPOINTMENT_STATUSES } from "../types/enums";
 
 export const createAppointmentSchema = z.object({
+  patientId: z.string().uuid(),
   slotId: z.string().uuid(),
 });
 
 export const updateAppointmentSchema = z.object({
-  status: z.enum(["scheduled", "confirmed", "completed", "cancelled", "no_show"]).optional(),
+  status: z.enum(APPOINTMENT_STATUSES).optional(),
   notes: z.string().max(500).nullable().optional(),
 });
 

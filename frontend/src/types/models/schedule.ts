@@ -7,7 +7,7 @@ export interface DoctorScheduleRecord {
   slotDuration: number;
 }
 
-export interface CreateDoctorScheduleRequest {
+export interface DoctorScheduleCreateRequest {
   doctorId: string;
   weekday: number;
   startTime: string;
@@ -15,7 +15,7 @@ export interface CreateDoctorScheduleRequest {
   slotDuration: number;
 }
 
-export interface UpdateDoctorScheduleRequest {
+export interface DoctorScheduleUpdateRequest {
   doctorId?: string;
   weekday?: number;
   startTime?: string;

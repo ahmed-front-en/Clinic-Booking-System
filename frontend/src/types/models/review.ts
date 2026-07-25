@@ -5,13 +5,13 @@ export interface ReviewRecord {
   comment: string | null;
 }
 
-export interface CreateReviewRequest {
+export interface ReviewCreateRequest {
   appointmentId: string;
   rating: number;
   comment?: string | null;
 }
 
-export interface UpdateReviewRequest {
+export interface ReviewUpdateRequest {
   rating?: number;
   comment?: string | null;
 }

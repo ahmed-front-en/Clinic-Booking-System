@@ -9,7 +9,7 @@ export interface PaymentRecord {
   transactionReference: string | null;
 }
 
-export interface CreatePaymentRequest {
+export interface PaymentCreateRequest {
   appointmentId: string;
   amount: number;
   method: PaymentMethod;
@@ -17,7 +17,7 @@ export interface CreatePaymentRequest {
   transactionReference?: string | null;
 }
 
-export interface UpdatePaymentRequest {
+export interface PaymentUpdateRequest {
   appointmentId?: string;
   amount?: number;
   method?: PaymentMethod;

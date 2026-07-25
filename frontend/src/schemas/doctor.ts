@@ -10,7 +10,6 @@ export const createDoctorSchema = z.object({
 });
 
 export const updateDoctorSchema = z.object({
-  userId: z.string().uuid().optional(),
   clinicId: z.string().uuid().optional(),
   specialtyId: z.string().uuid().optional(),
   consultationFee: z.number().min(0).optional(),

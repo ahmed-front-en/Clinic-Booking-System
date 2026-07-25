@@ -18,7 +18,6 @@ export interface DoctorCreateRequest {
 }
 
 export interface DoctorUpdateRequest {
-  userId?: string;
   clinicId?: string;
   specialtyId?: string;
   consultationFee?: number;

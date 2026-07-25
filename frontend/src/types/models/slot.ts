@@ -13,7 +13,7 @@ export interface AppointmentSlotRecord {
   deletedAt: string | null;
 }
 
-export interface CreateAppointmentSlotRequest {
+export interface AppointmentSlotCreateRequest {
   doctorId: string;
   doctorScheduleId: string;
   slotDate: string;
@@ -22,7 +22,7 @@ export interface CreateAppointmentSlotRequest {
   status?: SlotStatus;
 }
 
-export interface UpdateAppointmentSlotRequest {
+export interface AppointmentSlotUpdateRequest {
   doctorId?: string;
   doctorScheduleId?: string;
   slotDate?: string;

@@ -19,7 +19,13 @@ export const updateDoctorScheduleSchema = z.object({
   startTime: z.string().regex(timeRegex, "Invalid time format (HH:mm)").optional(),
   endTime: z.string().regex(timeRegex, "Invalid time format (HH:mm)").optional(),
   slotDuration: z.number().int().min(1).optional(),
-});
+}).refine(
+  (data) => {
+    if (!data.startTime || !data.endTime) return true;
+    return data.endTime > data.startTime;
+  },
+  { message: "End time must be after start time", path: ["endTime"] },
+);
 
 export type CreateDoctorScheduleInput = z.infer<typeof createDoctorScheduleSchema>;
 export type UpdateDoctorScheduleInput = z.infer<typeof updateDoctorScheduleSchema>;

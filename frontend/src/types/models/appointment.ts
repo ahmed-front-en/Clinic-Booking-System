@@ -8,11 +8,12 @@ export interface AppointmentRecord {
   notes: string | null;
 }
 
-export interface CreateAppointmentRequest {
+export interface AppointmentCreateRequest {
+  patientId: string;
   slotId: string;
 }
 
-export interface UpdateAppointmentRequest {
+export interface AppointmentUpdateRequest {
   status?: AppointmentStatus;
   notes?: string | null;
 }
