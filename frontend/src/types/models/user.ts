@@ -3,6 +3,7 @@ import type { UserRole } from "../enums";
 export interface UserRecord {
   id: string;
   email: string;
+  fullName: string;
   role: UserRole;
   isVerified: boolean;
   createdAt: string;

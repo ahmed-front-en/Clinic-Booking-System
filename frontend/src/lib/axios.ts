@@ -1,5 +1,6 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
 import { getAccessToken, setAccessToken, getRefreshToken, setRefreshToken, clearTokens } from "./token-store";
+import { showToast } from "./toast-store";
 import { API_BASE_URL } from "../config";
 
 interface FailedRequest {
@@ -82,6 +83,10 @@ api.interceptors.response.use(
     } catch (refreshError) {
       processQueue(refreshError, null);
       clearTokens();
+      showToast("Session expired. Please log in again.", "error");
+      if (typeof window !== "undefined") {
+        window.location.href = "/login";
+      }
       return Promise.reject(refreshError);
     } finally {
       isRefreshing = false;

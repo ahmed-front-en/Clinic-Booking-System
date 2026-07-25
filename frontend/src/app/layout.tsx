@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { Providers } from "./providers";
 
 export const metadata: Metadata = {
   title: "HealthFlow - Clinic Booking System",
@@ -18,7 +19,7 @@ export default function RootLayout({
       data-theme="dark"
     >
       <body className="min-h-full flex flex-col bg-background text-on-surface">
-        {children}
+        <Providers>{children}</Providers>
       </body>
     </html>
   );
