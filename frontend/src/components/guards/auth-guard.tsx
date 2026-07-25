@@ -3,17 +3,28 @@
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, type ReactNode } from "react";
+import type { UserRole } from "@/types/enums";
 
-export function AuthGuard({ children }: { children: ReactNode }) {
-  const { isAuthenticated, isLoading } = useAuth();
+interface AuthGuardProps {
+  children: ReactNode;
+  allowedRoles?: UserRole[];
+}
+
+export function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
+  const { user, isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
+    if (isLoading) return;
+    if (!isAuthenticated) {
       router.replace(`/login?redirect=${encodeURIComponent(pathname)}`);
+      return;
     }
-  }, [isAuthenticated, isLoading, router, pathname]);
+    if (allowedRoles && user && !allowedRoles.includes(user.role as UserRole)) {
+      router.replace("/");
+    }
+  }, [isAuthenticated, isLoading, router, pathname, user, allowedRoles]);
 
   if (isLoading) {
     return (
@@ -24,6 +35,10 @@ export function AuthGuard({ children }: { children: ReactNode }) {
   }
 
   if (!isAuthenticated) {
+    return null;
+  }
+
+  if (allowedRoles && user && !allowedRoles.includes(user.role as UserRole)) {
     return null;
   }
 

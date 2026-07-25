@@ -16,6 +16,7 @@ export function useRegister() {
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Registration failed";
       setError(message);
+      throw err;
     } finally {
       setIsPending(false);
     }

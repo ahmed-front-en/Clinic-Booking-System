@@ -16,6 +16,7 @@ export function useLogin() {
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Login failed";
       setError(message);
+      throw err;
     } finally {
       setIsPending(false);
     }
