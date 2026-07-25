@@ -1,0 +1,25 @@
+"use client";
+
+import { useState } from "react";
+import { useAuth } from "./use-auth";
+
+export function useRegister() {
+  const { register } = useAuth();
+  const [isPending, setIsPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function submit(email: string, password: string, fullName: string) {
+    setIsPending(true);
+    setError(null);
+    try {
+      await register(email, password, fullName);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Registration failed";
+      setError(message);
+    } finally {
+      setIsPending(false);
+    }
+  }
+
+  return { submit, isPending, error };
+}
