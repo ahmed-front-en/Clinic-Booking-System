@@ -10,7 +10,7 @@ export function PublicGuard({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
-      router.replace("/");
+      router.replace("/dashboard");
     }
   }, [isAuthenticated, isLoading, router]);
 

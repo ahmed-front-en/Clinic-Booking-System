@@ -4,11 +4,21 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { registerSchema, type RegisterInput } from "@/schemas/auth";
+import { z } from "zod";
+import { registerSchema } from "@/schemas/auth";
 import { useRegister } from "@/features/auth/hooks/use-register";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+
+const registerFormSchema = registerSchema.extend({
+  confirmPassword: z.string().min(1, "Confirm your password"),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords do not match",
+  path: ["confirmPassword"],
+});
+
+type RegisterFormInput = z.infer<typeof registerFormSchema>;
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -18,14 +28,14 @@ export default function RegisterPage() {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<RegisterInput>({
-    resolver: zodResolver(registerSchema),
+  } = useForm<RegisterFormInput>({
+    resolver: zodResolver(registerFormSchema),
   });
 
-  async function onSubmit(data: RegisterInput) {
+  async function onSubmit(data: RegisterFormInput) {
     try {
       await submit(data.email, data.password, data.fullName);
-      router.replace("/");
+      router.replace("/dashboard");
     } catch {
     }
   }
@@ -40,18 +50,20 @@ export default function RegisterPage() {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="fullName">Full name</Label>
             <Input
               id="fullName"
               type="text"
               placeholder="John Doe"
+              autoComplete="name"
               hasError={!!errors.fullName}
+              aria-describedby={errors.fullName ? "fullName-error" : undefined}
               {...register("fullName")}
             />
             {errors.fullName && (
-              <p className="text-xs text-destructive">{errors.fullName.message}</p>
+              <p id="fullName-error" className="text-xs text-destructive" role="alert">{errors.fullName.message}</p>
             )}
           </div>
 
@@ -61,11 +73,13 @@ export default function RegisterPage() {
               id="email"
               type="email"
               placeholder="you@example.com"
+              autoComplete="email"
               hasError={!!errors.email}
+              aria-describedby={errors.email ? "email-error" : undefined}
               {...register("email")}
             />
             {errors.email && (
-              <p className="text-xs text-destructive">{errors.email.message}</p>
+              <p id="email-error" className="text-xs text-destructive" role="alert">{errors.email.message}</p>
             )}
           </div>
 
@@ -75,16 +89,34 @@ export default function RegisterPage() {
               id="password"
               type="password"
               placeholder="Min. 8 characters"
+              autoComplete="new-password"
               hasError={!!errors.password}
+              aria-describedby={errors.password ? "password-error" : undefined}
               {...register("password")}
             />
             {errors.password && (
-              <p className="text-xs text-destructive">{errors.password.message}</p>
+              <p id="password-error" className="text-xs text-destructive" role="alert">{errors.password.message}</p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="confirmPassword">Confirm password</Label>
+            <Input
+              id="confirmPassword"
+              type="password"
+              placeholder="Re-enter your password"
+              autoComplete="new-password"
+              hasError={!!errors.confirmPassword}
+              aria-describedby={errors.confirmPassword ? "confirmPassword-error" : undefined}
+              {...register("confirmPassword")}
+            />
+            {errors.confirmPassword && (
+              <p id="confirmPassword-error" className="text-xs text-destructive" role="alert">{errors.confirmPassword.message}</p>
             )}
           </div>
 
           {error && (
-            <p className="text-sm text-destructive">{error}</p>
+            <p className="text-sm text-destructive" role="alert">{error}</p>
           )}
 
           <Button type="submit" disabled={isPending} className="w-full">

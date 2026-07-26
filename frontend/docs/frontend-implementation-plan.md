@@ -114,10 +114,10 @@ Sprint 14 (Final QA & Production)              │
 
 **Exit Criteria:** All providers compose correctly in root layout. `useAuth()` returns correct state for authenticated/unauthenticated users.
 
-| ID | Title | Goal | Dependencies | Files to Create/Modify | Expected Output | Acceptance Criteria | Complexity |
+| ID | Title | Goal | Dependencies | Files to Create/Modify | Expected Output | Acceptance Criteria | Complexity |  
 |----|-------|------|--------------|----------------------|-----------------|---------------------|------------|
 | S2.1 | Implement ThemeProvider | Read theme from localStorage, set `data-theme` attribute, expose `useTheme()` | S0.1 | `src/providers/theme-provider.tsx` | Dark mode default; toggle persists to localStorage | Theme toggle updates `data-theme` on `<html>` | Low |
-| S2.2 | Implement QueryProvider | Create stable QueryClient, enable devtools in dev, set networkMode | S1.8 | `src/providers/query-provider.tsx` | All TanStack Query hooks work inside provider | `useQuery()` in any child component works | Low |
+| S2.2 | Implement QueryProvider | Create stable QueryClient, enable devtools in dev, set networkMode | S1.8 | `src/providers/query-provider.tsx` | All TanStack Query hooks work inside provider | `useQuery()` in any child component works | Low | 
 | S2.3 | Implement AuthProvider | On mount: restore session via `/auth/refresh`, store access token in token-store, refresh token in localStorage, expose `useAuth()` | S1.6, S1.7, S0.2 | `src/providers/auth-provider.tsx` | Auth state restores on page load; login/register/logout work; no cookies used | `useAuth().isAuthenticated` is true after login | High |
 | S2.4 | Implement ToastProvider | shadcn/ui toast context with `success`, `error`, `info`, `warning` variants, auto-dismiss 5s, stack max 5 | S3.9 | `src/providers/toast-provider.tsx` | Any component can call `toast()` | `toast({ type: "success", message: "Done" })` shows toast | Low |
 | S2.5 | Implement useAuth hook | Consumer hook for AuthContext; returns `{ user, login, register, logout, isAuthenticated, isLoading }` | S2.3 | `src/hooks/useAuth.ts` | Components access auth state without raw tokens | `useAuth().user.role` returns role string | Low |

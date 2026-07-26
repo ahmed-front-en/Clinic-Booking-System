@@ -41,7 +41,7 @@ export function Navbar({ onMenuClick }: NavbarProps) {
         {isAuthenticated && user ? (
           <DropdownMenu>
             <DropdownMenuTrigger className="focus-visible:ring-2 focus-visible:ring-ring">
-              <Avatar fallback={user.fullName} className="cursor-pointer" />
+              <Avatar fallback={user.email} className="cursor-pointer" />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <div className="px-2.5 py-1.5 text-sm text-muted-foreground">
