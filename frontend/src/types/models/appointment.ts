@@ -9,7 +9,6 @@ export interface AppointmentRecord {
 }
 
 export interface AppointmentCreateRequest {
-  patientId: string;
   slotId: string;
 }
 

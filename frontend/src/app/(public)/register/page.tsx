@@ -35,7 +35,7 @@ export default function RegisterPage() {
   async function onSubmit(data: RegisterFormInput) {
     try {
       await submit(data.email, data.password, data.fullName);
-      router.replace("/");
+      router.replace("/dashboard");
     } catch {
     }
   }

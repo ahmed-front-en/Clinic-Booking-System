@@ -3,7 +3,7 @@
 import { createContext, useCallback, useEffect, useState, type ReactNode } from "react";
 import type { UserRecord } from "@/types/models/user";
 import * as authApi from "@/features/auth/api/auth.api";
-import { setAccessToken, setRefreshToken, getAccessToken, getRefreshToken, clearTokens } from "@/lib/token-store";
+import { setAccessToken, setRefreshToken, getRefreshToken, clearTokens } from "@/lib/token-store";
 import { showToast } from "@/lib/toast-store";
 
 export interface AuthContextValue {
@@ -19,13 +19,20 @@ export const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<UserRecord | null>(null);
-  const [isLoading, setIsLoading] = useState(!!getAccessToken());
+  const [isLoading, setIsLoading] = useState(!!getRefreshToken());
 
   useEffect(() => {
-    const token = getAccessToken();
-    if (!token) return;
+    const storedRefresh = getRefreshToken();
+    if (!storedRefresh) {
+      return;
+    }
     authApi
-      .getCurrentUser()
+      .refreshUserTokens({ refreshToken: storedRefresh })
+      .then((tokens) => {
+        setAccessToken(tokens.accessToken);
+        setRefreshToken(tokens.refreshToken);
+        return authApi.getCurrentUser();
+      })
       .then(setUser)
       .catch(() => {
         clearTokens();

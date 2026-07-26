@@ -2,7 +2,6 @@ import { z } from "zod";
 import { APPOINTMENT_STATUSES } from "../types/enums";
 
 export const createAppointmentSchema = z.object({
-  patientId: z.string().uuid(),
   slotId: z.string().uuid(),
 });
 

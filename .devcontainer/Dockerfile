@@ -10,10 +10,7 @@ RUN apt-get update && apt-get install -y \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
-# Install global AI CLI tools
-RUN npm install -g \
-    @google/gemini-cli \
-    opencode-ai
+
 
 WORKDIR /workspace
 
