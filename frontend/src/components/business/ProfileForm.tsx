@@ -1,0 +1,183 @@
+"use client";
+
+import { useState } from "react";
+import { CalendarIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { updatePatientSchema, type UpdatePatientInput } from "@/schemas/patient";
+import type { PatientRecord } from "@/types/models/patient";
+import { useApiError } from "@/hooks/useApiError";
+
+interface ProfileFormProps {
+  patient: PatientRecord;
+  onSubmit: (data: UpdatePatientInput) => Promise<void> | void;
+  isSubmitting?: boolean;
+}
+
+const GENDER_OPTIONS = ["male", "female", "other"];
+
+function toISODate(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function fromISODate(value: string | null): Date | undefined {
+  if (!value) return undefined;
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (!match) return undefined;
+  return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+}
+
+export function ProfileForm({ patient, onSubmit, isSubmitting }: ProfileFormProps) {
+  const { parse } = useApiError();
+  const [fullName, setFullName] = useState(patient.fullName);
+  const [phone, setPhone] = useState(patient.phone ?? "");
+  const [gender, setGender] = useState(patient.gender ?? "");
+  const [birthDate, setBirthDate] = useState(fromISODate(patient.birthDate));
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [formError, setFormError] = useState<string | null>(null);
+
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setFieldErrors({});
+    setFormError(null);
+
+    const result = updatePatientSchema.safeParse({
+      fullName,
+      phone: phone.trim() === "" ? null : phone.trim(),
+      gender: gender.trim() === "" ? null : gender.trim(),
+      birthDate: birthDate ? toISODate(birthDate) : null,
+    });
+
+    if (!result.success) {
+      const errors: Record<string, string> = {};
+      for (const issue of result.error.issues) {
+        const key = issue.path.join(".");
+        if (!errors[key]) errors[key] = issue.message;
+      }
+      setFieldErrors(errors);
+      return;
+    }
+
+    Promise.resolve(onSubmit(result.data)).catch((err: unknown) => {
+      const { message } = parse(err);
+      setFormError(message);
+    });
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+      {formError && (
+        <div
+          role="alert"
+          className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive"
+        >
+          {formError}
+        </div>
+      )}
+
+      <div className="space-y-2">
+        <Label htmlFor="fullName">Full name</Label>
+        <Input
+          id="fullName"
+          name="fullName"
+          value={fullName}
+          onChange={(e) => setFullName(e.target.value)}
+          hasError={Boolean(fieldErrors.fullName)}
+          disabled={isSubmitting}
+        />
+        {fieldErrors.fullName && (
+          <p className="text-xs text-destructive">{fieldErrors.fullName}</p>
+        )}
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="phone">Phone</Label>
+        <Input
+          id="phone"
+          name="phone"
+          type="tel"
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
+          hasError={Boolean(fieldErrors.phone)}
+          disabled={isSubmitting}
+        />
+        {fieldErrors.phone && (
+          <p className="text-xs text-destructive">{fieldErrors.phone}</p>
+        )}
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="gender">Gender</Label>
+        <Select
+          value={gender}
+          onValueChange={(value) => setGender(value ?? "")}
+          disabled={isSubmitting}
+        >
+          <SelectTrigger id="gender" className="w-full">
+            <SelectValue placeholder="Select gender" />
+          </SelectTrigger>
+          <SelectContent>
+            {GENDER_OPTIONS.map((option) => (
+              <SelectItem key={option} value={option}>
+                {option}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        {fieldErrors.gender && (
+          <p className="text-xs text-destructive">{fieldErrors.gender}</p>
+        )}
+      </div>
+
+      <div className="space-y-2">
+        <Label>Birth date</Label>
+        <Popover>
+          <PopoverTrigger
+            className="flex w-full items-center justify-between gap-2 rounded-lg border border-input bg-background px-3 py-2 text-sm shadow-sm transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <span className={birthDate ? "text-foreground" : "text-muted-foreground"}>
+              {birthDate ? toISODate(birthDate) : "Select a date"}
+            </span>
+            <CalendarIcon className="size-4 text-muted-foreground" aria-hidden="true" />
+          </PopoverTrigger>
+          <PopoverContent align="start" className="w-auto p-0">
+            <Calendar
+              mode="single"
+              selected={birthDate}
+              onSelect={(date) => setBirthDate(date)}
+              captionLayout="dropdown"
+              startMonth={new Date(1900, 0)}
+              endMonth={new Date(new Date().getFullYear(), 11)}
+            />
+          </PopoverContent>
+        </Popover>
+        {fieldErrors.birthDate && (
+          <p className="text-xs text-destructive">{fieldErrors.birthDate}</p>
+        )}
+      </div>
+
+      <div className="flex justify-end">
+        <Button type="submit" disabled={isSubmitting}>
+          {isSubmitting ? "Saving..." : "Save changes"}
+        </Button>
+      </div>
+    </form>
+  );
+}
