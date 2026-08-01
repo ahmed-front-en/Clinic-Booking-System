@@ -3,23 +3,34 @@ import { getAccessToken, setAccessToken, getRefreshToken, setRefreshToken, clear
 import { showToast } from "./toast-store";
 import { API_BASE_URL } from "../config";
 
-interface FailedRequest {
-  resolve: (token: string) => void;
-  reject: (error: unknown) => void;
-}
+let refreshPromise: Promise<string> | null = null;
 
-let isRefreshing = false;
-let failedQueue: FailedRequest[] = [];
+export function refreshAccessToken(): Promise<string> {
+  if (refreshPromise) {
+    return refreshPromise;
+  }
 
-function processQueue(error: unknown, token: string | null): void {
-  failedQueue.forEach((prom) => {
-    if (error) {
-      prom.reject(error);
-    } else {
-      prom.resolve(token!);
+  refreshPromise = (async () => {
+    const storedRefreshToken = getRefreshToken();
+    if (!storedRefreshToken) {
+      throw new Error("No refresh token available");
     }
+
+    const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {
+      refreshToken: storedRefreshToken,
+    });
+
+    const { accessToken: newAccessToken, refreshToken: newRefreshToken } = response.data.data;
+
+    setAccessToken(newAccessToken);
+    setRefreshToken(newRefreshToken);
+
+    return newAccessToken;
+  })().finally(() => {
+    refreshPromise = null;
   });
-  failedQueue = [];
+
+  return refreshPromise;
 }
 
 const api = axios.create({
@@ -49,47 +60,20 @@ api.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    if (isRefreshing) {
-      return new Promise<string>((resolve, reject) => {
-        failedQueue.push({ resolve, reject });
-      }).then((token) => {
-        originalRequest.headers.Authorization = `Bearer ${token}`;
-        return api(originalRequest);
-      });
-    }
-
     originalRequest._retry = true;
-    isRefreshing = true;
 
     try {
-      const storedRefreshToken = getRefreshToken();
-      if (!storedRefreshToken) {
-        throw new Error("No refresh token available");
-      }
-
-      const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {
-        refreshToken: storedRefreshToken,
-      });
-
-      const { accessToken: newAccessToken, refreshToken: newRefreshToken } = response.data.data;
-
-      setAccessToken(newAccessToken);
-      setRefreshToken(newRefreshToken);
-
-      processQueue(null, newAccessToken);
+      const newAccessToken = await refreshAccessToken();
 
       originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
       return api(originalRequest);
     } catch (refreshError) {
-      processQueue(refreshError, null);
       clearTokens();
       showToast("Session expired. Please log in again.", "error");
       if (typeof window !== "undefined") {
         window.location.href = "/login";
       }
       return Promise.reject(refreshError);
-    } finally {
-      isRefreshing = false;
     }
   },
 );
