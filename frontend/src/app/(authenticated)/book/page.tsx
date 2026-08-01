@@ -1,0 +1,191 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useClinicsList } from "@/features/clinics/hooks/useClinicsList";
+import { useSpecialtiesList } from "@/features/specialties/hooks/useSpecialtiesList";
+import { useDoctorsList } from "@/features/doctors/hooks/useDoctorsList";
+import { useAvailableSlots } from "@/features/slots/hooks/useAvailableSlots";
+import { useBookAppointment } from "@/features/appointments/hooks/useBookAppointment";
+import { StepWizard } from "@/components/business/StepWizard";
+import { ClinicSelector } from "@/components/business/ClinicSelector";
+import { SpecialtySelector } from "@/components/business/SpecialtySelector";
+import { DoctorCard } from "@/components/business/DoctorCard";
+import { SlotPicker } from "@/components/business/SlotPicker";
+import { AppointmentConfirmation } from "@/components/business/AppointmentConfirmation";
+import type { AppointmentRecord } from "@/types/models/appointment";
+
+export default function BookAppointmentPage() {
+  const router = useRouter();
+  const [currentStep, setCurrentStep] = useState(0);
+  const [selectedClinicId, setSelectedClinicId] = useState<string | null>(null);
+  const [selectedSpecialtyId, setSelectedSpecialtyId] = useState<string | null>(null);
+  const [selectedDoctorId, setSelectedDoctorId] = useState<string | null>(null);
+  const [selectedDate, setSelectedDate] = useState<string>(
+    new Date().toISOString().split("T")[0]
+  );
+  const [selectedSlotId, setSelectedSlotId] = useState<string | null>(null);
+  const [confirmedAppointment, setConfirmedAppointment] =
+    useState<AppointmentRecord | null>(null);
+
+  const { data: clinics = [], isLoading: isLoadingClinics } = useClinicsList();
+  const { data: specialties = [], isLoading: isLoadingSpecialties } =
+    useSpecialtiesList();
+  const { data: doctors = [], isLoading: isLoadingDoctors } = useDoctorsList({
+    clinicId: selectedClinicId,
+    specialtyId: selectedSpecialtyId,
+  });
+  const { data: slots = [], isLoading: isLoadingSlots } = useAvailableSlots({
+    doctorId: selectedDoctorId ?? undefined,
+    date: selectedDate,
+  });
+
+  const bookMutation = useBookAppointment();
+
+  // Find selected entities for confirmation details
+  const selectedClinic = clinics.find((c) => c.id === selectedClinicId);
+  const selectedSpecialty = specialties.find((s) => s.id === selectedSpecialtyId);
+  const selectedDoctor = doctors.find((d) => d.id === selectedDoctorId);
+  const selectedSlot = slots.find((s) => s.id === selectedSlotId);
+
+  const isNextDisabled = () => {
+    if (currentStep === 0) return !selectedClinicId;
+    if (currentStep === 1) return !selectedSpecialtyId;
+    if (currentStep === 2) return !selectedDoctorId;
+    if (currentStep === 3) return !selectedSlotId;
+    return false;
+  };
+
+  const handleNext = () => {
+    if (currentStep === 3) {
+      if (!selectedSlotId) return;
+      bookMutation.mutate(selectedSlotId, {
+        onSuccess: (data) => {
+          setConfirmedAppointment(data);
+        },
+      });
+    } else {
+      setCurrentStep((prev) => Math.min(prev + 1, 3));
+    }
+  };
+
+  const handleBack = () => {
+    setCurrentStep((prev) => Math.max(prev - 1, 0));
+  };
+
+  if (confirmedAppointment) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <AppointmentConfirmation
+          doctorName="Doctor"
+          specialtyName={selectedSpecialty?.name}
+          clinicName={selectedClinic?.name}
+          date={selectedDate}
+          startTime={selectedSlot?.startTime ?? ""}
+          endTime={selectedSlot?.endTime ?? ""}
+          consultationFee={selectedDoctor?.consultationFee ?? 100}
+          onViewAppointments={() => router.push("/appointments")}
+        />
+      </div>
+    );
+  }
+
+  const steps = [
+    {
+      title: "Select Clinic",
+      content: (
+        <ClinicSelector
+          clinics={clinics}
+          selectedClinicId={selectedClinicId}
+          onSelect={(id) => {
+            setSelectedClinicId(id);
+            setSelectedDoctorId(null);
+          }}
+          isLoading={isLoadingClinics}
+        />
+      ),
+    },
+    {
+      title: "Select Specialty",
+      content: (
+        <SpecialtySelector
+          specialties={specialties}
+          selectedSpecialtyId={selectedSpecialtyId}
+          onSelect={(id) => {
+            setSelectedSpecialtyId(id);
+            setSelectedDoctorId(null);
+          }}
+          isLoading={isLoadingSpecialties}
+        />
+      ),
+    },
+    {
+      title: "Select Doctor",
+      content: (
+        <div className="space-y-4">
+          {isLoadingDoctors ? (
+            <div className="grid gap-4 sm:grid-cols-2">
+              {[1, 2].map((i) => (
+                <div
+                  key={i}
+                  className="h-32 animate-pulse rounded-lg bg-surface-container-high"
+                />
+              ))}
+            </div>
+          ) : doctors.length === 0 ? (
+            <div className="py-12 text-center text-muted-foreground">
+              No doctors available matching the selected clinic and specialty.
+            </div>
+          ) : (
+            <div className="grid gap-4 sm:grid-cols-2">
+              {doctors.map((doctor) => (
+                <DoctorCard
+                  key={doctor.id}
+                  doctor={doctor}
+                  doctorName={`Dr. Specialist (${doctor.experienceYears}y exp)`}
+                  clinicName={selectedClinic?.name}
+                  specialtyName={selectedSpecialty?.name}
+                  isSelected={selectedDoctorId === doctor.id}
+                  onSelect={() => setSelectedDoctorId(doctor.id)}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      ),
+    },
+    {
+      title: "Date & Time",
+      content: (
+        <SlotPicker
+          slots={slots}
+          selectedSlotId={selectedSlotId}
+          onSelectSlot={(id) => setSelectedSlotId(id)}
+          selectedDate={selectedDate}
+          onDateChange={setSelectedDate}
+          isLoading={isLoadingSlots}
+        />
+      ),
+    },
+  ];
+
+  return (
+    <div className="container mx-auto max-w-5xl px-4 py-8 space-y-6">
+      <div className="space-y-1">
+        <h1 className="text-2xl font-bold text-on-surface">Book an Appointment</h1>
+        <p className="text-sm text-muted-foreground">
+          Follow the steps below to schedule your visit with a specialist.
+        </p>
+      </div>
+
+      <StepWizard
+        steps={steps}
+        currentStep={currentStep}
+        onNext={handleNext}
+        onBack={handleBack}
+        isNextDisabled={isNextDisabled()}
+        isLoading={bookMutation.isPending}
+      />
+    </div>
+  );
+}
