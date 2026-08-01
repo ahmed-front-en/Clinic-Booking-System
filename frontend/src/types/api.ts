@@ -34,3 +34,15 @@ export interface PaginationParams {
   page?: number;
   limit?: number;
 }
+
+export interface PaginatedData<T> {
+  data: T[];
+  pagination?: PaginationMeta;
+}
+
+export interface PaginatedApiResponse<T> {
+  success: boolean;
+  data: T[];
+  pagination?: PaginationMeta;
+  message?: string;
+}
