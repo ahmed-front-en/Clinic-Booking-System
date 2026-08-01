@@ -4,7 +4,7 @@ import { Check, ChevronDown } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { cn } from "@/lib/utils";
 
-interface FilterOption {
+export interface FilterOption {
   value: string;
   label: string;
 }

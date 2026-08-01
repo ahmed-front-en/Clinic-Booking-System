@@ -1,0 +1,253 @@
+"use client";
+
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  createAppointmentSlotSchema,
+  updateAppointmentSlotSchema,
+  type CreateAppointmentSlotInput,
+  type UpdateAppointmentSlotInput,
+} from "@/schemas/slot";
+import { SLOT_STATUSES } from "@/types/enums";
+import type { DoctorRecord } from "@/types/models/doctor";
+import type { DoctorScheduleRecord } from "@/types/models/schedule";
+import type { AppointmentSlotRecord } from "@/types/models/slot";
+import { useApiError } from "@/hooks/useApiError";
+
+interface SlotFormModalProps {
+  open: boolean;
+  onClose: () => void;
+  slot?: AppointmentSlotRecord | null;
+  doctors: DoctorRecord[];
+  schedules: DoctorScheduleRecord[];
+  onSubmit: (data: CreateAppointmentSlotInput | UpdateAppointmentSlotInput) => void;
+  isSubmitting?: boolean;
+}
+
+export function SlotFormModal({
+  open,
+  onClose,
+  slot,
+  doctors,
+  schedules,
+  onSubmit,
+  isSubmitting,
+}: SlotFormModalProps) {
+  const { parse } = useApiError();
+  const [doctorId, setDoctorId] = useState(slot?.doctorId ?? "");
+  const [doctorScheduleId, setDoctorScheduleId] = useState(
+    slot?.doctorScheduleId ?? "",
+  );
+  const [slotDate, setSlotDate] = useState(slot?.slotDate ?? "");
+  const [startTime, setStartTime] = useState(slot?.startTime ?? "");
+  const [endTime, setEndTime] = useState(slot?.endTime ?? "");
+  const [status, setStatus] = useState(slot?.status ?? "available");
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [formError, setFormError] = useState<string | null>(null);
+
+  const doctorSchedules = schedules.filter((s) => s.doctorId === doctorId);
+
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setFieldErrors({});
+    setFormError(null);
+
+    const payload = {
+      doctorId,
+      doctorScheduleId,
+      slotDate,
+      startTime,
+      endTime,
+      status,
+    };
+    const result = slot
+      ? updateAppointmentSlotSchema.safeParse(payload)
+      : createAppointmentSlotSchema.safeParse(payload);
+
+    if (!result.success) {
+      const errors: Record<string, string> = {};
+      for (const issue of result.error.issues) {
+        const key = issue.path.join(".");
+        if (!errors[key]) errors[key] = issue.message;
+      }
+      setFieldErrors(errors);
+      return;
+    }
+
+    Promise.resolve(onSubmit(result.data)).catch((err: unknown) => {
+      const { message } = parse(err);
+      setFormError(message);
+    });
+  }
+
+  return (
+    <Dialog open={open} onClose={onClose}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{slot ? "Edit slot" : "Create slot"}</DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4 mt-4" noValidate>
+          {formError && (
+            <div
+              role="alert"
+              className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive"
+            >
+              {formError}
+            </div>
+          )}
+
+          <div className="space-y-2">
+            <Label htmlFor="doctorId">Doctor</Label>
+            <Select
+              value={doctorId}
+              onValueChange={(value) => {
+                setDoctorId(value ?? "");
+                setDoctorScheduleId("");
+              }}
+              disabled={isSubmitting}
+            >
+              <SelectTrigger id="doctorId" className="w-full">
+                <SelectValue placeholder="Select doctor" />
+              </SelectTrigger>
+              <SelectContent>
+                {doctors.map((doctor) => (
+                  <SelectItem key={doctor.id} value={doctor.id}>
+                    Doctor {doctor.id.slice(0, 8)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {fieldErrors.doctorId && (
+              <p className="text-xs text-destructive">{fieldErrors.doctorId}</p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="doctorScheduleId">Schedule</Label>
+            <Select
+              value={doctorScheduleId}
+              onValueChange={(value) => setDoctorScheduleId(value ?? "")}
+              disabled={isSubmitting || doctorSchedules.length === 0}
+            >
+              <SelectTrigger id="doctorScheduleId" className="w-full">
+                <SelectValue
+                  placeholder={
+                    doctorSchedules.length === 0
+                      ? "No schedule for this doctor"
+                      : "Select schedule"
+                  }
+                />
+              </SelectTrigger>
+              <SelectContent>
+                {doctorSchedules.map((schedule) => (
+                  <SelectItem key={schedule.id} value={schedule.id}>
+                    {schedule.startTime} - {schedule.endTime} ({schedule.slotDuration} min)
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {fieldErrors.doctorScheduleId && (
+              <p className="text-xs text-destructive">
+                {fieldErrors.doctorScheduleId}
+              </p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="slotDate">Date</Label>
+            <Input
+              id="slotDate"
+              type="date"
+              value={slotDate}
+              onChange={(e) => setSlotDate(e.target.value)}
+              hasError={Boolean(fieldErrors.slotDate)}
+              disabled={isSubmitting}
+            />
+            {fieldErrors.slotDate && (
+              <p className="text-xs text-destructive">{fieldErrors.slotDate}</p>
+            )}
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="startTime">Start time</Label>
+              <Input
+                id="startTime"
+                type="time"
+                value={startTime}
+                onChange={(e) => setStartTime(e.target.value)}
+                hasError={Boolean(fieldErrors.startTime)}
+                disabled={isSubmitting}
+              />
+              {fieldErrors.startTime && (
+                <p className="text-xs text-destructive">{fieldErrors.startTime}</p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="endTime">End time</Label>
+              <Input
+                id="endTime"
+                type="time"
+                value={endTime}
+                onChange={(e) => setEndTime(e.target.value)}
+                hasError={Boolean(fieldErrors.endTime)}
+                disabled={isSubmitting}
+              />
+              {fieldErrors.endTime && (
+                <p className="text-xs text-destructive">{fieldErrors.endTime}</p>
+              )}
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="status">Status</Label>
+            <Select
+              value={status}
+              onValueChange={(value) => setStatus(value as AppointmentSlotRecord["status"])}
+              disabled={isSubmitting}
+            >
+              <SelectTrigger id="status" className="w-full">
+                <SelectValue placeholder="Select status" />
+              </SelectTrigger>
+              <SelectContent>
+                {SLOT_STATUSES.map((option) => (
+                  <SelectItem key={option} value={option}>
+                    {option}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {fieldErrors.status && (
+              <p className="text-xs text-destructive">{fieldErrors.status}</p>
+            )}
+          </div>
+
+          <div className="mt-6 flex justify-end gap-3">
+            <Button variant="outline" type="button" onClick={onClose} disabled={isSubmitting}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? "Saving..." : slot ? "Save changes" : "Create slot"}
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}

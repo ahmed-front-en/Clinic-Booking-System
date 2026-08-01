@@ -32,12 +32,14 @@ export const queryKeys = {
   schedules: {
     me: ["schedules", "me"] as const,
     all: ["schedules"] as const,
+    admin: (params?: PaginationParams) => ["schedules", "admin", params] as const,
     byDoctor: (id: string) => ["schedules", "doctor", id] as const,
     byId: (id: string) => ["schedules", id] as const,
   },
   appointments: {
     mine: ["appointments", "mine"] as const,
     all: ["appointments"] as const,
+    admin: (params?: PaginationParams) => ["appointments", "admin", params] as const,
     byId: (id: string) => ["appointments", id] as const,
     byPatient: (id: string) => ["appointments", "patient", id] as const,
     byDoctor: (id: string) => ["appointments", "doctor", id] as const,
