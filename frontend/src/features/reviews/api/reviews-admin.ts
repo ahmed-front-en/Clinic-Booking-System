@@ -5,13 +5,13 @@ import type {
   PaginatedData,
   PaginationParams,
 } from "@/types/api";
-import type { ReviewRecord } from "@/types/models/review";
+import type { ReviewRecord, ReviewReadModel } from "@/types/models/review";
 import type { UpdateReviewInput } from "@/schemas/review";
 
 export async function getReviewsAdmin(
   params: PaginationParams,
-): Promise<PaginatedData<ReviewRecord>> {
-  const response = await api.get<PaginatedApiResponse<ReviewRecord>>("/reviews", {
+): Promise<PaginatedData<ReviewReadModel>> {
+  const response = await api.get<PaginatedApiResponse<ReviewReadModel>>("/reviews", {
     params,
   });
   return { data: response.data.data, pagination: response.data.pagination };

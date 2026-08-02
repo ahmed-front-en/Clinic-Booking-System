@@ -5,13 +5,13 @@ import type {
   PaginatedData,
   PaginationParams,
 } from "@/types/api";
-import type { PaymentRecord } from "@/types/models/payment";
+import type { PaymentRecord, PaymentReadModel } from "@/types/models/payment";
 import type { UpdatePaymentInput } from "@/schemas/payment";
 
 export async function getPaymentsAdmin(
   params: PaginationParams,
-): Promise<PaginatedData<PaymentRecord>> {
-  const response = await api.get<PaginatedApiResponse<PaymentRecord>>("/payments", {
+): Promise<PaginatedData<PaymentReadModel>> {
+  const response = await api.get<PaginatedApiResponse<PaymentReadModel>>("/payments", {
     params,
   });
   return { data: response.data.data, pagination: response.data.pagination };

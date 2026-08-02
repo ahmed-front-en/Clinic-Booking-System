@@ -83,7 +83,8 @@ function PatientReviewsContent() {
               className="flex items-center justify-between gap-4 rounded-xl border border-border bg-card p-4"
             >
               <p className="text-sm text-muted-foreground">
-                Appointment #{appointment.id.slice(0, 8)}
+                {appointment.doctor.displayName} · {appointment.slot.date} at{" "}
+                {appointment.slot.startTime}
               </p>
               <Button onClick={() => setSelected(appointment)}>
                 <MessageSquarePlus />

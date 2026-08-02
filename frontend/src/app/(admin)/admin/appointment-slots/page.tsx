@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { CalendarRange, Pencil, Plus, Trash2 } from "lucide-react";
 import type { Column, DataTableProps } from "@/components/data/DataTable";
@@ -38,7 +38,7 @@ import { usePrefetchAdminPage } from "@/hooks/usePrefetchAdminPage";
 import { formatTime } from "@/lib/utils";
 import { queryKeys } from "@/lib/query-keys";
 import { PAGINATION_DEFAULTS } from "@/config";
-import type { AppointmentSlotRecord } from "@/types/models/slot";
+import type { AppointmentSlotReadModel } from "@/types/models/slot";
 import type {
   CreateAppointmentSlotInput,
   UpdateAppointmentSlotInput,
@@ -57,9 +57,9 @@ export default function AdminAppointmentSlotsPage() {
   const { mutate: updateSlot, isPending: isUpdating } = useUpdateSlot();
   const { mutate: deleteSlot, isPending: isDeleting } = useDeleteSlot();
 
-  const [editing, setEditing] = useState<AppointmentSlotRecord | null>(null);
+  const [editing, setEditing] = useState<AppointmentSlotReadModel | null>(null);
   const [creating, setCreating] = useState(false);
-  const [deleting, setDeleting] = useState<AppointmentSlotRecord | null>(null);
+  const [deleting, setDeleting] = useState<AppointmentSlotReadModel | null>(null);
 
   const slots = data?.data ?? [];
   const totalPages = data?.pagination?.totalPages ?? 1;
@@ -73,14 +73,8 @@ export default function AdminAppointmentSlotsPage() {
     totalPages,
   });
 
-  const doctorLabel = useCallback(
-    (id: string) =>
-      doctors?.find((doctor) => doctor.id === id)?.id.slice(0, 8) ?? id.slice(0, 8),
-    [doctors],
-  );
-
-  const columns: Column<AppointmentSlotRecord>[] = useMemo(() => [
-    { key: "doctorId", header: "Doctor", render: (slot) => `Doctor ${doctorLabel(slot.doctorId)}` },
+  const columns: Column<AppointmentSlotReadModel>[] = useMemo(() => [
+    { key: "doctorId", header: "Doctor", render: (slot) => slot.doctor.displayName },
     { key: "slotDate", header: "Date", sortable: true },
     {
       key: "startTime",
@@ -102,7 +96,7 @@ export default function AdminAppointmentSlotsPage() {
             variant="ghost"
             size="xs"
             onClick={() => setEditing(slot)}
-            aria-label={`Edit slot ${slot.slotDate}`}
+            aria-label={`Edit slot for ${slot.doctor.displayName} on ${slot.slotDate}`}
           >
             <Pencil className="size-4" />
           </Button>
@@ -110,14 +104,14 @@ export default function AdminAppointmentSlotsPage() {
             variant="ghost"
             size="xs"
             onClick={() => setDeleting(slot)}
-            aria-label={`Delete slot ${slot.slotDate}`}
+            aria-label={`Delete slot for ${slot.doctor.displayName} on ${slot.slotDate}`}
           >
             <Trash2 className="size-4" />
           </Button>
         </div>
       ),
     },
-  ], [doctorLabel]);
+  ], []);
 
   return (
     <div className="flex flex-col gap-6">

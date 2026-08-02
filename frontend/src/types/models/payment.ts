@@ -1,4 +1,9 @@
 import type { PaymentMethod, PaymentStatus } from "../enums";
+import type {
+  PatientSummary,
+  SlotSummary,
+  DoctorSummary,
+} from "./read-models";
 
 export interface PaymentRecord {
   id: string;
@@ -7,6 +12,12 @@ export interface PaymentRecord {
   method: PaymentMethod;
   status: PaymentStatus;
   transactionReference: string | null;
+}
+
+export interface PaymentReadModel extends PaymentRecord {
+  patient: PatientSummary;
+  slot: SlotSummary;
+  doctor: DoctorSummary;
 }
 
 export interface PaymentCreateRequest {

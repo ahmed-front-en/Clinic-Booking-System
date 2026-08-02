@@ -5,13 +5,13 @@ import type {
   PaginatedData,
   PaginationParams,
 } from "@/types/api";
-import type { AppointmentRecord } from "@/types/models/appointment";
+import type { AppointmentRecord, AppointmentReadModel } from "@/types/models/appointment";
 import type { UpdateAppointmentInput } from "@/schemas/appointment";
 
 export async function getAppointmentsAdmin(
   params: PaginationParams,
-): Promise<PaginatedData<AppointmentRecord>> {
-  const response = await api.get<PaginatedApiResponse<AppointmentRecord>>(
+): Promise<PaginatedData<AppointmentReadModel>> {
+  const response = await api.get<PaginatedApiResponse<AppointmentReadModel>>(
     "/appointments",
     { params },
   );

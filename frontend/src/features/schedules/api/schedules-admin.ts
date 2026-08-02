@@ -5,7 +5,7 @@ import type {
   PaginatedData,
   PaginationParams,
 } from "@/types/api";
-import type { DoctorScheduleRecord } from "@/types/models/schedule";
+import type { DoctorScheduleRecord, DoctorScheduleReadModel } from "@/types/models/schedule";
 import type {
   CreateDoctorScheduleInput,
   UpdateDoctorScheduleInput,
@@ -13,8 +13,8 @@ import type {
 
 export async function getSchedulesAdmin(
   params: PaginationParams,
-): Promise<PaginatedData<DoctorScheduleRecord>> {
-  const response = await api.get<PaginatedApiResponse<DoctorScheduleRecord>>(
+): Promise<PaginatedData<DoctorScheduleReadModel>> {
+  const response = await api.get<PaginatedApiResponse<DoctorScheduleReadModel>>(
     "/doctor-schedules",
     { params },
   );

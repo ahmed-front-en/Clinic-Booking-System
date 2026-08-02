@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { CheckCircle2, Calendar, Clock, Building2, User, DollarSign } from "lucide-react";
+import { formatCurrency } from "@/lib/utils";
 
 interface AppointmentConfirmationProps {
   doctorName: string;
@@ -77,7 +78,7 @@ export function AppointmentConfirmation({
               <span>Consultation Fee</span>
               <div className="flex items-center text-primary">
                 <DollarSign className="size-4" />
-                <span>${consultationFee}.00</span>
+                <span>{formatCurrency(consultationFee)}</span>
               </div>
             </div>
           </div>

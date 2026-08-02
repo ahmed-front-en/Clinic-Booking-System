@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { Clock, Pencil, Plus, Trash2 } from "lucide-react";
 import type { Column, DataTableProps } from "@/components/data/DataTable";
@@ -44,7 +44,7 @@ import {
 } from "@/features/schedules";
 import { useDoctorsList } from "@/features/doctors";
 import { formatTime } from "@/lib/utils";
-import type { DoctorScheduleRecord } from "@/types/models/schedule";
+import type { DoctorScheduleReadModel } from "@/types/models/schedule";
 import type {
   CreateDoctorScheduleInput,
   UpdateDoctorScheduleInput,
@@ -66,9 +66,9 @@ export default function AdminDoctorSchedulesPage() {
   const { mutate: deleteSchedule, isPending: isDeleting } = useDeleteSchedule();
 
   const [selectedDoctor, setSelectedDoctor] = useState<string>("");
-  const [editing, setEditing] = useState<DoctorScheduleRecord | null>(null);
+  const [editing, setEditing] = useState<DoctorScheduleReadModel | null>(null);
   const [creating, setCreating] = useState(false);
-  const [deleting, setDeleting] = useState<DoctorScheduleRecord | null>(null);
+  const [deleting, setDeleting] = useState<DoctorScheduleReadModel | null>(null);
 
   const schedules = useMemo(() => schedulesData?.data ?? [], [schedulesData]);
   const doctorSchedules = useMemo(
@@ -79,13 +79,7 @@ export default function AdminDoctorSchedulesPage() {
     [schedules, selectedDoctor],
   );
 
-  const doctorLabel = useCallback(
-    (id: string) =>
-      doctors?.find((doctor) => doctor.id === id)?.id.slice(0, 8) ?? id.slice(0, 8),
-    [doctors],
-  );
-
-  const columns: Column<DoctorScheduleRecord>[] = useMemo(() => [
+  const columns: Column<DoctorScheduleReadModel>[] = useMemo(() => [
     {
       key: "weekday",
       header: "Day",
@@ -116,7 +110,7 @@ export default function AdminDoctorSchedulesPage() {
             variant="ghost"
             size="xs"
             onClick={() => setEditing(schedule)}
-            aria-label={`Edit schedule for ${doctorLabel(schedule.doctorId)}`}
+            aria-label={`Edit schedule for ${schedule.doctor.displayName}`}
           >
             <Pencil className="size-4" />
           </Button>
@@ -124,14 +118,14 @@ export default function AdminDoctorSchedulesPage() {
             variant="ghost"
             size="xs"
             onClick={() => setDeleting(schedule)}
-            aria-label={`Delete schedule for ${doctorLabel(schedule.doctorId)}`}
+            aria-label={`Delete schedule for ${schedule.doctor.displayName}`}
           >
             <Trash2 className="size-4" />
           </Button>
         </div>
       ),
     },
-  ], [doctorLabel]);
+  ], []);
 
   if (isError) {
     return <ErrorBanner message="Could not load schedules." onRetry={refetch} />;
@@ -163,7 +157,7 @@ export default function AdminDoctorSchedulesPage() {
           <SelectContent>
             {(doctors ?? []).map((doctor) => (
               <SelectItem key={doctor.id} value={doctor.id}>
-                Doctor {doctor.id.slice(0, 8)}
+                {doctor.doctor.displayName}
               </SelectItem>
             ))}
           </SelectContent>

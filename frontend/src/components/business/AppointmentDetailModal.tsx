@@ -20,13 +20,13 @@ import {
 import { StatusBadge } from "@/components/business/StatusBadge";
 import { updateAppointmentSchema, type UpdateAppointmentInput } from "@/schemas/appointment";
 import { APPOINTMENT_STATUSES } from "@/types/enums";
-import type { AppointmentRecord } from "@/types/models/appointment";
+import type { AppointmentReadModel } from "@/types/models/appointment";
 import { useApiError } from "@/hooks/useApiError";
 
 interface AppointmentDetailModalProps {
   open: boolean;
   onClose: () => void;
-  appointment: AppointmentRecord;
+  appointment: AppointmentReadModel;
   onSubmit: (data: UpdateAppointmentInput) => void;
   isSubmitting?: boolean;
 }
@@ -80,10 +80,10 @@ export function AppointmentDetailModal({
           <div className="flex items-center justify-between rounded-lg border border-border bg-muted/30 px-4 py-3">
             <div className="flex flex-col gap-1 text-sm">
               <span className="text-muted-foreground">
-                Patient: <span className="font-medium text-foreground">#{appointment.patientId.slice(0, 8)}</span>
+                Patient: <span className="font-medium text-foreground">{appointment.patient.fullName}</span>
               </span>
               <span className="text-muted-foreground">
-                Slot: <span className="font-medium text-foreground">#{appointment.slotId.slice(0, 8)}</span>
+                Slot: <span className="font-medium text-foreground">{appointment.slot.date} at {appointment.slot.startTime}</span>
               </span>
             </div>
             <StatusBadge status={appointment.status} />
@@ -104,7 +104,7 @@ export function AppointmentDetailModal({
               <Select
                 value={status}
                 onValueChange={(value) =>
-                  setStatus(value as AppointmentRecord["status"])
+                  setStatus(value as AppointmentReadModel["status"])
                 }
                 disabled={isSubmitting}
               >

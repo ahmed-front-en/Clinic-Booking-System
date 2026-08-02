@@ -24,7 +24,7 @@ import {
   type UpdateAppointmentSlotInput,
 } from "@/schemas/slot";
 import { SLOT_STATUSES } from "@/types/enums";
-import type { DoctorRecord } from "@/types/models/doctor";
+import type { DoctorReadModel } from "@/types/models/doctor";
 import type { DoctorScheduleRecord } from "@/types/models/schedule";
 import type { AppointmentSlotRecord } from "@/types/models/slot";
 import { useApiError } from "@/hooks/useApiError";
@@ -33,7 +33,7 @@ interface SlotFormModalProps {
   open: boolean;
   onClose: () => void;
   slot?: AppointmentSlotRecord | null;
-  doctors: DoctorRecord[];
+  doctors: DoctorReadModel[];
   schedules: DoctorScheduleRecord[];
   onSubmit: (data: CreateAppointmentSlotInput | UpdateAppointmentSlotInput) => void;
   isSubmitting?: boolean;
@@ -127,7 +127,7 @@ export function SlotFormModal({
               <SelectContent>
                 {doctors.map((doctor) => (
                   <SelectItem key={doctor.id} value={doctor.id}>
-                    Doctor {doctor.id.slice(0, 8)}
+                    {doctor.doctor.displayName}
                   </SelectItem>
                 ))}
               </SelectContent>
