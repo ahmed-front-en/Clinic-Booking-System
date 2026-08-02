@@ -1,21 +1,39 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import dynamic from "next/dynamic";
 import { Pencil, Trash2, Users } from "lucide-react";
-import { DataTable, type Column } from "@/components/data/DataTable";
+import type { Column, DataTableProps } from "@/components/data/DataTable";
 import { Pagination } from "@/components/data/Pagination";
 import { SearchInput } from "@/components/data/SearchInput";
 import { FilterDropdown, type FilterOption } from "@/components/data/FilterDropdown";
-import { UserFormModal } from "@/components/business/UserFormModal";
-import { ConfirmDialog } from "@/components/business/ConfirmDialog";
 import { ErrorBanner } from "@/components/feedback/ErrorBanner";
 import { EmptyState } from "@/components/feedback/EmptyState";
+import { Skeleton } from "@/components/feedback/Skeleton";
 import { Button } from "@/components/ui/button";
+
+const DataTable = dynamic(
+  () => import("@/components/data/DataTable").then((mod) => mod.DataTable),
+  { loading: () => <Skeleton variant="table" /> },
+) as <T extends object>(props: DataTableProps<T>) => React.JSX.Element;
+
+const UserFormModal = dynamic(
+  () => import("@/components/business/UserFormModal").then((mod) => mod.UserFormModal),
+  { loading: () => <Skeleton variant="form" /> },
+);
+
+const ConfirmDialog = dynamic(
+  () => import("@/components/business/ConfirmDialog").then((mod) => mod.ConfirmDialog),
+  { loading: () => <Skeleton variant="form" /> },
+);
 import {
   useUsersAdmin,
   useUpdateUserAdmin,
   useDeleteUserAdmin,
 } from "@/features/users";
+import { getUsersAdmin } from "@/features/users/api/users-admin";
+import { usePrefetchAdminPage } from "@/hooks/usePrefetchAdminPage";
+import { queryKeys } from "@/lib/query-keys";
 import { PAGINATION_DEFAULTS } from "@/config";
 import type { UserRecord } from "@/types/models/user";
 import type { UpdateUserInput } from "@/schemas/user";
@@ -52,6 +70,20 @@ export default function AdminUsersPage() {
   const users = data?.data ?? [];
   const totalPages = data?.pagination?.totalPages ?? 1;
 
+  const prefetchPage = usePrefetchAdminPage({
+    queryKey: queryKeys.users.all,
+    queryFn: getUsersAdmin,
+    params: {
+      page,
+      limit: PAGINATION_DEFAULTS.limit,
+      search: search || undefined,
+      role: role as UserRecord["role"],
+      isVerified,
+    },
+    page,
+    totalPages,
+  });
+
   function handleSearch(value: string) {
     setSearch(value);
     setPage(1);
@@ -67,7 +99,7 @@ export default function AdminUsersPage() {
     setPage(1);
   }
 
-  const columns: Column<UserRecord>[] = [
+  const columns: Column<UserRecord>[] = useMemo(() => [
     { key: "email", header: "Email", sortable: true },
     {
       key: "role",
@@ -118,7 +150,7 @@ export default function AdminUsersPage() {
         </div>
       ),
     },
-  ];
+  ], []);
 
   return (
     <div className="flex flex-col gap-6">
@@ -171,7 +203,12 @@ export default function AdminUsersPage() {
             }
           />
 
-          <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+          <Pagination
+            page={page}
+            totalPages={totalPages}
+            onPageChange={setPage}
+            onPagePrefetch={prefetchPage}
+          />
         </>
       )}
 

@@ -1,20 +1,38 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import dynamic from "next/dynamic";
 import { Pencil, Star, Trash2 } from "lucide-react";
-import { DataTable, type Column } from "@/components/data/DataTable";
+import type { Column, DataTableProps } from "@/components/data/DataTable";
 import { Pagination } from "@/components/data/Pagination";
-import { ReviewDetailModal } from "@/components/business/ReviewDetailModal";
-import { ConfirmDialog } from "@/components/business/ConfirmDialog";
 import { ErrorBanner } from "@/components/feedback/ErrorBanner";
 import { EmptyState } from "@/components/feedback/EmptyState";
+import { Skeleton } from "@/components/feedback/Skeleton";
 import { StarRating } from "@/components/business/StarRating";
 import { Button } from "@/components/ui/button";
+
+const DataTable = dynamic(
+  () => import("@/components/data/DataTable").then((mod) => mod.DataTable),
+  { loading: () => <Skeleton variant="table" /> },
+) as <T extends object>(props: DataTableProps<T>) => React.JSX.Element;
+
+const ReviewDetailModal = dynamic(
+  () => import("@/components/business/ReviewDetailModal").then((mod) => mod.ReviewDetailModal),
+  { loading: () => <Skeleton variant="form" /> },
+);
+
+const ConfirmDialog = dynamic(
+  () => import("@/components/business/ConfirmDialog").then((mod) => mod.ConfirmDialog),
+  { loading: () => <Skeleton variant="form" /> },
+);
 import {
   useReviewsAdmin,
   useUpdateReview,
   useDeleteReview,
 } from "@/features/reviews";
+import { getReviewsAdmin } from "@/features/reviews/api/reviews-admin";
+import { usePrefetchAdminPage } from "@/hooks/usePrefetchAdminPage";
+import { queryKeys } from "@/lib/query-keys";
 import { PAGINATION_DEFAULTS } from "@/config";
 import type { ReviewRecord } from "@/types/models/review";
 import type { UpdateReviewInput } from "@/schemas/review";
@@ -37,7 +55,15 @@ export default function AdminReviewsPage() {
   const reviews = data?.data ?? [];
   const totalPages = data?.pagination?.totalPages ?? 1;
 
-  const columns: Column<ReviewRecord>[] = [
+  const prefetchPage = usePrefetchAdminPage({
+    queryKey: queryKeys.reviews.admin,
+    queryFn: getReviewsAdmin,
+    params: { page, limit: PAGINATION_DEFAULTS.limit },
+    page,
+    totalPages,
+  });
+
+  const columns: Column<ReviewRecord>[] = useMemo(() => [
     {
       key: "appointmentId",
       header: "Appointment",
@@ -83,7 +109,7 @@ export default function AdminReviewsPage() {
         </div>
       ),
     },
-  ];
+  ], []);
 
   return (
     <div className="flex flex-col gap-6">
@@ -111,7 +137,12 @@ export default function AdminReviewsPage() {
               />
             }
           />
-          <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+          <Pagination
+            page={page}
+            totalPages={totalPages}
+            onPageChange={setPage}
+            onPagePrefetch={prefetchPage}
+          />
         </>
       )}
 

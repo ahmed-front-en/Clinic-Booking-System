@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import dynamic from "next/dynamic";
 import { MessageSquarePlus, Star } from "lucide-react";
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { useMyReviews, useCreateReview } from "@/features/reviews";
 import { useMyAppointments } from "@/features/appointments";
 import { ReviewCard } from "@/components/business/ReviewCard";
-import { ReviewForm } from "@/components/business/ReviewForm";
 import { Skeleton } from "@/components/feedback/Skeleton";
 import { ErrorBanner } from "@/components/feedback/ErrorBanner";
 import { EmptyState } from "@/components/feedback/EmptyState";
@@ -20,21 +20,30 @@ import {
 import type { AppointmentRecord } from "@/types/models/appointment";
 import type { CreateReviewInput } from "@/schemas/review";
 
+const ReviewForm = dynamic(
+  () => import("@/components/business/ReviewForm").then((mod) => mod.ReviewForm),
+  { loading: () => <Skeleton variant="form" /> },
+);
+
 function PatientReviewsContent() {
   const { data: reviews, isPending, isError, refetch } = useMyReviews();
   const { data: appointments } = useMyAppointments();
   const { mutate: createReview, isPending: isSubmitting } = useCreateReview();
   const [selected, setSelected] = useState<AppointmentRecord | null>(null);
 
-  const reviewedAppointmentIds = new Set(
-    reviews?.map((review) => review.appointmentId) ?? [],
+  const reviewedAppointmentIds = useMemo(
+    () => new Set(reviews?.map((review) => review.appointmentId) ?? []),
+    [reviews],
   );
-  const pendingReviews =
-    appointments?.filter(
-      (appointment) =>
-        appointment.status === "completed" &&
-        !reviewedAppointmentIds.has(appointment.id),
-    ) ?? [];
+  const pendingReviews = useMemo(
+    () =>
+      appointments?.filter(
+        (appointment) =>
+          appointment.status === "completed" &&
+          !reviewedAppointmentIds.has(appointment.id),
+      ) ?? [],
+    [appointments, reviewedAppointmentIds],
+  );
 
   if (isError) {
     return (

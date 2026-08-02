@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import { CreditCard, Receipt } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/business/StatusBadge";
@@ -12,7 +13,11 @@ interface PaymentCardProps {
   isPaying?: boolean;
 }
 
-export function PaymentCard({ payment, onPay, isPaying }: PaymentCardProps) {
+export const PaymentCard = memo(function PaymentCard({
+  payment,
+  onPay,
+  isPaying,
+}: PaymentCardProps) {
   const canPay = payment.status === "pending" && Boolean(onPay);
 
   return (
@@ -50,4 +55,4 @@ export function PaymentCard({ payment, onPay, isPaying }: PaymentCardProps) {
       </div>
     </div>
   );
-}
+});

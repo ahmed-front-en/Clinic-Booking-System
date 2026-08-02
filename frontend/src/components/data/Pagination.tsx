@@ -8,11 +8,24 @@ interface PaginationProps {
   page: number;
   totalPages: number;
   onPageChange: (page: number) => void;
+  onPagePrefetch?: (page: number) => void;
   className?: string;
 }
 
-export function Pagination({ page, totalPages, onPageChange, className }: PaginationProps) {
+export function Pagination({
+  page,
+  totalPages,
+  onPageChange,
+  onPagePrefetch,
+  className,
+}: PaginationProps) {
   if (totalPages <= 1) return null;
+
+  const handlePagePrefetch = (target: number) => {
+    if (target >= 1 && target <= totalPages && target !== page) {
+      onPagePrefetch?.(target);
+    }
+  };
 
   const pages: (number | "...")[] = [];
   const delta = 1;
@@ -32,6 +45,8 @@ export function Pagination({ page, totalPages, onPageChange, className }: Pagina
         size="xs"
         disabled={page <= 1}
         onClick={() => onPageChange(page - 1)}
+        onMouseEnter={() => handlePagePrefetch(page - 1)}
+        onFocus={() => handlePagePrefetch(page - 1)}
         aria-label="Previous page"
       >
         <ChevronLeft className="size-4" />
@@ -48,6 +63,8 @@ export function Pagination({ page, totalPages, onPageChange, className }: Pagina
             variant={p === page ? "default" : "outline"}
             size="xs"
             onClick={() => onPageChange(p)}
+            onMouseEnter={() => handlePagePrefetch(p)}
+            onFocus={() => handlePagePrefetch(p)}
             aria-current={p === page ? "page" : undefined}
           >
             {p}
@@ -60,6 +77,8 @@ export function Pagination({ page, totalPages, onPageChange, className }: Pagina
         size="xs"
         disabled={page >= totalPages}
         onClick={() => onPageChange(page + 1)}
+        onMouseEnter={() => handlePagePrefetch(page + 1)}
+        onFocus={() => handlePagePrefetch(page + 1)}
         aria-label="Next page"
       >
         <ChevronRight className="size-4" />

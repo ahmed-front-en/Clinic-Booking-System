@@ -1,14 +1,28 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useMemo, useState } from "react";
+import dynamic from "next/dynamic";
 import { Pencil, Plus, Trash2, UserRound } from "lucide-react";
-import { DataTable, type Column } from "@/components/data/DataTable";
-import { DoctorFormModal } from "@/components/business/DoctorFormModal";
-import { ConfirmDialog } from "@/components/business/ConfirmDialog";
+import type { Column, DataTableProps } from "@/components/data/DataTable";
 import { ErrorBanner } from "@/components/feedback/ErrorBanner";
 import { EmptyState } from "@/components/feedback/EmptyState";
 import { Skeleton } from "@/components/feedback/Skeleton";
 import { Button } from "@/components/ui/button";
+
+const DataTable = dynamic(
+  () => import("@/components/data/DataTable").then((mod) => mod.DataTable),
+  { loading: () => <Skeleton variant="table" /> },
+) as <T extends object>(props: DataTableProps<T>) => React.JSX.Element;
+
+const DoctorFormModal = dynamic(
+  () => import("@/components/business/DoctorFormModal").then((mod) => mod.DoctorFormModal),
+  { loading: () => <Skeleton variant="form" /> },
+);
+
+const ConfirmDialog = dynamic(
+  () => import("@/components/business/ConfirmDialog").then((mod) => mod.ConfirmDialog),
+  { loading: () => <Skeleton variant="form" /> },
+);
 import {
   useDoctorsList,
   useCreateDoctor,
@@ -41,16 +55,25 @@ export default function AdminDoctorsPage() {
   const [creating, setCreating] = useState(false);
   const [deleting, setDeleting] = useState<DoctorRecord | null>(null);
 
-  const users = doctorUsers?.data ?? [];
+  const users = useMemo(() => doctorUsers?.data ?? [], [doctorUsers]);
 
-  const clinicName = (id: string) =>
-    clinics?.find((clinic) => clinic.id === id)?.name ?? id.slice(0, 8);
-  const specialtyName = (id: string) =>
-    specialties?.find((specialty) => specialty.id === id)?.name ?? id.slice(0, 8);
-  const doctorEmail = (id: string) =>
-    users.find((user) => user.id === id)?.email ?? id.slice(0, 8);
+  const clinicName = useCallback(
+    (id: string) =>
+      clinics?.find((clinic) => clinic.id === id)?.name ?? id.slice(0, 8),
+    [clinics],
+  );
+  const specialtyName = useCallback(
+    (id: string) =>
+      specialties?.find((specialty) => specialty.id === id)?.name ?? id.slice(0, 8),
+    [specialties],
+  );
+  const doctorEmail = useCallback(
+    (id: string) =>
+      users.find((user) => user.id === id)?.email ?? id.slice(0, 8),
+    [users],
+  );
 
-  const columns: Column<DoctorRecord>[] = [
+  const columns: Column<DoctorRecord>[] = useMemo(() => [
     {
       key: "userId",
       header: "User",
@@ -101,7 +124,7 @@ export default function AdminDoctorsPage() {
         </div>
       ),
     },
-  ];
+  ], [clinicName, specialtyName, doctorEmail]);
 
   if (isError) {
     return <ErrorBanner message="Could not load doctors." onRetry={refetch} />;

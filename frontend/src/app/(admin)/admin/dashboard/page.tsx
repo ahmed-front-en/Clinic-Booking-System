@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { usePrefetchAdminSection } from "@/hooks/usePrefetchAdminSection";
 import {
   Users,
   Building2,
@@ -83,6 +86,8 @@ const sections: {
 ];
 
 export default function AdminDashboardPage() {
+  const prefetchSection = usePrefetchAdminSection();
+
   return (
     <div className="flex flex-col gap-6">
       <header>
@@ -96,7 +101,13 @@ export default function AdminDashboardPage() {
         {sections.map((section) => {
           const Icon = section.icon;
           return (
-            <Link key={section.href} href={section.href} className="group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-xl">
+            <Link
+              key={section.href}
+              href={section.href}
+              onMouseEnter={() => prefetchSection(section.href)}
+              onFocus={() => prefetchSection(section.href)}
+              className="group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-xl"
+            >
               <Card className="h-full transition-colors group-hover:border-primary/50 group-focus-visible:border-primary/50">
                 <CardContent className="flex flex-col gap-3">
                   <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">

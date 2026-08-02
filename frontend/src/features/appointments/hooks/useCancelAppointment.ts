@@ -38,8 +38,10 @@ export function useCancelAppointment() {
       showToast(message, "error");
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.appointments.mine });
       showToast("Appointment cancelled", "success");
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["appointments"] });
     },
   });
 }

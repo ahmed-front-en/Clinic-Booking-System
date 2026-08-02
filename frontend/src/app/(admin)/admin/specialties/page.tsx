@@ -1,13 +1,28 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import dynamic from "next/dynamic";
 import { Pencil, Plus, Stethoscope, Trash2 } from "lucide-react";
-import { DataTable, type Column } from "@/components/data/DataTable";
-import { SpecialtyFormModal } from "@/components/business/SpecialtyFormModal";
-import { ConfirmDialog } from "@/components/business/ConfirmDialog";
+import type { Column, DataTableProps } from "@/components/data/DataTable";
 import { ErrorBanner } from "@/components/feedback/ErrorBanner";
 import { EmptyState } from "@/components/feedback/EmptyState";
+import { Skeleton } from "@/components/feedback/Skeleton";
 import { Button } from "@/components/ui/button";
+
+const DataTable = dynamic(
+  () => import("@/components/data/DataTable").then((mod) => mod.DataTable),
+  { loading: () => <Skeleton variant="table" /> },
+) as <T extends object>(props: DataTableProps<T>) => React.JSX.Element;
+
+const SpecialtyFormModal = dynamic(
+  () => import("@/components/business/SpecialtyFormModal").then((mod) => mod.SpecialtyFormModal),
+  { loading: () => <Skeleton variant="form" /> },
+);
+
+const ConfirmDialog = dynamic(
+  () => import("@/components/business/ConfirmDialog").then((mod) => mod.ConfirmDialog),
+  { loading: () => <Skeleton variant="form" /> },
+);
 import { useSpecialtiesList } from "@/features/specialties";
 import {
   useCreateSpecialty,
@@ -32,7 +47,7 @@ export default function AdminSpecialtiesPage() {
   const [creating, setCreating] = useState(false);
   const [deleting, setDeleting] = useState<SpecialtyRecord | null>(null);
 
-  const columns: Column<SpecialtyRecord>[] = [
+  const columns: Column<SpecialtyRecord>[] = useMemo(() => [
     { key: "name", header: "Name", sortable: true },
     {
       key: "actions",
@@ -59,7 +74,7 @@ export default function AdminSpecialtiesPage() {
         </div>
       ),
     },
-  ];
+  ], []);
 
   return (
     <div className="flex flex-col gap-6">

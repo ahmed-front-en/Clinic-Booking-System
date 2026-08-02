@@ -1,21 +1,39 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import dynamic from "next/dynamic";
 import { CreditCard, Pencil, Trash2 } from "lucide-react";
-import { DataTable, type Column } from "@/components/data/DataTable";
+import type { Column, DataTableProps } from "@/components/data/DataTable";
 import { Pagination } from "@/components/data/Pagination";
-import { PaymentFormModal } from "@/components/business/PaymentFormModal";
-import { ConfirmDialog } from "@/components/business/ConfirmDialog";
 import { ErrorBanner } from "@/components/feedback/ErrorBanner";
 import { EmptyState } from "@/components/feedback/EmptyState";
+import { Skeleton } from "@/components/feedback/Skeleton";
 import { StatusBadge } from "@/components/business/StatusBadge";
 import { Button } from "@/components/ui/button";
+
+const DataTable = dynamic(
+  () => import("@/components/data/DataTable").then((mod) => mod.DataTable),
+  { loading: () => <Skeleton variant="table" /> },
+) as <T extends object>(props: DataTableProps<T>) => React.JSX.Element;
+
+const PaymentFormModal = dynamic(
+  () => import("@/components/business/PaymentFormModal").then((mod) => mod.PaymentFormModal),
+  { loading: () => <Skeleton variant="form" /> },
+);
+
+const ConfirmDialog = dynamic(
+  () => import("@/components/business/ConfirmDialog").then((mod) => mod.ConfirmDialog),
+  { loading: () => <Skeleton variant="form" /> },
+);
 import {
   usePaymentsAdmin,
   useUpdatePayment,
   useDeletePayment,
 } from "@/features/payments";
+import { getPaymentsAdmin } from "@/features/payments/api/payments-admin";
+import { usePrefetchAdminPage } from "@/hooks/usePrefetchAdminPage";
 import { formatCurrency } from "@/lib/utils";
+import { queryKeys } from "@/lib/query-keys";
 import { PAGINATION_DEFAULTS } from "@/config";
 import type { PaymentRecord } from "@/types/models/payment";
 import type { UpdatePaymentInput } from "@/schemas/payment";
@@ -38,7 +56,15 @@ export default function AdminPaymentsPage() {
   const payments = data?.data ?? [];
   const totalPages = data?.pagination?.totalPages ?? 1;
 
-  const columns: Column<PaymentRecord>[] = [
+  const prefetchPage = usePrefetchAdminPage({
+    queryKey: queryKeys.payments.admin,
+    queryFn: getPaymentsAdmin,
+    params: { page, limit: PAGINATION_DEFAULTS.limit },
+    page,
+    totalPages,
+  });
+
+  const columns: Column<PaymentRecord>[] = useMemo(() => [
     {
       key: "appointmentId",
       header: "Appointment",
@@ -92,7 +118,7 @@ export default function AdminPaymentsPage() {
         </div>
       ),
     },
-  ];
+  ], []);
 
   return (
     <div className="flex flex-col gap-6">
@@ -120,7 +146,12 @@ export default function AdminPaymentsPage() {
               />
             }
           />
-          <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+          <Pagination
+            page={page}
+            totalPages={totalPages}
+            onPageChange={setPage}
+            onPagePrefetch={prefetchPage}
+          />
         </>
       )}
 

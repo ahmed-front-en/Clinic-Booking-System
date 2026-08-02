@@ -1,11 +1,16 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { CalendarClock } from "lucide-react";
 import { useMySchedule } from "@/features/schedules";
-import { WeeklyCalendar } from "@/components/business/WeeklyCalendar";
 import { Skeleton } from "@/components/feedback/Skeleton";
 import { ErrorBanner } from "@/components/feedback/ErrorBanner";
 import { EmptyState } from "@/components/feedback/EmptyState";
+
+const WeeklyCalendar = dynamic(
+  () => import("@/components/business/WeeklyCalendar").then((mod) => mod.WeeklyCalendar),
+  { loading: () => <Skeleton variant="calendar" /> },
+);
 
 export default function DoctorSchedulePage() {
   const { data: schedules, isPending, isError, refetch } = useMySchedule();

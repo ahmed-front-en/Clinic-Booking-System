@@ -12,6 +12,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { useAuth } from "@/features/auth/hooks/use-auth";
+import { usePrefetchBookingData } from "@/hooks/usePrefetchBookingData";
 import { cn } from "@/lib/utils";
 
 interface NavItem {
@@ -39,6 +40,7 @@ const doctorLinks: NavItem[] = [
 export function RoleBasedSidebar({ className }: { className?: string }) {
   const { user } = useAuth();
   const pathname = usePathname();
+  const prefetchBooking = usePrefetchBookingData();
 
   const links = user?.role === "doctor" ? doctorLinks : patientLinks;
 
@@ -51,6 +53,8 @@ export function RoleBasedSidebar({ className }: { className?: string }) {
           <Link
             key={link.href}
             href={link.href}
+            onMouseEnter={link.href === "/book" ? prefetchBooking : undefined}
+            onFocus={link.href === "/book" ? prefetchBooking : undefined}
             className={cn(
               "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
               isActive

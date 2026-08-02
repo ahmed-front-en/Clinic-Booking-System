@@ -1,21 +1,39 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import dynamic from "next/dynamic";
 import { ClipboardList, Pencil, Plus, Trash2 } from "lucide-react";
-import { DataTable, type Column } from "@/components/data/DataTable";
+import type { Column, DataTableProps } from "@/components/data/DataTable";
 import { Pagination } from "@/components/data/Pagination";
-import { PatientFormModal } from "@/components/business/PatientFormModal";
-import { ConfirmDialog } from "@/components/business/ConfirmDialog";
 import { ErrorBanner } from "@/components/feedback/ErrorBanner";
 import { EmptyState } from "@/components/feedback/EmptyState";
+import { Skeleton } from "@/components/feedback/Skeleton";
 import { Button } from "@/components/ui/button";
+
+const DataTable = dynamic(
+  () => import("@/components/data/DataTable").then((mod) => mod.DataTable),
+  { loading: () => <Skeleton variant="table" /> },
+) as <T extends object>(props: DataTableProps<T>) => React.JSX.Element;
+
+const PatientFormModal = dynamic(
+  () => import("@/components/business/PatientFormModal").then((mod) => mod.PatientFormModal),
+  { loading: () => <Skeleton variant="form" /> },
+);
+
+const ConfirmDialog = dynamic(
+  () => import("@/components/business/ConfirmDialog").then((mod) => mod.ConfirmDialog),
+  { loading: () => <Skeleton variant="form" /> },
+);
 import {
   usePatientsAdmin,
   useCreatePatient,
   useUpdatePatient,
   useDeletePatient,
 } from "@/features/patients";
+import { getPatientsAdmin } from "@/features/patients/api/patients-admin";
 import { useUsersAdmin } from "@/features/users";
+import { usePrefetchAdminPage } from "@/hooks/usePrefetchAdminPage";
+import { queryKeys } from "@/lib/query-keys";
 import { PAGINATION_DEFAULTS } from "@/config";
 import type { PatientRecord } from "@/types/models/patient";
 import type { CreatePatientInput, UpdatePatientInput } from "@/schemas/patient";
@@ -40,7 +58,17 @@ export default function AdminPatientsPage() {
   const totalPages = data?.pagination?.totalPages ?? 1;
   const users = patientUsers?.data ?? [];
 
-  const columns: Column<PatientRecord>[] = [
+  const prefetchPage = usePrefetchAdminPage({
+    queryKey: queryKeys.patients.all,
+    queryFn: getPatientsAdmin,
+    params: { page, limit: PAGINATION_DEFAULTS.limit },
+    page,
+    totalPages,
+  });
+
+  const columns: Column<PatientRecord>[] = useMemo(
+    () => [
+
     { key: "fullName", header: "Full name", sortable: true },
     {
       key: "phone",
@@ -82,7 +110,9 @@ export default function AdminPatientsPage() {
         </div>
       ),
     },
-  ];
+    ],
+    [],
+  );
 
   return (
     <div className="flex flex-col gap-6">
@@ -116,7 +146,12 @@ export default function AdminPatientsPage() {
               />
             }
           />
-          <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+          <Pagination
+            page={page}
+            totalPages={totalPages}
+            onPageChange={setPage}
+            onPagePrefetch={prefetchPage}
+          />
         </>
       )}
 

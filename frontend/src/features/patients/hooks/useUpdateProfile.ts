@@ -5,6 +5,7 @@ import { useApiError } from "@/hooks/useApiError";
 import { showToast } from "@/lib/toast-store";
 import { queryKeys } from "@/lib/query-keys";
 import { updateMyProfile } from "../api/patients";
+import type { PatientRecord } from "@/types/models/patient";
 import type { UpdatePatientInput } from "@/schemas/patient";
 
 export function useUpdateProfile() {
@@ -15,12 +16,14 @@ export function useUpdateProfile() {
     mutationFn: updateMyProfile,
     onMutate: async (data: UpdatePatientInput) => {
       await queryClient.cancelQueries({ queryKey: queryKeys.patients.me });
-      const previous = queryClient.getQueryData(queryKeys.patients.me);
+      const previous = queryClient.getQueryData<PatientRecord>(
+        queryKeys.patients.me,
+      );
       if (previous) {
-        queryClient.setQueryData(queryKeys.patients.me, {
-          ...(previous as object),
-          ...data,
-        });
+        queryClient.setQueryData<PatientRecord>(
+          queryKeys.patients.me,
+          (old) => (old ? { ...old, ...data } : old),
+        );
       }
       return { previous };
     },
@@ -32,8 +35,10 @@ export function useUpdateProfile() {
       showToast(message, "error");
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.patients.me });
       showToast("Profile updated successfully", "success");
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.patients.me });
     },
   });
 }

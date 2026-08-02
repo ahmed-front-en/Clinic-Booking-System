@@ -1,19 +1,26 @@
 "use client";
 
+import { useCallback, useEffect, useMemo } from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { CalendarPlus, CalendarDays, CalendarClock } from "lucide-react";
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { useMyAppointments, useCancelAppointment } from "@/features/appointments";
 import { usePatientProfile } from "@/features/patients";
 import { useMySchedule } from "@/features/schedules";
+import { usePrefetchBookingData } from "@/hooks/usePrefetchBookingData";
 import { AppointmentCard } from "@/components/business/AppointmentCard";
 import { ProfileSummaryCard } from "@/components/business/ProfileSummaryCard";
-import { WeeklyCalendar } from "@/components/business/WeeklyCalendar";
 import { Skeleton } from "@/components/feedback/Skeleton";
 import { ErrorBanner } from "@/components/feedback/ErrorBanner";
 import { EmptyState } from "@/components/feedback/EmptyState";
 import { Button } from "@/components/ui/button";
 import type { AppointmentStatus } from "@/types/enums";
+
+const WeeklyCalendar = dynamic(
+  () => import("@/components/business/WeeklyCalendar").then((mod) => mod.WeeklyCalendar),
+  { loading: () => <Skeleton variant="calendar" /> },
+);
 
 const UPCOMING_STATUSES = new Set<AppointmentStatus>([
   "scheduled",
@@ -25,11 +32,23 @@ function PatientDashboardContent() {
   const { data: patient, isPending: isProfilePending } = usePatientProfile();
   const { mutate: cancelAppointment, isPending: isCancelling } =
     useCancelAppointment();
+  const prefetchBooking = usePrefetchBookingData();
 
-  const upcoming =
-    appointments?.filter((appointment) =>
-      UPCOMING_STATUSES.has(appointment.status),
-    ) ?? [];
+  useEffect(() => {
+    prefetchBooking();
+  }, [prefetchBooking]);
+
+  const upcoming = useMemo(
+    () =>
+      appointments?.filter((appointment) =>
+        UPCOMING_STATUSES.has(appointment.status),
+      ) ?? [],
+    [appointments],
+  );
+  const handleCancel = useCallback(
+    (id: string) => cancelAppointment(id),
+    [cancelAppointment],
+  );
 
   return (
     <div className="flex flex-col gap-6 p-6">
@@ -43,7 +62,11 @@ function PatientDashboardContent() {
             schedule.
           </p>
         </div>
-        <Link href="/book">
+        <Link
+          href="/book"
+          onMouseEnter={prefetchBooking}
+          onFocus={prefetchBooking}
+        >
           <Button>
             <CalendarPlus />
             Book New Appointment
@@ -84,7 +107,11 @@ function PatientDashboardContent() {
                 title="No upcoming appointments"
                 description="Book your first appointment to get started with your health journey."
                 action={
-                  <Link href="/book">
+                  <Link
+                    href="/book"
+                    onMouseEnter={prefetchBooking}
+                    onFocus={prefetchBooking}
+                  >
                     <Button>
                       <CalendarPlus />
                       Book Appointment
@@ -99,7 +126,7 @@ function PatientDashboardContent() {
                 <AppointmentCard
                   key={appointment.id}
                   appointment={appointment}
-                  onCancel={(id) => cancelAppointment(id)}
+                  onCancel={handleCancel}
                   isCancelling={isCancelling}
                 />
               ))}
@@ -131,10 +158,17 @@ function DoctorDashboardContent() {
   const { mutate: cancelAppointment, isPending: isCancelling } =
     useCancelAppointment();
 
-  const upcoming =
-    appointments?.filter((appointment) =>
-      UPCOMING_STATUSES.has(appointment.status),
-    ) ?? [];
+  const upcoming = useMemo(
+    () =>
+      appointments?.filter((appointment) =>
+        UPCOMING_STATUSES.has(appointment.status),
+      ) ?? [],
+    [appointments],
+  );
+  const handleCancel = useCallback(
+    (id: string) => cancelAppointment(id),
+    [cancelAppointment],
+  );
 
   return (
     <div className="flex flex-col gap-6 p-6">
@@ -187,7 +221,7 @@ function DoctorDashboardContent() {
                 <AppointmentCard
                   key={appointment.id}
                   appointment={appointment}
-                  onCancel={(id) => cancelAppointment(id)}
+                  onCancel={handleCancel}
                   isCancelling={isCancelling}
                 />
               ))}
