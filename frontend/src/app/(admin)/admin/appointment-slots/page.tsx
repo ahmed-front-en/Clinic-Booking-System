@@ -1,15 +1,30 @@
 "use client";
 
 import { useState } from "react";
+import dynamic from "next/dynamic";
 import { CalendarRange, Pencil, Plus, Trash2 } from "lucide-react";
-import { DataTable, type Column } from "@/components/data/DataTable";
+import type { Column, DataTableProps } from "@/components/data/DataTable";
 import { Pagination } from "@/components/data/Pagination";
-import { SlotFormModal } from "@/components/business/SlotFormModal";
-import { ConfirmDialog } from "@/components/business/ConfirmDialog";
 import { ErrorBanner } from "@/components/feedback/ErrorBanner";
 import { EmptyState } from "@/components/feedback/EmptyState";
+import { Skeleton } from "@/components/feedback/Skeleton";
 import { StatusBadge } from "@/components/business/StatusBadge";
 import { Button } from "@/components/ui/button";
+
+const DataTable = dynamic(
+  () => import("@/components/data/DataTable").then((mod) => mod.DataTable),
+  { loading: () => <Skeleton variant="table" /> },
+) as <T extends object>(props: DataTableProps<T>) => React.JSX.Element;
+
+const SlotFormModal = dynamic(
+  () => import("@/components/business/SlotFormModal").then((mod) => mod.SlotFormModal),
+  { loading: () => <Skeleton variant="form" /> },
+);
+
+const ConfirmDialog = dynamic(
+  () => import("@/components/business/ConfirmDialog").then((mod) => mod.ConfirmDialog),
+  { loading: () => <Skeleton variant="form" /> },
+);
 import {
   useSlotsAdmin,
   useCreateSlot,

@@ -1,12 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import dynamic from "next/dynamic";
 import { MessageSquarePlus, Star } from "lucide-react";
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { useMyReviews, useCreateReview } from "@/features/reviews";
 import { useMyAppointments } from "@/features/appointments";
 import { ReviewCard } from "@/components/business/ReviewCard";
-import { ReviewForm } from "@/components/business/ReviewForm";
 import { Skeleton } from "@/components/feedback/Skeleton";
 import { ErrorBanner } from "@/components/feedback/ErrorBanner";
 import { EmptyState } from "@/components/feedback/EmptyState";
@@ -19,6 +19,11 @@ import {
 } from "@/components/ui/dialog";
 import type { AppointmentRecord } from "@/types/models/appointment";
 import type { CreateReviewInput } from "@/schemas/review";
+
+const ReviewForm = dynamic(
+  () => import("@/components/business/ReviewForm").then((mod) => mod.ReviewForm),
+  { loading: () => <Skeleton variant="form" /> },
+);
 
 function PatientReviewsContent() {
   const { data: reviews, isPending, isError, refetch } = useMyReviews();

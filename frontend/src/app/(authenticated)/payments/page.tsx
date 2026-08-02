@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import dynamic from "next/dynamic";
 import { Wallet } from "lucide-react";
 import { useMyPayments, useCreatePayment } from "@/features/payments";
 import { PaymentCard } from "@/components/business/PaymentCard";
-import { PaymentForm } from "@/components/business/PaymentForm";
 import { Skeleton } from "@/components/feedback/Skeleton";
 import { ErrorBanner } from "@/components/feedback/ErrorBanner";
 import { EmptyState } from "@/components/feedback/EmptyState";
@@ -16,6 +16,11 @@ import {
 } from "@/components/ui/dialog";
 import type { PaymentRecord } from "@/types/models/payment";
 import type { CreatePaymentInput } from "@/schemas/payment";
+
+const PaymentForm = dynamic(
+  () => import("@/components/business/PaymentForm").then((mod) => mod.PaymentForm),
+  { loading: () => <Skeleton variant="form" /> },
+);
 
 export default function PatientPaymentsPage() {
   const { data: payments, isPending, isError, refetch } = useMyPayments();

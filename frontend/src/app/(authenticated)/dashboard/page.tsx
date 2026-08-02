@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { CalendarPlus, CalendarDays, CalendarClock } from "lucide-react";
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { useMyAppointments, useCancelAppointment } from "@/features/appointments";
@@ -8,12 +9,16 @@ import { usePatientProfile } from "@/features/patients";
 import { useMySchedule } from "@/features/schedules";
 import { AppointmentCard } from "@/components/business/AppointmentCard";
 import { ProfileSummaryCard } from "@/components/business/ProfileSummaryCard";
-import { WeeklyCalendar } from "@/components/business/WeeklyCalendar";
 import { Skeleton } from "@/components/feedback/Skeleton";
 import { ErrorBanner } from "@/components/feedback/ErrorBanner";
 import { EmptyState } from "@/components/feedback/EmptyState";
 import { Button } from "@/components/ui/button";
 import type { AppointmentStatus } from "@/types/enums";
+
+const WeeklyCalendar = dynamic(
+  () => import("@/components/business/WeeklyCalendar").then((mod) => mod.WeeklyCalendar),
+  { loading: () => <Skeleton variant="calendar" /> },
+);
 
 const UPCOMING_STATUSES = new Set<AppointmentStatus>([
   "scheduled",

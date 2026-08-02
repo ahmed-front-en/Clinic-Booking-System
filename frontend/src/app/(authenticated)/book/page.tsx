@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
 import { useClinicsList } from "@/features/clinics/hooks/useClinicsList";
 import { useSpecialtiesList } from "@/features/specialties/hooks/useSpecialtiesList";
 import { useDoctorsList } from "@/features/doctors/hooks/useDoctorsList";
@@ -11,9 +12,14 @@ import { StepWizard } from "@/components/business/StepWizard";
 import { ClinicSelector } from "@/components/business/ClinicSelector";
 import { SpecialtySelector } from "@/components/business/SpecialtySelector";
 import { DoctorCard } from "@/components/business/DoctorCard";
-import { SlotPicker } from "@/components/business/SlotPicker";
 import { AppointmentConfirmation } from "@/components/business/AppointmentConfirmation";
+import { Skeleton } from "@/components/feedback/Skeleton";
 import type { AppointmentRecord } from "@/types/models/appointment";
+
+const SlotPicker = dynamic(
+  () => import("@/components/business/SlotPicker").then((mod) => mod.SlotPicker),
+  { loading: () => <Skeleton variant="calendar" /> },
+);
 
 export default function BookAppointmentPage() {
   const router = useRouter();
