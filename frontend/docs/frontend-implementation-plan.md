@@ -368,7 +368,7 @@ Sprint 14 (Final QA & Production)              │
 | S12.3 | Apply useMemo/useCallback | Memoize computed values (filtered doctors, sorted appointments) and callbacks | All page and component files | Update relevant files | Expensive computations cached | useCallback prevents child re-renders | Medium |
 | S12.4 | Implement prefetching | Add `queryClient.prefetchQuery` for hover triggers and page-mounted prefetches | S7.2, S7.3, S7.4, S7.6 | Update dashboard, booking, admin list pages | Clinics/specialties prefetch on "Book" CTA hover | Network tab shows prefetch on hover | Medium |
 | S12.5 | Implement optimistic updates | Cancel appointment, profile update, admin toggle isVerified, admin delete clinic | S7.6, S7.1, S11.2 | Update relevant mutation hooks | UI updates instantly; reverts on error | verify rollback on API error | High |
-| S12.6 | Optimize images | Add `next/image` with priority/lazy, blur placeholders, explicit dimensions | S6.7, S8.3 | Landing page, DoctorCard | Images load with proper optimization | LCP under 2.5s | Low |
+| S12.6 | Optimize images | Add `next/image` with priority/lazy, blur placeholders, explicit dimensions | S6.7, S8.3 | Landing page, DoctorCard | Images load with proper optimization | LCP under 2.5s | Low | 
 | S12.7 | Font optimization | Load Inter via `next/font` with `display: swap` | S0.1 | `src/app/layout.tsx` | Inter loads with swap strategy | No layout shift from font loading | Low |
 | S12.8 | Audit code splitting | Verify route groups split correctly, no large shared chunks | All page files | Review build output | Admin routes do not include patient components | `next build` output shows separate chunks per route group | Low |
 
