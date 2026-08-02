@@ -1,21 +1,31 @@
 "use client";
 
-import { Suspense } from "react";
+import { Suspense, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { loginSchema, type LoginInput } from "@/schemas/auth";
+import { useAuth } from "@/features/auth/hooks/use-auth";
 import { useLogin } from "@/features/auth/hooks/use-login";
+import { getHomePathForRole } from "@/lib/routing";
+import type { UserRole } from "@/types/enums";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
+function isAllowedRedirect(role: UserRole, path: string): boolean {
+  const isAdminPath = path.startsWith("/admin");
+  return role === "admin" ? isAdminPath : !isAdminPath;
+}
+
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectRaw = searchParams.get("redirect") || "/dashboard";
-  const redirectTo = redirectRaw.startsWith("/") ? redirectRaw : "/dashboard";
+  const { user, isAuthenticated } = useAuth();
+  const redirectRaw = searchParams.get("redirect");
+  const redirectParam =
+    redirectRaw && redirectRaw.startsWith("/") ? redirectRaw : null;
   const { submit, isPending, error } = useLogin();
 
   const {
@@ -26,10 +36,18 @@ function LoginForm() {
     resolver: zodResolver(loginSchema),
   });
 
+  useEffect(() => {
+    if (!isAuthenticated || !user) return;
+    const target =
+      redirectParam && isAllowedRedirect(user.role, redirectParam)
+        ? redirectParam
+        : getHomePathForRole(user.role);
+    router.replace(target);
+  }, [isAuthenticated, user, redirectParam, router]);
+
   async function onSubmit(data: LoginInput) {
     try {
       await submit(data.email, data.password);
-      router.replace(redirectTo);
     } catch {
     }
   }
