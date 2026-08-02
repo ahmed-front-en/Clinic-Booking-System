@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { MessageSquarePlus, Star } from "lucide-react";
 import { useAuth } from "@/features/auth/hooks/use-auth";
@@ -31,15 +31,19 @@ function PatientReviewsContent() {
   const { mutate: createReview, isPending: isSubmitting } = useCreateReview();
   const [selected, setSelected] = useState<AppointmentRecord | null>(null);
 
-  const reviewedAppointmentIds = new Set(
-    reviews?.map((review) => review.appointmentId) ?? [],
+  const reviewedAppointmentIds = useMemo(
+    () => new Set(reviews?.map((review) => review.appointmentId) ?? []),
+    [reviews],
   );
-  const pendingReviews =
-    appointments?.filter(
-      (appointment) =>
-        appointment.status === "completed" &&
-        !reviewedAppointmentIds.has(appointment.id),
-    ) ?? [];
+  const pendingReviews = useMemo(
+    () =>
+      appointments?.filter(
+        (appointment) =>
+          appointment.status === "completed" &&
+          !reviewedAppointmentIds.has(appointment.id),
+      ) ?? [],
+    [appointments, reviewedAppointmentIds],
+  );
 
   if (isError) {
     return (

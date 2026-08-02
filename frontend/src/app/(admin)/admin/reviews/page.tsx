@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { Pencil, Star, Trash2 } from "lucide-react";
 import type { Column, DataTableProps } from "@/components/data/DataTable";
@@ -52,7 +52,7 @@ export default function AdminReviewsPage() {
   const reviews = data?.data ?? [];
   const totalPages = data?.pagination?.totalPages ?? 1;
 
-  const columns: Column<ReviewRecord>[] = [
+  const columns: Column<ReviewRecord>[] = useMemo(() => [
     {
       key: "appointmentId",
       header: "Appointment",
@@ -98,7 +98,7 @@ export default function AdminReviewsPage() {
         </div>
       ),
     },
-  ];
+  ], []);
 
   return (
     <div className="flex flex-col gap-6">

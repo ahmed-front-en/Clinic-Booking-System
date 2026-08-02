@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { Pencil, Plus, Trash2, UserRound } from "lucide-react";
 import type { Column, DataTableProps } from "@/components/data/DataTable";
@@ -55,16 +55,25 @@ export default function AdminDoctorsPage() {
   const [creating, setCreating] = useState(false);
   const [deleting, setDeleting] = useState<DoctorRecord | null>(null);
 
-  const users = doctorUsers?.data ?? [];
+  const users = useMemo(() => doctorUsers?.data ?? [], [doctorUsers]);
 
-  const clinicName = (id: string) =>
-    clinics?.find((clinic) => clinic.id === id)?.name ?? id.slice(0, 8);
-  const specialtyName = (id: string) =>
-    specialties?.find((specialty) => specialty.id === id)?.name ?? id.slice(0, 8);
-  const doctorEmail = (id: string) =>
-    users.find((user) => user.id === id)?.email ?? id.slice(0, 8);
+  const clinicName = useCallback(
+    (id: string) =>
+      clinics?.find((clinic) => clinic.id === id)?.name ?? id.slice(0, 8),
+    [clinics],
+  );
+  const specialtyName = useCallback(
+    (id: string) =>
+      specialties?.find((specialty) => specialty.id === id)?.name ?? id.slice(0, 8),
+    [specialties],
+  );
+  const doctorEmail = useCallback(
+    (id: string) =>
+      users.find((user) => user.id === id)?.email ?? id.slice(0, 8),
+    [users],
+  );
 
-  const columns: Column<DoctorRecord>[] = [
+  const columns: Column<DoctorRecord>[] = useMemo(() => [
     {
       key: "userId",
       header: "User",
@@ -115,7 +124,7 @@ export default function AdminDoctorsPage() {
         </div>
       ),
     },
-  ];
+  ], [clinicName, specialtyName, doctorEmail]);
 
   if (isError) {
     return <ErrorBanner message="Could not load doctors." onRetry={refetch} />;

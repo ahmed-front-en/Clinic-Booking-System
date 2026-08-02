@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { Building2, Pencil, Plus, Trash2 } from "lucide-react";
 import type { Column, DataTableProps } from "@/components/data/DataTable";
@@ -42,7 +42,7 @@ export default function AdminClinicsPage() {
   const [creating, setCreating] = useState(false);
   const [deleting, setDeleting] = useState<ClinicRecord | null>(null);
 
-  const columns: Column<ClinicRecord>[] = [
+  const columns: Column<ClinicRecord>[] = useMemo(() => [
     { key: "name", header: "Name", sortable: true },
     {
       key: "phone",
@@ -84,7 +84,7 @@ export default function AdminClinicsPage() {
         </div>
       ),
     },
-  ];
+  ], []);
 
   return (
     <div className="flex flex-col gap-6">

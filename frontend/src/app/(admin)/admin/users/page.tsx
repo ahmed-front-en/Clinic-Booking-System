@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { Pencil, Trash2, Users } from "lucide-react";
 import type { Column, DataTableProps } from "@/components/data/DataTable";
@@ -82,7 +82,7 @@ export default function AdminUsersPage() {
     setPage(1);
   }
 
-  const columns: Column<UserRecord>[] = [
+  const columns: Column<UserRecord>[] = useMemo(() => [
     { key: "email", header: "Email", sortable: true },
     {
       key: "role",
@@ -133,7 +133,7 @@ export default function AdminUsersPage() {
         </div>
       ),
     },
-  ];
+  ], []);
 
   return (
     <div className="flex flex-col gap-6">

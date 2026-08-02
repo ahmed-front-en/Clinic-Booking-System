@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { Clock, Pencil, Plus, Trash2 } from "lucide-react";
 import type { Column, DataTableProps } from "@/components/data/DataTable";
@@ -70,15 +70,22 @@ export default function AdminDoctorSchedulesPage() {
   const [creating, setCreating] = useState(false);
   const [deleting, setDeleting] = useState<DoctorScheduleRecord | null>(null);
 
-  const schedules = schedulesData?.data ?? [];
-  const doctorSchedules = selectedDoctor
-    ? schedules.filter((schedule) => schedule.doctorId === selectedDoctor)
-    : schedules;
+  const schedules = useMemo(() => schedulesData?.data ?? [], [schedulesData]);
+  const doctorSchedules = useMemo(
+    () =>
+      selectedDoctor
+        ? schedules.filter((schedule) => schedule.doctorId === selectedDoctor)
+        : schedules,
+    [schedules, selectedDoctor],
+  );
 
-  const doctorLabel = (id: string) =>
-    doctors?.find((doctor) => doctor.id === id)?.id.slice(0, 8) ?? id.slice(0, 8);
+  const doctorLabel = useCallback(
+    (id: string) =>
+      doctors?.find((doctor) => doctor.id === id)?.id.slice(0, 8) ?? id.slice(0, 8),
+    [doctors],
+  );
 
-  const columns: Column<DoctorScheduleRecord>[] = [
+  const columns: Column<DoctorScheduleRecord>[] = useMemo(() => [
     {
       key: "weekday",
       header: "Day",
@@ -124,7 +131,7 @@ export default function AdminDoctorSchedulesPage() {
         </div>
       ),
     },
-  ];
+  ], [doctorLabel]);
 
   if (isError) {
     return <ErrorBanner message="Could not load schedules." onRetry={refetch} />;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { Calendar, Pencil, Trash2 } from "lucide-react";
 import type { Column, DataTableProps } from "@/components/data/DataTable";
@@ -52,7 +52,7 @@ export default function AdminAppointmentsPage() {
   const appointments = data?.data ?? [];
   const totalPages = data?.pagination?.totalPages ?? 1;
 
-  const columns: Column<AppointmentRecord>[] = [
+  const columns: Column<AppointmentRecord>[] = useMemo(() => [
     {
       key: "patientId",
       header: "Patient",
@@ -99,7 +99,7 @@ export default function AdminAppointmentsPage() {
         </div>
       ),
     },
-  ];
+  ], []);
 
   return (
     <div className="flex flex-col gap-6">

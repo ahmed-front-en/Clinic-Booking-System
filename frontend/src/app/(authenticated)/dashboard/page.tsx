@@ -1,5 +1,6 @@
 "use client";
 
+import { useCallback, useMemo } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { CalendarPlus, CalendarDays, CalendarClock } from "lucide-react";
@@ -31,10 +32,17 @@ function PatientDashboardContent() {
   const { mutate: cancelAppointment, isPending: isCancelling } =
     useCancelAppointment();
 
-  const upcoming =
-    appointments?.filter((appointment) =>
-      UPCOMING_STATUSES.has(appointment.status),
-    ) ?? [];
+  const upcoming = useMemo(
+    () =>
+      appointments?.filter((appointment) =>
+        UPCOMING_STATUSES.has(appointment.status),
+      ) ?? [],
+    [appointments],
+  );
+  const handleCancel = useCallback(
+    (id: string) => cancelAppointment(id),
+    [cancelAppointment],
+  );
 
   return (
     <div className="flex flex-col gap-6 p-6">
@@ -104,7 +112,7 @@ function PatientDashboardContent() {
                 <AppointmentCard
                   key={appointment.id}
                   appointment={appointment}
-                  onCancel={(id) => cancelAppointment(id)}
+                  onCancel={handleCancel}
                   isCancelling={isCancelling}
                 />
               ))}
@@ -136,10 +144,17 @@ function DoctorDashboardContent() {
   const { mutate: cancelAppointment, isPending: isCancelling } =
     useCancelAppointment();
 
-  const upcoming =
-    appointments?.filter((appointment) =>
-      UPCOMING_STATUSES.has(appointment.status),
-    ) ?? [];
+  const upcoming = useMemo(
+    () =>
+      appointments?.filter((appointment) =>
+        UPCOMING_STATUSES.has(appointment.status),
+      ) ?? [],
+    [appointments],
+  );
+  const handleCancel = useCallback(
+    (id: string) => cancelAppointment(id),
+    [cancelAppointment],
+  );
 
   return (
     <div className="flex flex-col gap-6 p-6">
@@ -192,7 +207,7 @@ function DoctorDashboardContent() {
                 <AppointmentCard
                   key={appointment.id}
                   appointment={appointment}
-                  onCancel={(id) => cancelAppointment(id)}
+                  onCancel={handleCancel}
                   isCancelling={isCancelling}
                 />
               ))}

@@ -1,5 +1,6 @@
 "use client";
 
+import { useCallback, useMemo } from "react";
 import Link from "next/link";
 import { CalendarPlus, CalendarDays, Inbox } from "lucide-react";
 import { useAuth } from "@/features/auth/hooks/use-auth";
@@ -24,13 +25,24 @@ function PatientAppointmentsContent() {
   const { mutate: cancelAppointment, isPending: isCancelling } =
     useCancelAppointment();
 
-  const upcoming =
-    appointments?.filter((appointment) =>
-      UPCOMING_STATUSES.has(appointment.status),
-    ) ?? [];
-  const past =
-    appointments?.filter((appointment) => PAST_STATUSES.has(appointment.status)) ??
-    [];
+  const upcoming = useMemo(
+    () =>
+      appointments?.filter((appointment) =>
+        UPCOMING_STATUSES.has(appointment.status),
+      ) ?? [],
+    [appointments],
+  );
+  const past = useMemo(
+    () =>
+      appointments?.filter((appointment) =>
+        PAST_STATUSES.has(appointment.status),
+      ) ?? [],
+    [appointments],
+  );
+  const handleCancel = useCallback(
+    (id: string) => cancelAppointment(id),
+    [cancelAppointment],
+  );
 
   if (isError) {
     return (
@@ -109,7 +121,7 @@ function PatientAppointmentsContent() {
                   <AppointmentCard
                     key={appointment.id}
                     appointment={appointment}
-                    onCancel={(id) => cancelAppointment(id)}
+                    onCancel={handleCancel}
                     isCancelling={isCancelling}
                   />
                 ))}
@@ -143,13 +155,24 @@ function DoctorAppointmentsContent() {
   const { mutate: cancelAppointment, isPending: isCancelling } =
     useCancelAppointment();
 
-  const upcoming =
-    appointments?.filter((appointment) =>
-      UPCOMING_STATUSES.has(appointment.status),
-    ) ?? [];
-  const past =
-    appointments?.filter((appointment) => PAST_STATUSES.has(appointment.status)) ??
-    [];
+  const upcoming = useMemo(
+    () =>
+      appointments?.filter((appointment) =>
+        UPCOMING_STATUSES.has(appointment.status),
+      ) ?? [],
+    [appointments],
+  );
+  const past = useMemo(
+    () =>
+      appointments?.filter((appointment) =>
+        PAST_STATUSES.has(appointment.status),
+      ) ?? [],
+    [appointments],
+  );
+  const handleCancel = useCallback(
+    (id: string) => cancelAppointment(id),
+    [cancelAppointment],
+  );
 
   if (isError) {
     return (
@@ -212,7 +235,7 @@ function DoctorAppointmentsContent() {
                   <AppointmentCard
                     key={appointment.id}
                     appointment={appointment}
-                    onCancel={(id) => cancelAppointment(id)}
+                    onCancel={handleCancel}
                     isCancelling={isCancelling}
                   />
                 ))}

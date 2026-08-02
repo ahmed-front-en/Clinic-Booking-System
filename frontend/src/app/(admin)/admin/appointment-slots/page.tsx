@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { CalendarRange, Pencil, Plus, Trash2 } from "lucide-react";
 import type { Column, DataTableProps } from "@/components/data/DataTable";
@@ -62,10 +62,13 @@ export default function AdminAppointmentSlotsPage() {
   const totalPages = data?.pagination?.totalPages ?? 1;
   const schedules = schedulesData?.data ?? [];
 
-  const doctorLabel = (id: string) =>
-    doctors?.find((doctor) => doctor.id === id)?.id.slice(0, 8) ?? id.slice(0, 8);
+  const doctorLabel = useCallback(
+    (id: string) =>
+      doctors?.find((doctor) => doctor.id === id)?.id.slice(0, 8) ?? id.slice(0, 8),
+    [doctors],
+  );
 
-  const columns: Column<AppointmentSlotRecord>[] = [
+  const columns: Column<AppointmentSlotRecord>[] = useMemo(() => [
     { key: "doctorId", header: "Doctor", render: (slot) => `Doctor ${doctorLabel(slot.doctorId)}` },
     { key: "slotDate", header: "Date", sortable: true },
     {
@@ -103,7 +106,7 @@ export default function AdminAppointmentSlotsPage() {
         </div>
       ),
     },
-  ];
+  ], [doctorLabel]);
 
   return (
     <div className="flex flex-col gap-6">
