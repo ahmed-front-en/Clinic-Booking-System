@@ -8,4 +8,5 @@ export interface CreateUserInput {
   passwordHash: string;
   role: UserRole;
   isVerified?: boolean;
+  fullName?: string | null;
 }

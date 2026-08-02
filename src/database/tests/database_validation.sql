@@ -16,13 +16,13 @@ BEGIN;
 -- ---------------------------------------------------------------------------
 WITH
     inserted_doctor_user AS (
-        INSERT INTO users (email, password_hash, role)
-        VALUES ('dr.smith@clinic.com', '$2b$10$abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnop', 'doctor')
+        INSERT INTO users (email, password_hash, role, full_name)
+        VALUES ('dr.smith@clinic.com', '$2b$10$abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnop', 'doctor', 'Dr. Sarah Smith')
         RETURNING id
     ),
     inserted_patient_user AS (
-        INSERT INTO users (email, password_hash, role)
-        VALUES ('jane.doe@email.com', '$2b$10$zyxwvutsrqponmlkjihgfedcba0123456789zyxwvutsrqponmlkjihg', 'patient')
+        INSERT INTO users (email, password_hash, role, full_name)
+        VALUES ('jane.doe@email.com', '$2b$10$zyxwvutsrqponmlkjihgfedcba0123456789zyxwvutsrqponmlkjihg', 'patient', 'Jane Doe')
         RETURNING id
     ),
 
@@ -53,6 +53,23 @@ WITH
             du.id, c.id, s.id, 250.00,
             'Board-certified cardiologist with 15 years of experience.', 15
         FROM inserted_doctor_user du, inserted_clinic c, inserted_specialty s
+        RETURNING id
+    ),
+
+-- ---------------------------------------------------------------------------
+-- 1d-2. Doctor profile with NO full name (validates COALESCE fallback to email)
+-- ---------------------------------------------------------------------------
+    inserted_doctor_no_name_user AS (
+        INSERT INTO users (email, password_hash, role)
+        VALUES ('dr.anonymous@clinic.com', '$2b$10$abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnop', 'doctor')
+        RETURNING id
+    ),
+    inserted_doctor_no_name AS (
+        INSERT INTO doctors (user_id, clinic_id, specialty_id, consultation_fee, bio, experience_years)
+        SELECT
+            du.id, c.id, s.id, 200.00,
+            NULL, 5
+        FROM inserted_doctor_no_name_user du, inserted_clinic c, inserted_specialty s
         RETURNING id
     ),
 
@@ -414,10 +431,12 @@ ORDER BY udt_name, table_name, column_name;
 -- SECTION 6: QUERY VALIDATION — Useful SELECTs for Manual Verification
 -- =============================================================================
 
--- 6a. Doctors with specialty
+-- 6a. Doctors with specialty (display name = full_name when set, else email)
 SELECT
     d.id AS doctor_id,
     u.email AS doctor_email,
+    u.full_name AS doctor_full_name,
+    COALESCE(u.full_name, u.email) AS doctor_display_name,
     s.name AS specialty,
     d.consultation_fee,
     d.experience_years

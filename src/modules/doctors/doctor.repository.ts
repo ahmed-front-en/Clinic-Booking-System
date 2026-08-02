@@ -33,7 +33,7 @@ export class DoctorRepository extends BaseRepository {
     d.experience_years AS "experienceYears",
     json_build_object(
       'id', d.id,
-      'displayName', u.email,
+      'displayName', COALESCE(u.full_name, u.email),
       'clinicName', cl.name,
       'specialtyName', sp.name
     ) AS doctor
@@ -102,6 +102,15 @@ export class DoctorRepository extends BaseRepository {
       [id],
     );
     return result.rows[0] ?? null;
+  }
+
+  async updateUserFullName(userId: UUID, fullName: string): Promise<void> {
+    await this.query(
+      `UPDATE users
+       SET full_name = $2, updated_at = NOW()
+       WHERE id = $1`,
+      [userId, fullName],
+    );
   }
 
   async findClinicById(id: UUID): Promise<IdRow | null> {

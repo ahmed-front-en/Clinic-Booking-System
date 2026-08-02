@@ -26,7 +26,7 @@ export class DoctorScheduleRepository extends BaseRepository {
     ds.slot_duration AS "slotDuration",
     json_build_object(
       'id', d.id,
-      'displayName', u.email,
+      'displayName', COALESCE(u.full_name, u.email),
       'clinicName', cl.name,
       'specialtyName', sp.name
     ) AS doctor

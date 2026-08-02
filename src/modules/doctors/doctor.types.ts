@@ -5,6 +5,7 @@ export interface CreateDoctorDto {
   consultationFee: number;
   bio?: string | null;
   experienceYears: number;
+  fullName?: string;
 }
 
 export interface UpdateDoctorDto {
@@ -13,4 +14,5 @@ export interface UpdateDoctorDto {
   consultationFee?: number;
   bio?: string | null;
   experienceYears?: number;
+  fullName?: string;
 }

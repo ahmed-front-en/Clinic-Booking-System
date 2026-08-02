@@ -30,7 +30,7 @@ export class DoctorService {
       throw new AppError(HttpStatus.CONFLICT, "Doctor already exists for this user");
     }
 
-    return doctorRepository.create({
+    const created = await doctorRepository.create({
       userId: dto.userId,
       clinicId: dto.clinicId,
       specialtyId: dto.specialtyId,
@@ -38,6 +38,12 @@ export class DoctorService {
       bio: dto.bio ?? null,
       experienceYears: dto.experienceYears,
     });
+
+    if (dto.fullName !== undefined) {
+      await doctorRepository.updateUserFullName(dto.userId, dto.fullName);
+    }
+
+    return created;
   }
 
   async findAll(): Promise<DoctorReadModel[]> {
@@ -63,7 +69,8 @@ export class DoctorService {
       dto.specialtyId === undefined &&
       dto.consultationFee === undefined &&
       dto.bio === undefined &&
-      dto.experienceYears === undefined
+      dto.experienceYears === undefined &&
+      dto.fullName === undefined
     ) {
       throw new AppError(HttpStatus.BAD_REQUEST, "No fields provided for update");
     }
@@ -80,6 +87,22 @@ export class DoctorService {
       if (!specialty) {
         throw AppError.notFound("Specialty not found");
       }
+    }
+
+    if (dto.fullName !== undefined) {
+      await doctorRepository.updateUserFullName(doctor.userId, dto.fullName);
+    }
+
+    const hasDoctorFields =
+      dto.clinicId !== undefined ||
+      dto.specialtyId !== undefined ||
+      dto.consultationFee !== undefined ||
+      dto.bio !== undefined ||
+      dto.experienceYears !== undefined;
+
+    if (!hasDoctorFields) {
+      const { doctor: _summary, ...record } = doctor;
+      return record;
     }
 
     const updated = await doctorRepository.update(id, {

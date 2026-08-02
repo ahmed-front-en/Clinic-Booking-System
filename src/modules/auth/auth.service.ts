@@ -47,6 +47,7 @@ export class AuthService {
         email: dto.email,
         passwordHash,
         role: "patient",
+        fullName: dto.fullName,
       });
 
       await authRepository.createPatient(u.id, dto.fullName);
