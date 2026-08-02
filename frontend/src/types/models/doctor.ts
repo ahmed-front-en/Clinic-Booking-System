@@ -1,3 +1,5 @@
+import type { DoctorSummary } from "./read-models";
+
 export interface DoctorRecord {
   id: string;
   userId: string;
@@ -6,6 +8,10 @@ export interface DoctorRecord {
   consultationFee: number;
   bio: string | null;
   experienceYears: number;
+}
+
+export interface DoctorReadModel extends DoctorRecord {
+  doctor: DoctorSummary;
 }
 
 export interface DoctorCreateRequest {

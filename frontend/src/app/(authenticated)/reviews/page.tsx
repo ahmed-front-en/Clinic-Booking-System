@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/dialog";
 import type { AppointmentRecord } from "@/types/models/appointment";
 import type { CreateReviewInput } from "@/schemas/review";
+import { formatDateTime } from "@/lib/utils";
 
 const ReviewForm = dynamic(
   () => import("@/components/business/ReviewForm").then((mod) => mod.ReviewForm),
@@ -83,7 +84,8 @@ function PatientReviewsContent() {
               className="flex items-center justify-between gap-4 rounded-xl border border-border bg-card p-4"
             >
               <p className="text-sm text-muted-foreground">
-                Appointment #{appointment.id.slice(0, 8)}
+                {appointment.doctor.displayName} ·{" "}
+                {formatDateTime(appointment.slot.date, appointment.slot.startTime)}
               </p>
               <Button onClick={() => setSelected(appointment)}>
                 <MessageSquarePlus />

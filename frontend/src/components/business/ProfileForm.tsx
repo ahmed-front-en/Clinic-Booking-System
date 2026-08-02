@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/popover";
 import { updatePatientSchema, type UpdatePatientInput } from "@/schemas/patient";
 import type { PatientRecord } from "@/types/models/patient";
+import { formatDate } from "@/lib/utils";
 import { useApiError } from "@/hooks/useApiError";
 
 interface ProfileFormProps {
@@ -153,7 +154,7 @@ export function ProfileForm({ patient, onSubmit, isSubmitting }: ProfileFormProp
             className="flex w-full items-center justify-between gap-2 rounded-lg border border-input bg-background px-3 py-2 text-sm shadow-sm transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <span className={birthDate ? "text-foreground" : "text-muted-foreground"}>
-              {birthDate ? toISODate(birthDate) : "Select a date"}
+              {birthDate ? formatDate(birthDate) : "Select a date"}
             </span>
             <CalendarIcon className="size-4 text-muted-foreground" aria-hidden="true" />
           </PopoverTrigger>

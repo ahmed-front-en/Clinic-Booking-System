@@ -1,6 +1,6 @@
 import { BaseRepository } from "../../shared/repositories/base.repository.js";
 import { pool } from "../../services/database.service.js";
-import type { ReviewRecord } from "./review.interfaces.js";
+import type { ReviewRecord, ReviewReadModel } from "./review.interfaces.js";
 import type { UUID } from "../../shared/types/common.types.js";
 
 interface IdRow {
@@ -28,6 +28,21 @@ export class ReviewRepository extends BaseRepository {
     comment
   `;
 
+  private readonly readSelectFields = `
+    r.id,
+    r.appointment_id AS "appointmentId",
+    r.rating,
+    r.comment,
+    json_build_object('id', pa.id, 'fullName', pa.full_name) AS patient,
+    json_build_object('id', s.id, 'date', s.slot_date, 'startTime', s.start_time, 'endTime', s.end_time) AS slot,
+    json_build_object(
+      'id', d.id,
+      'displayName', u.email,
+      'clinicName', cl.name,
+      'specialtyName', sp.name
+    ) AS doctor
+  `;
+
   async create(data: {
     appointmentId: UUID;
     rating: number;
@@ -42,30 +57,51 @@ export class ReviewRepository extends BaseRepository {
     return result.rows[0];
   }
 
-  async findAll(): Promise<ReviewRecord[]> {
-    const result = await this.query<ReviewRecord>(
-      `SELECT ${this.selectFields}
-       FROM reviews
-       ORDER BY id`,
+  async findAll(): Promise<ReviewReadModel[]> {
+    const result = await this.query<ReviewReadModel>(
+      `SELECT ${this.readSelectFields}
+       FROM reviews r
+       JOIN appointments a        ON r.appointment_id = a.id
+       JOIN patients pa           ON a.patient_id     = pa.id
+       JOIN appointment_slots s   ON a.slot_id        = s.id
+       JOIN doctors d             ON s.doctor_id      = d.id
+       JOIN users u               ON d.user_id        = u.id
+       JOIN clinics cl            ON d.clinic_id      = cl.id
+       JOIN specialties sp        ON d.specialty_id   = sp.id
+       ORDER BY r.id`,
     );
     return result.rows;
   }
 
-  async findById(id: UUID): Promise<ReviewRecord | null> {
-    const result = await this.query<ReviewRecord>(
-      `SELECT ${this.selectFields}
-       FROM reviews
-       WHERE id = $1`,
+  async findById(id: UUID): Promise<ReviewReadModel | null> {
+    const result = await this.query<ReviewReadModel>(
+      `SELECT ${this.readSelectFields}
+       FROM reviews r
+       JOIN appointments a        ON r.appointment_id = a.id
+       JOIN patients pa           ON a.patient_id     = pa.id
+       JOIN appointment_slots s   ON a.slot_id        = s.id
+       JOIN doctors d             ON s.doctor_id      = d.id
+       JOIN users u               ON d.user_id        = u.id
+       JOIN clinics cl            ON d.clinic_id      = cl.id
+       JOIN specialties sp        ON d.specialty_id   = sp.id
+       WHERE r.id = $1`,
       [id],
     );
     return result.rows[0] ?? null;
   }
 
-  async findByAppointmentId(appointmentId: UUID): Promise<ReviewRecord | null> {
-    const result = await this.query<ReviewRecord>(
-      `SELECT ${this.selectFields}
-       FROM reviews
-       WHERE appointment_id = $1`,
+  async findByAppointmentId(appointmentId: UUID): Promise<ReviewReadModel | null> {
+    const result = await this.query<ReviewReadModel>(
+      `SELECT ${this.readSelectFields}
+       FROM reviews r
+       JOIN appointments a        ON r.appointment_id = a.id
+       JOIN patients pa           ON a.patient_id     = pa.id
+       JOIN appointment_slots s   ON a.slot_id        = s.id
+       JOIN doctors d             ON s.doctor_id      = d.id
+       JOIN users u               ON d.user_id        = u.id
+       JOIN clinics cl            ON d.clinic_id      = cl.id
+       JOIN specialties sp        ON d.specialty_id   = sp.id
+       WHERE r.appointment_id = $1`,
       [appointmentId],
     );
     return result.rows[0] ?? null;
@@ -103,11 +139,17 @@ export class ReviewRepository extends BaseRepository {
     return result.rows[0] ?? null;
   }
 
-  async findReviewsByPatientId(patientId: UUID): Promise<ReviewRecord[]> {
-    const result = await this.query<ReviewRecord>(
-      `SELECT r.id, r.appointment_id AS "appointmentId", r.rating, r.comment
+  async findReviewsByPatientId(patientId: UUID): Promise<ReviewReadModel[]> {
+    const result = await this.query<ReviewReadModel>(
+      `SELECT ${this.readSelectFields}
        FROM reviews r
-       JOIN appointments a ON r.appointment_id = a.id
+       JOIN appointments a        ON r.appointment_id = a.id
+       JOIN patients pa           ON a.patient_id     = pa.id
+       JOIN appointment_slots s   ON a.slot_id        = s.id
+       JOIN doctors d             ON s.doctor_id      = d.id
+       JOIN users u               ON d.user_id        = u.id
+       JOIN clinics cl            ON d.clinic_id      = cl.id
+       JOIN specialties sp        ON d.specialty_id   = sp.id
        WHERE a.patient_id = $1
        ORDER BY r.id`,
       [patientId],
@@ -115,13 +157,18 @@ export class ReviewRepository extends BaseRepository {
     return result.rows;
   }
 
-  async findReviewsByDoctorId(doctorId: UUID): Promise<ReviewRecord[]> {
-    const result = await this.query<ReviewRecord>(
-      `SELECT r.id, r.appointment_id AS "appointmentId", r.rating, r.comment
+  async findReviewsByDoctorId(doctorId: UUID): Promise<ReviewReadModel[]> {
+    const result = await this.query<ReviewReadModel>(
+      `SELECT ${this.readSelectFields}
        FROM reviews r
-       JOIN appointments a ON r.appointment_id = a.id
-       JOIN appointment_slots s ON a.slot_id = s.id
-       WHERE s.doctor_id = $1
+       JOIN appointments a        ON r.appointment_id = a.id
+       JOIN patients pa           ON a.patient_id     = pa.id
+       JOIN appointment_slots s   ON a.slot_id        = s.id
+       JOIN doctors d             ON s.doctor_id      = d.id
+       JOIN users u               ON d.user_id        = u.id
+       JOIN clinics cl            ON d.clinic_id      = cl.id
+       JOIN specialties sp        ON d.specialty_id   = sp.id
+       WHERE s.doctor_id = $1 AND s.deleted_at IS NULL
        ORDER BY r.id`,
       [doctorId],
     );

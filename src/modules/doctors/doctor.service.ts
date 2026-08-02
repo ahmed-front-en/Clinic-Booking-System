@@ -2,7 +2,7 @@ import { doctorRepository } from "./doctor.repository.js";
 import { AppError } from "../../shared/errors/app-error.js";
 import { HttpStatus } from "../../shared/constants/http-status.js";
 import type { CreateDoctorDto, UpdateDoctorDto } from "./doctor.types.js";
-import type { DoctorRecord } from "./doctor.interfaces.js";
+import type { DoctorRecord, DoctorReadModel } from "./doctor.interfaces.js";
 import type { UUID } from "../../shared/types/common.types.js";
 
 export class DoctorService {
@@ -40,11 +40,11 @@ export class DoctorService {
     });
   }
 
-  async findAll(): Promise<DoctorRecord[]> {
+  async findAll(): Promise<DoctorReadModel[]> {
     return doctorRepository.findAll();
   }
 
-  async findById(id: UUID): Promise<DoctorRecord> {
+  async findById(id: UUID): Promise<DoctorReadModel> {
     const doctor = await doctorRepository.findById(id);
     if (!doctor) {
       throw AppError.notFound("Doctor not found");

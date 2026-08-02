@@ -1,10 +1,10 @@
 import api from "@/lib/axios";
 import type { ApiResponse } from "@/types/api";
-import type { PaymentRecord } from "@/types/models/payment";
+import type { PaymentRecord, PaymentReadModel } from "@/types/models/payment";
 import type { CreatePaymentInput } from "@/schemas/payment";
 
-export async function getMyPayments(): Promise<PaymentRecord[]> {
-  const response = await api.get<ApiResponse<PaymentRecord[]>>("/payments/mine");
+export async function getMyPayments(): Promise<PaymentReadModel[]> {
+  const response = await api.get<ApiResponse<PaymentReadModel[]>>("/payments/mine");
   return response.data.data;
 }
 

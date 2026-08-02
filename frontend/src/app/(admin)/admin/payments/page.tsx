@@ -32,14 +32,11 @@ import {
 } from "@/features/payments";
 import { getPaymentsAdmin } from "@/features/payments/api/payments-admin";
 import { usePrefetchAdminPage } from "@/hooks/usePrefetchAdminPage";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, formatDateTime } from "@/lib/utils";
 import { queryKeys } from "@/lib/query-keys";
 import { PAGINATION_DEFAULTS } from "@/config";
-import type { PaymentRecord } from "@/types/models/payment";
+import type { PaymentReadModel } from "@/types/models/payment";
 import type { UpdatePaymentInput } from "@/schemas/payment";
-
-const truncate = (value: string, length = 10) =>
-  value.length > length ? `${value.slice(0, length)}…` : value;
 
 export default function AdminPaymentsPage() {
   const [page, setPage] = useState<number>(PAGINATION_DEFAULTS.page);
@@ -50,8 +47,8 @@ export default function AdminPaymentsPage() {
   const { mutate: updatePayment, isPending: isUpdating } = useUpdatePayment();
   const { mutate: deletePayment, isPending: isDeleting } = useDeletePayment();
 
-  const [editing, setEditing] = useState<PaymentRecord | null>(null);
-  const [deleting, setDeleting] = useState<PaymentRecord | null>(null);
+  const [editing, setEditing] = useState<PaymentReadModel | null>(null);
+  const [deleting, setDeleting] = useState<PaymentReadModel | null>(null);
 
   const payments = data?.data ?? [];
   const totalPages = data?.pagination?.totalPages ?? 1;
@@ -64,11 +61,12 @@ export default function AdminPaymentsPage() {
     totalPages,
   });
 
-  const columns: Column<PaymentRecord>[] = useMemo(() => [
+  const columns: Column<PaymentReadModel>[] = useMemo(() => [
     {
       key: "appointmentId",
       header: "Appointment",
-      render: (payment) => truncate(payment.appointmentId),
+      render: (payment) =>
+        `${payment.doctor.displayName} · ${formatDateTime(payment.slot.date, payment.slot.startTime)}`,
     },
     {
       key: "amount",
@@ -103,7 +101,8 @@ export default function AdminPaymentsPage() {
             variant="ghost"
             size="xs"
             onClick={() => setEditing(payment)}
-            aria-label={`Edit payment ${truncate(payment.id)}`}
+            aria-label={`Edit payment for ${payment.doctor.displayName}`}
+            title={`Edit payment for ${payment.doctor.displayName}`}
           >
             <Pencil className="size-4" />
           </Button>
@@ -111,7 +110,8 @@ export default function AdminPaymentsPage() {
             variant="ghost"
             size="xs"
             onClick={() => setDeleting(payment)}
-            aria-label={`Delete payment ${truncate(payment.id)}`}
+            aria-label={`Delete payment for ${payment.doctor.displayName}`}
+            title={`Delete payment for ${payment.doctor.displayName}`}
           >
             <Trash2 className="size-4" />
           </Button>
@@ -178,7 +178,7 @@ export default function AdminPaymentsPage() {
             deletePayment(deleting.id, { onSuccess: () => setDeleting(null) })
           }
           title="Delete payment"
-          message={`Delete payment ${truncate(deleting.id)}? This cannot be undone.`}
+          message={`Delete payment for ${deleting.doctor.displayName}? This cannot be undone.`}
           confirmLabel="Delete"
           isLoading={isDeleting}
         />

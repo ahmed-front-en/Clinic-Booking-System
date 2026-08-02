@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Calendar as CalendarIcon, Clock, Info } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, formatTime, toISODateString } from "@/lib/utils";
 
 interface SlotPickerProps {
   slots: AppointmentSlotRecord[];
@@ -24,20 +24,7 @@ export function SlotPicker({
   onDateChange,
   isLoading,
 }: SlotPickerProps) {
-  // Format times e.g. "09:00:00" -> "09:00 AM"
-  const formatSlotTime = (timeStr: string) => {
-    try {
-      const [hours, minutes] = timeStr.split(":");
-      const h = parseInt(hours, 10);
-      const ampm = h >= 12 ? "PM" : "AM";
-      const formattedHour = h % 12 === 0 ? 12 : h % 12;
-      return `${formattedHour}:${minutes} ${ampm}`;
-    } catch {
-      return timeStr;
-    }
-  };
-
-  const todayStr = new Date().toISOString().split("T")[0];
+  const todayStr = toISODateString(new Date());
 
   return (
     <div className="space-y-6">
@@ -101,9 +88,9 @@ export function SlotPicker({
                       : "border-border bg-surface-container-lowest text-on-surface hover:border-primary",
                   )}
                 >
-                  <span>{formatSlotTime(slot.startTime)}</span>
+                  <span>{formatTime(slot.startTime)}</span>
                   <span className="text-[10px] opacity-75">
-                    {formatSlotTime(slot.endTime)}
+                    {formatTime(slot.endTime)}
                   </span>
                 </Button>
               );
@@ -114,7 +101,7 @@ export function SlotPicker({
 
       <div className="flex items-center gap-2 rounded-md bg-primary/5 p-3 text-xs text-primary">
         <Info className="size-4 shrink-0" />
-        <span>Time slots are in your local timezone. Select a slot to proceed.</span>
+        <span>All times are shown in Africa/Cairo (EG). Select a slot to proceed.</span>
       </div>
     </div>
   );

@@ -3,16 +3,17 @@
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { useRouter } from "next/navigation";
 import { useEffect, type ReactNode } from "react";
+import { getHomePathForRole } from "@/lib/routing";
 
 export function PublicGuard({ children }: { children: ReactNode }) {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { user, isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (!isLoading && isAuthenticated) {
-      router.replace("/dashboard");
+    if (!isLoading && isAuthenticated && user) {
+      router.replace(getHomePathForRole(user.role));
     }
-  }, [isAuthenticated, isLoading, router]);
+  }, [isAuthenticated, isLoading, router, user]);
 
   if (isLoading) {
     return (

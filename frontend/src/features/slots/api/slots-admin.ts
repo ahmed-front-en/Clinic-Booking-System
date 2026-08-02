@@ -5,7 +5,7 @@ import type {
   PaginatedData,
   PaginationParams,
 } from "@/types/api";
-import type { AppointmentSlotRecord } from "@/types/models/slot";
+import type { AppointmentSlotRecord, AppointmentSlotReadModel } from "@/types/models/slot";
 import type {
   CreateAppointmentSlotInput,
   UpdateAppointmentSlotInput,
@@ -13,8 +13,8 @@ import type {
 
 export async function getSlotsAdmin(
   params: PaginationParams,
-): Promise<PaginatedData<AppointmentSlotRecord>> {
-  const response = await api.get<PaginatedApiResponse<AppointmentSlotRecord>>(
+): Promise<PaginatedData<AppointmentSlotReadModel>> {
+  const response = await api.get<PaginatedApiResponse<AppointmentSlotReadModel>>(
     "/admin/appointment-slots",
     { params },
   );

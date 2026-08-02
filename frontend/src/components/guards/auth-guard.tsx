@@ -4,6 +4,7 @@ import { useAuth } from "@/features/auth/hooks/use-auth";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, type ReactNode } from "react";
 import type { UserRole } from "@/types/enums";
+import { getHomePathForRole } from "@/lib/routing";
 
 interface AuthGuardProps {
   children: ReactNode;
@@ -22,7 +23,7 @@ export function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
       return;
     }
     if (allowedRoles && user && !allowedRoles.includes(user.role as UserRole)) {
-      router.replace("/");
+      router.replace(getHomePathForRole(user.role as UserRole));
     }
   }, [isAuthenticated, isLoading, router, pathname, user, allowedRoles]);
 

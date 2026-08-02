@@ -1,6 +1,6 @@
 import { BaseRepository } from "../../shared/repositories/base.repository.js";
 import { pool } from "../../services/database.service.js";
-import type { PaymentRecord } from "./payment.interfaces.js";
+import type { PaymentRecord, PaymentReadModel } from "./payment.interfaces.js";
 import type { UUID } from "../../shared/types/common.types.js";
 
 interface IdRow {
@@ -23,6 +23,23 @@ export class PaymentRepository extends BaseRepository {
     transaction_reference AS "transactionReference"
   `;
 
+  private readonly readSelectFields = `
+    p.id,
+    p.appointment_id AS "appointmentId",
+    p.amount,
+    p.method,
+    p.status,
+    p.transaction_reference AS "transactionReference",
+    json_build_object('id', pa.id, 'fullName', pa.full_name) AS patient,
+    json_build_object('id', s.id, 'date', s.slot_date, 'startTime', s.start_time, 'endTime', s.end_time) AS slot,
+    json_build_object(
+      'id', d.id,
+      'displayName', u.email,
+      'clinicName', cl.name,
+      'specialtyName', sp.name
+    ) AS doctor
+  `;
+
   async create(data: {
     appointmentId: UUID;
     amount: number;
@@ -39,30 +56,51 @@ export class PaymentRepository extends BaseRepository {
     return result.rows[0];
   }
 
-  async findAll(): Promise<PaymentRecord[]> {
-    const result = await this.query<PaymentRecord>(
-      `SELECT ${this.selectFields}
-       FROM payments
-       ORDER BY id`,
+  async findAll(): Promise<PaymentReadModel[]> {
+    const result = await this.query<PaymentReadModel>(
+      `SELECT ${this.readSelectFields}
+       FROM payments p
+       JOIN appointments a        ON p.appointment_id = a.id
+       JOIN patients pa           ON a.patient_id     = pa.id
+       JOIN appointment_slots s   ON a.slot_id        = s.id
+       JOIN doctors d             ON s.doctor_id      = d.id
+       JOIN users u               ON d.user_id        = u.id
+       JOIN clinics cl            ON d.clinic_id      = cl.id
+       JOIN specialties sp        ON d.specialty_id   = sp.id
+       ORDER BY p.id`,
     );
     return result.rows;
   }
 
-  async findById(id: UUID): Promise<PaymentRecord | null> {
-    const result = await this.query<PaymentRecord>(
-      `SELECT ${this.selectFields}
-       FROM payments
-       WHERE id = $1`,
+  async findById(id: UUID): Promise<PaymentReadModel | null> {
+    const result = await this.query<PaymentReadModel>(
+      `SELECT ${this.readSelectFields}
+       FROM payments p
+       JOIN appointments a        ON p.appointment_id = a.id
+       JOIN patients pa           ON a.patient_id     = pa.id
+       JOIN appointment_slots s   ON a.slot_id        = s.id
+       JOIN doctors d             ON s.doctor_id      = d.id
+       JOIN users u               ON d.user_id        = u.id
+       JOIN clinics cl            ON d.clinic_id      = cl.id
+       JOIN specialties sp        ON d.specialty_id   = sp.id
+       WHERE p.id = $1`,
       [id],
     );
     return result.rows[0] ?? null;
   }
 
-  async findByAppointmentId(appointmentId: UUID): Promise<PaymentRecord | null> {
-    const result = await this.query<PaymentRecord>(
-      `SELECT ${this.selectFields}
-       FROM payments
-       WHERE appointment_id = $1`,
+  async findByAppointmentId(appointmentId: UUID): Promise<PaymentReadModel | null> {
+    const result = await this.query<PaymentReadModel>(
+      `SELECT ${this.readSelectFields}
+       FROM payments p
+       JOIN appointments a        ON p.appointment_id = a.id
+       JOIN patients pa           ON a.patient_id     = pa.id
+       JOIN appointment_slots s   ON a.slot_id        = s.id
+       JOIN doctors d             ON s.doctor_id      = d.id
+       JOIN users u               ON d.user_id        = u.id
+       JOIN clinics cl            ON d.clinic_id      = cl.id
+       JOIN specialties sp        ON d.specialty_id   = sp.id
+       WHERE p.appointment_id = $1`,
       [appointmentId],
     );
     return result.rows[0] ?? null;
@@ -92,11 +130,17 @@ export class PaymentRepository extends BaseRepository {
     return result.rows[0] ?? null;
   }
 
-  async findByPatientId(patientId: UUID): Promise<PaymentRecord[]> {
-    const result = await this.query<PaymentRecord>(
-      `SELECT p.id, p.appointment_id AS "appointmentId", p.amount, p.method, p.status, p.transaction_reference AS "transactionReference"
+  async findByPatientId(patientId: UUID): Promise<PaymentReadModel[]> {
+    const result = await this.query<PaymentReadModel>(
+      `SELECT ${this.readSelectFields}
        FROM payments p
-       JOIN appointments a ON p.appointment_id = a.id
+       JOIN appointments a        ON p.appointment_id = a.id
+       JOIN patients pa           ON a.patient_id     = pa.id
+       JOIN appointment_slots s   ON a.slot_id        = s.id
+       JOIN doctors d             ON s.doctor_id      = d.id
+       JOIN users u               ON d.user_id        = u.id
+       JOIN clinics cl            ON d.clinic_id      = cl.id
+       JOIN specialties sp        ON d.specialty_id   = sp.id
        WHERE a.patient_id = $1
        ORDER BY p.id`,
       [patientId],

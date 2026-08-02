@@ -1,18 +1,15 @@
 "use client";
 
-import { CalendarClock, Stethoscope, X } from "lucide-react";
+import { Stethoscope, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/business/StatusBadge";
 import { ConfirmDialog } from "@/components/business/ConfirmDialog";
 import { useState, memo } from "react";
-import type { AppointmentRecord } from "@/types/models/appointment";
+import { formatDateTime } from "@/lib/utils";
+import type { AppointmentReadModel } from "@/types/models/appointment";
 
 interface AppointmentCardProps {
-  appointment: AppointmentRecord;
-  doctorName?: string | null;
-  specialtyName?: string | null;
-  slotDate?: string | null;
-  startTime?: string | null;
+  appointment: AppointmentReadModel;
   onCancel?: (id: string) => void;
   isCancelling?: boolean;
 }
@@ -21,10 +18,6 @@ const CANCELLABLE_STATUSES = new Set(["scheduled", "confirmed"]);
 
 export const AppointmentCard = memo(function AppointmentCard({
   appointment,
-  doctorName,
-  specialtyName,
-  slotDate,
-  startTime,
   onCancel,
   isCancelling,
 }: AppointmentCardProps) {
@@ -40,29 +33,19 @@ export const AppointmentCard = memo(function AppointmentCard({
         </div>
         <div className="min-w-0">
           <h3 className="truncate text-sm font-medium text-foreground">
-            {doctorName ?? "Doctor unavailable"}
+            {appointment.doctor.displayName}
           </h3>
-          {specialtyName ? (
-            <p className="text-sm text-muted-foreground">{specialtyName}</p>
-          ) : (
-            <p className="text-sm text-muted-foreground">Appointment #{appointment.id.slice(0, 8)}</p>
-          )}
+          <p className="text-sm text-muted-foreground">
+            {appointment.doctor.specialtyName}
+          </p>
         </div>
       </div>
 
       <div className="flex items-center justify-between gap-4 sm:justify-end">
         <div className="text-left sm:text-right">
-          {slotDate && startTime ? (
-            <>
-              <p className="text-sm font-medium text-foreground">{slotDate}</p>
-              <p className="text-sm text-muted-foreground">{startTime}</p>
-            </>
-          ) : (
-            <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-              <CalendarClock className="size-4" aria-hidden="true" />
-              <span>Slot details unavailable</span>
-            </div>
-          )}
+          <p className="text-sm font-medium text-foreground">
+            {formatDateTime(appointment.slot.date, appointment.slot.startTime)}
+          </p>
         </div>
         <StatusBadge status={appointment.status} />
         {cancellable && (

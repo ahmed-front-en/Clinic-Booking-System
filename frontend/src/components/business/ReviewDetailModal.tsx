@@ -12,13 +12,14 @@ import {
 } from "@/components/ui/dialog";
 import { StarRating } from "@/components/business/StarRating";
 import { updateReviewSchema, type UpdateReviewInput } from "@/schemas/review";
-import type { ReviewRecord } from "@/types/models/review";
+import { formatDateTime } from "@/lib/utils";
+import type { ReviewReadModel } from "@/types/models/review";
 import { useApiError } from "@/hooks/useApiError";
 
 interface ReviewDetailModalProps {
   open: boolean;
   onClose: () => void;
-  review: ReviewRecord;
+  review: ReviewReadModel;
   onSubmit: (data: UpdateReviewInput) => void;
   isSubmitting?: boolean;
 }
@@ -70,7 +71,11 @@ export function ReviewDetailModal({
         </DialogHeader>
         <div className="mt-4">
           <p className="mb-4 text-sm text-muted-foreground">
-            Appointment <span className="font-medium text-foreground">#{review.appointmentId.slice(0, 8)}</span>
+            Doctor{" "}
+            <span className="font-medium text-foreground">
+              {review.doctor.displayName}
+            </span>{" "}
+            · {formatDateTime(review.slot.date, review.slot.startTime)}
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-4" noValidate>

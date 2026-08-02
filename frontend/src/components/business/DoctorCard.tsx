@@ -1,17 +1,14 @@
 "use client";
 
 import { memo } from "react";
-import type { DoctorRecord } from "@/types/models/doctor";
+import type { DoctorReadModel } from "@/types/models/doctor";
 import { Card, CardContent } from "@/components/ui/card";
 import { StarRating } from "@/components/business/StarRating";
 import { User, Award, DollarSign, Building2, Stethoscope } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, formatCurrency } from "@/lib/utils";
 
 interface DoctorCardProps {
-  doctor: DoctorRecord;
-  doctorName?: string;
-  clinicName?: string;
-  specialtyName?: string;
+  doctor: DoctorReadModel;
   rating?: number;
   isSelected: boolean;
   onSelect: () => void;
@@ -19,10 +16,7 @@ interface DoctorCardProps {
 
 export const DoctorCard = memo(function DoctorCard({
   doctor,
-  doctorName = "Dr. Doctor",
-  clinicName,
-  specialtyName,
-  rating = 4.8,
+  rating,
   isSelected,
   onSelect,
 }: DoctorCardProps) {
@@ -45,28 +39,26 @@ export const DoctorCard = memo(function DoctorCard({
             <div className="flex items-start justify-between">
               <div>
                 <h3 className="text-lg font-semibold text-on-surface">
-                  {doctorName}
+                  {doctor.doctor.displayName}
                 </h3>
-                {specialtyName && (
-                  <div className="flex items-center gap-1.5 text-sm text-primary">
-                    <Stethoscope className="size-4" />
-                    <span>{specialtyName}</span>
-                  </div>
-                )}
+                <div className="flex items-center gap-1.5 text-sm text-primary">
+                  <Stethoscope className="size-4" />
+                  <span>{doctor.doctor.specialtyName}</span>
+                </div>
               </div>
-              <div className="flex items-center gap-1 text-sm font-medium text-amber-500">
-                <StarRating rating={rating} readonly />
-                <span className="text-xs text-muted-foreground">({rating})</span>
-              </div>
+              {typeof rating === "number" && (
+                <div className="flex items-center gap-1 text-sm font-medium text-amber-500">
+                  <StarRating rating={rating} readonly />
+                  <span className="text-xs text-muted-foreground">({rating})</span>
+                </div>
+              )}
             </div>
 
             <div className="mt-3 space-y-1 text-sm text-muted-foreground">
-              {clinicName && (
-                <div className="flex items-center gap-2">
-                  <Building2 className="size-4 shrink-0 text-muted-foreground" />
-                  <span>{clinicName}</span>
-                </div>
-              )}
+              <div className="flex items-center gap-2">
+                <Building2 className="size-4 shrink-0 text-muted-foreground" />
+                <span>{doctor.doctor.clinicName}</span>
+              </div>
               <div className="flex items-center justify-between pt-2">
                 {doctor.experienceYears > 0 && (
                   <div className="flex items-center gap-1 text-xs">
@@ -76,7 +68,7 @@ export const DoctorCard = memo(function DoctorCard({
                 )}
                 <div className="flex items-center font-semibold text-on-surface">
                   <DollarSign className="size-4 text-primary" />
-                  <span>Fee: ${doctor.consultationFee}</span>
+                  <span>{formatCurrency(Number(doctor.consultationFee))}</span>
                 </div>
               </div>
             </div>

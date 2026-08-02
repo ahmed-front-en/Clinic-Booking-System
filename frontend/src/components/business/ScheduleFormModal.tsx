@@ -23,7 +23,7 @@ import {
   type CreateDoctorScheduleInput,
   type UpdateDoctorScheduleInput,
 } from "@/schemas/schedule";
-import type { DoctorRecord } from "@/types/models/doctor";
+import type { DoctorReadModel } from "@/types/models/doctor";
 import type { DoctorScheduleRecord } from "@/types/models/schedule";
 import { useApiError } from "@/hooks/useApiError";
 
@@ -41,7 +41,7 @@ interface ScheduleFormModalProps {
   open: boolean;
   onClose: () => void;
   schedule?: DoctorScheduleRecord | null;
-  doctors: DoctorRecord[];
+  doctors: DoctorReadModel[];
   onSubmit: (data: CreateDoctorScheduleInput | UpdateDoctorScheduleInput) => void;
   isSubmitting?: boolean;
 }
@@ -124,7 +124,7 @@ export function ScheduleFormModal({
               <SelectContent>
                 {doctors.map((doctor) => (
                   <SelectItem key={doctor.id} value={doctor.id}>
-                    Doctor {doctor.id.slice(0, 8)}
+                    {doctor.doctor.displayName}
                   </SelectItem>
                 ))}
               </SelectContent>

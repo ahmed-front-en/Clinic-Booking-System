@@ -10,6 +10,7 @@ import { EmptyState } from "@/components/feedback/EmptyState";
 import { Skeleton } from "@/components/feedback/Skeleton";
 import { StatusBadge } from "@/components/business/StatusBadge";
 import { Button } from "@/components/ui/button";
+import { formatDateTime } from "@/lib/utils";
 
 const DataTable = dynamic(
   () => import("@/components/data/DataTable").then((mod) => mod.DataTable),
@@ -34,11 +35,8 @@ import { getAppointmentsAdmin } from "@/features/appointments/api/appointments-a
 import { usePrefetchAdminPage } from "@/hooks/usePrefetchAdminPage";
 import { queryKeys } from "@/lib/query-keys";
 import { PAGINATION_DEFAULTS } from "@/config";
-import type { AppointmentRecord } from "@/types/models/appointment";
+import type { AppointmentReadModel } from "@/types/models/appointment";
 import type { UpdateAppointmentInput } from "@/schemas/appointment";
-
-const truncate = (value: string, length = 10) =>
-  value.length > length ? `${value.slice(0, length)}…` : value;
 
 export default function AdminAppointmentsPage() {
   const [page, setPage] = useState<number>(PAGINATION_DEFAULTS.page);
@@ -49,8 +47,8 @@ export default function AdminAppointmentsPage() {
   const { mutate: updateAppointment, isPending: isUpdating } = useUpdateAppointment();
   const { mutate: deleteAppointment, isPending: isDeleting } = useDeleteAppointment();
 
-  const [editing, setEditing] = useState<AppointmentRecord | null>(null);
-  const [deleting, setDeleting] = useState<AppointmentRecord | null>(null);
+  const [editing, setEditing] = useState<AppointmentReadModel | null>(null);
+  const [deleting, setDeleting] = useState<AppointmentReadModel | null>(null);
 
   const appointments = data?.data ?? [];
   const totalPages = data?.pagination?.totalPages ?? 1;
@@ -63,16 +61,17 @@ export default function AdminAppointmentsPage() {
     totalPages,
   });
 
-  const columns: Column<AppointmentRecord>[] = useMemo(() => [
+  const columns: Column<AppointmentReadModel>[] = useMemo(() => [
     {
       key: "patientId",
       header: "Patient",
-      render: (appointment) => truncate(appointment.patientId),
+      render: (appointment) => appointment.patient.fullName,
     },
     {
       key: "slotId",
       header: "Slot",
-      render: (appointment) => truncate(appointment.slotId),
+      render: (appointment) =>
+        formatDateTime(appointment.slot.date, appointment.slot.startTime),
     },
     {
       key: "status",
@@ -95,7 +94,8 @@ export default function AdminAppointmentsPage() {
             variant="ghost"
             size="xs"
             onClick={() => setEditing(appointment)}
-            aria-label={`Edit appointment ${truncate(appointment.id)}`}
+            aria-label={`Edit appointment for ${appointment.patient.fullName}`}
+            title={`Edit appointment for ${appointment.patient.fullName}`}
           >
             <Pencil className="size-4" />
           </Button>
@@ -103,7 +103,8 @@ export default function AdminAppointmentsPage() {
             variant="ghost"
             size="xs"
             onClick={() => setDeleting(appointment)}
-            aria-label={`Delete appointment ${truncate(appointment.id)}`}
+            aria-label={`Delete appointment for ${appointment.patient.fullName}`}
+            title={`Delete appointment for ${appointment.patient.fullName}`}
           >
             <Trash2 className="size-4" />
           </Button>
@@ -172,7 +173,7 @@ export default function AdminAppointmentsPage() {
             deleteAppointment(deleting.id, { onSuccess: () => setDeleting(null) })
           }
           title="Delete appointment"
-          message={`Delete appointment ${truncate(deleting.id)}? Deleting fails if a payment record exists for it.`}
+          message={`Delete appointment for ${deleting.patient.fullName}? Deleting fails if a payment record exists for it.`}
           confirmLabel="Delete"
           isLoading={isDeleting}
         />

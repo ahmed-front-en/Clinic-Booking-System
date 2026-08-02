@@ -1,15 +1,9 @@
 import { CalendarDays, Phone, User as UserIcon, VenusAndMars } from "lucide-react";
+import { formatDate } from "@/lib/utils";
 import type { PatientRecord } from "@/types/models/patient";
 
 interface ProfileSummaryCardProps {
   patient: PatientRecord | null;
-}
-
-function formatBirthDate(birthDate: string | null): string {
-  if (!birthDate) return "Not set";
-  const [year, month, day] = birthDate.split("-");
-  if (!year || !month || !day) return birthDate;
-  return `${day}/${month}/${year}`;
 }
 
 export function ProfileSummaryCard({ patient }: ProfileSummaryCardProps) {
@@ -29,7 +23,7 @@ export function ProfileSummaryCard({ patient }: ProfileSummaryCardProps) {
     {
       icon: CalendarDays,
       label: "Birth date",
-      value: formatBirthDate(patient.birthDate),
+      value: patient.birthDate ? formatDate(patient.birthDate) : "Not set",
     },
   ];
 

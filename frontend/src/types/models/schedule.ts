@@ -1,3 +1,5 @@
+import type { DoctorSummary } from "./read-models";
+
 export interface DoctorScheduleRecord {
   id: string;
   doctorId: string;
@@ -5,6 +7,10 @@ export interface DoctorScheduleRecord {
   startTime: string;
   endTime: string;
   slotDuration: number;
+}
+
+export interface DoctorScheduleReadModel extends DoctorScheduleRecord {
+  doctor: DoctorSummary;
 }
 
 export interface DoctorScheduleCreateRequest {

@@ -4,12 +4,12 @@ import { memo } from "react";
 import { CreditCard, Receipt } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/business/StatusBadge";
-import { formatCurrency } from "@/lib/utils";
-import type { PaymentRecord } from "@/types/models/payment";
+import { formatCurrency, formatDateTime } from "@/lib/utils";
+import type { PaymentReadModel } from "@/types/models/payment";
 
 interface PaymentCardProps {
-  payment: PaymentRecord;
-  onPay?: (payment: PaymentRecord) => void;
+  payment: PaymentReadModel;
+  onPay?: (payment: PaymentReadModel) => void;
   isPaying?: boolean;
 }
 
@@ -31,8 +31,10 @@ export const PaymentCard = memo(function PaymentCard({
             {formatCurrency(payment.amount)}
           </h3>
           <p className="text-sm text-muted-foreground">
-            {payment.method.replace(/_/g, " ")} · Payment #
-            {payment.id.slice(0, 8)}
+            {payment.method.replace(/_/g, " ")} · {payment.doctor.displayName}
+          </p>
+          <p className="text-xs text-muted-foreground">
+            {formatDateTime(payment.slot.date, payment.slot.startTime)}
           </p>
         </div>
       </div>

@@ -1,9 +1,9 @@
 import api from "@/lib/axios";
 import type { ApiResponse } from "@/types/api";
-import type { AppointmentRecord } from "@/types/models/appointment";
+import type { AppointmentRecord, AppointmentReadModel } from "@/types/models/appointment";
 
-export async function getMyAppointments(): Promise<AppointmentRecord[]> {
-  const response = await api.get<ApiResponse<AppointmentRecord[]>>("/appointments/mine");
+export async function getMyAppointments(): Promise<AppointmentReadModel[]> {
+  const response = await api.get<ApiResponse<AppointmentReadModel[]>>("/appointments/mine");
   return response.data.data;
 }
 

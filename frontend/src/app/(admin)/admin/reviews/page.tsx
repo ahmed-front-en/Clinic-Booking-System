@@ -10,6 +10,7 @@ import { EmptyState } from "@/components/feedback/EmptyState";
 import { Skeleton } from "@/components/feedback/Skeleton";
 import { StarRating } from "@/components/business/StarRating";
 import { Button } from "@/components/ui/button";
+import { formatDateTime } from "@/lib/utils";
 
 const DataTable = dynamic(
   () => import("@/components/data/DataTable").then((mod) => mod.DataTable),
@@ -34,7 +35,7 @@ import { getReviewsAdmin } from "@/features/reviews/api/reviews-admin";
 import { usePrefetchAdminPage } from "@/hooks/usePrefetchAdminPage";
 import { queryKeys } from "@/lib/query-keys";
 import { PAGINATION_DEFAULTS } from "@/config";
-import type { ReviewRecord } from "@/types/models/review";
+import type { ReviewReadModel } from "@/types/models/review";
 import type { UpdateReviewInput } from "@/schemas/review";
 
 const truncate = (value: string, length = 40) =>
@@ -49,8 +50,8 @@ export default function AdminReviewsPage() {
   const { mutate: updateReview, isPending: isUpdating } = useUpdateReview();
   const { mutate: deleteReview, isPending: isDeleting } = useDeleteReview();
 
-  const [editing, setEditing] = useState<ReviewRecord | null>(null);
-  const [deleting, setDeleting] = useState<ReviewRecord | null>(null);
+  const [editing, setEditing] = useState<ReviewReadModel | null>(null);
+  const [deleting, setDeleting] = useState<ReviewReadModel | null>(null);
 
   const reviews = data?.data ?? [];
   const totalPages = data?.pagination?.totalPages ?? 1;
@@ -63,11 +64,12 @@ export default function AdminReviewsPage() {
     totalPages,
   });
 
-  const columns: Column<ReviewRecord>[] = useMemo(() => [
+  const columns: Column<ReviewReadModel>[] = useMemo(() => [
     {
       key: "appointmentId",
       header: "Appointment",
-      render: (review) => truncate(review.appointmentId, 10),
+      render: (review) =>
+        `${review.doctor.displayName} · ${formatDateTime(review.slot.date, review.slot.startTime)}`,
     },
     {
       key: "rating",
@@ -94,7 +96,8 @@ export default function AdminReviewsPage() {
             variant="ghost"
             size="xs"
             onClick={() => setEditing(review)}
-            aria-label={`Edit review ${truncate(review.id, 10)}`}
+            aria-label={`Edit review for ${review.doctor.displayName}`}
+            title={`Edit review for ${review.doctor.displayName}`}
           >
             <Pencil className="size-4" />
           </Button>
@@ -102,7 +105,8 @@ export default function AdminReviewsPage() {
             variant="ghost"
             size="xs"
             onClick={() => setDeleting(review)}
-            aria-label={`Delete review ${truncate(review.id, 10)}`}
+            aria-label={`Delete review for ${review.doctor.displayName}`}
+            title={`Delete review for ${review.doctor.displayName}`}
           >
             <Trash2 className="size-4" />
           </Button>

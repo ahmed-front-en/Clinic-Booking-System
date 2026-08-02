@@ -1,6 +1,6 @@
 import { BaseRepository } from "../../shared/repositories/base.repository.js";
 import { pool } from "../../services/database.service.js";
-import type { AppointmentRecord } from "./appointment.interfaces.js";
+import type { AppointmentRecord, AppointmentReadModel } from "./appointment.interfaces.js";
 import type { UUID } from "../../shared/types/common.types.js";
 
 interface IdRow {
@@ -29,6 +29,22 @@ export class AppointmentRepository extends BaseRepository {
     notes
   `;
 
+  private readonly readSelectFields = `
+    a.id,
+    a.patient_id AS "patientId",
+    a.slot_id AS "slotId",
+    a.status,
+    a.notes,
+    json_build_object('id', p.id, 'fullName', p.full_name) AS patient,
+    json_build_object('id', s.id, 'date', s.slot_date, 'startTime', s.start_time, 'endTime', s.end_time) AS slot,
+    json_build_object(
+      'id', d.id,
+      'displayName', u.email,
+      'clinicName', cl.name,
+      'specialtyName', sp.name
+    ) AS doctor
+  `;
+
   async create(data: {
     patientId: UUID;
     slotId: UUID;
@@ -44,41 +60,64 @@ export class AppointmentRepository extends BaseRepository {
     return result.rows[0];
   }
 
-  async findAll(): Promise<AppointmentRecord[]> {
-    const result = await this.query<AppointmentRecord>(
-      `SELECT ${this.selectFields}
-       FROM appointments
-       ORDER BY id`,
+  async findAll(): Promise<AppointmentReadModel[]> {
+    const result = await this.query<AppointmentReadModel>(
+      `SELECT ${this.readSelectFields}
+       FROM appointments a
+       JOIN patients p          ON a.patient_id = p.id
+       JOIN appointment_slots s ON a.slot_id     = s.id
+       JOIN doctors d           ON s.doctor_id   = d.id
+       JOIN users u             ON d.user_id     = u.id
+       JOIN clinics cl          ON d.clinic_id   = cl.id
+       JOIN specialties sp      ON d.specialty_id = sp.id
+       ORDER BY a.id`,
     );
     return result.rows;
   }
 
-  async findById(id: UUID): Promise<AppointmentRecord | null> {
-    const result = await this.query<AppointmentRecord>(
-      `SELECT ${this.selectFields}
-       FROM appointments
-       WHERE id = $1`,
+  async findById(id: UUID): Promise<AppointmentReadModel | null> {
+    const result = await this.query<AppointmentReadModel>(
+      `SELECT ${this.readSelectFields}
+       FROM appointments a
+       JOIN patients p          ON a.patient_id = p.id
+       JOIN appointment_slots s ON a.slot_id     = s.id
+       JOIN doctors d           ON s.doctor_id   = d.id
+       JOIN users u             ON d.user_id     = u.id
+       JOIN clinics cl          ON d.clinic_id   = cl.id
+       JOIN specialties sp      ON d.specialty_id = sp.id
+       WHERE a.id = $1`,
       [id],
     );
     return result.rows[0] ?? null;
   }
 
-  async findByPatientId(patientId: UUID): Promise<AppointmentRecord[]> {
-    const result = await this.query<AppointmentRecord>(
-      `SELECT ${this.selectFields}
-       FROM appointments
-       WHERE patient_id = $1
-       ORDER BY id`,
+  async findByPatientId(patientId: UUID): Promise<AppointmentReadModel[]> {
+    const result = await this.query<AppointmentReadModel>(
+      `SELECT ${this.readSelectFields}
+       FROM appointments a
+       JOIN patients p          ON a.patient_id = p.id
+       JOIN appointment_slots s ON a.slot_id     = s.id
+       JOIN doctors d           ON s.doctor_id   = d.id
+       JOIN users u             ON d.user_id     = u.id
+       JOIN clinics cl          ON d.clinic_id   = cl.id
+       JOIN specialties sp      ON d.specialty_id = sp.id
+       WHERE a.patient_id = $1
+       ORDER BY a.id`,
       [patientId],
     );
     return result.rows;
   }
 
-  async findByDoctorId(doctorId: UUID): Promise<AppointmentRecord[]> {
-    const result = await this.query<AppointmentRecord>(
-      `SELECT a.id, a.patient_id AS "patientId", a.slot_id AS "slotId", a.status, a.notes
+  async findByDoctorId(doctorId: UUID): Promise<AppointmentReadModel[]> {
+    const result = await this.query<AppointmentReadModel>(
+      `SELECT ${this.readSelectFields}
        FROM appointments a
-       JOIN appointment_slots s ON a.slot_id = s.id
+       JOIN patients p          ON a.patient_id = p.id
+       JOIN appointment_slots s ON a.slot_id     = s.id
+       JOIN doctors d           ON s.doctor_id   = d.id
+       JOIN users u             ON d.user_id     = u.id
+       JOIN clinics cl          ON d.clinic_id   = cl.id
+       JOIN specialties sp      ON d.specialty_id = sp.id
        WHERE s.doctor_id = $1 AND s.deleted_at IS NULL
        ORDER BY a.id`,
       [doctorId],

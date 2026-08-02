@@ -1,10 +1,10 @@
 import api from "@/lib/axios";
 import type { ApiResponse } from "@/types/api";
-import type { ReviewRecord } from "@/types/models/review";
+import type { ReviewRecord, ReviewReadModel } from "@/types/models/review";
 import type { CreateReviewInput } from "@/schemas/review";
 
-export async function getMyReviews(): Promise<ReviewRecord[]> {
-  const response = await api.get<ApiResponse<ReviewRecord[]>>("/reviews/mine");
+export async function getMyReviews(): Promise<ReviewReadModel[]> {
+  const response = await api.get<ApiResponse<ReviewReadModel[]>>("/reviews/mine");
   return response.data.data;
 }
 

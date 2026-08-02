@@ -14,6 +14,7 @@ import { SpecialtySelector } from "@/components/business/SpecialtySelector";
 import { DoctorCard } from "@/components/business/DoctorCard";
 import { AppointmentConfirmation } from "@/components/business/AppointmentConfirmation";
 import { Skeleton } from "@/components/feedback/Skeleton";
+import { toISODateString } from "@/lib/utils";
 import type { AppointmentRecord } from "@/types/models/appointment";
 
 const SlotPicker = dynamic(
@@ -28,7 +29,7 @@ export default function BookAppointmentPage() {
   const [selectedSpecialtyId, setSelectedSpecialtyId] = useState<string | null>(null);
   const [selectedDoctorId, setSelectedDoctorId] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<string>(
-    new Date().toISOString().split("T")[0]
+    toISODateString(new Date())
   );
   const [selectedSlotId, setSelectedSlotId] = useState<string | null>(null);
   const [confirmedAppointment, setConfirmedAppointment] =
@@ -49,8 +50,6 @@ export default function BookAppointmentPage() {
   const bookMutation = useBookAppointment();
 
   // Find selected entities for confirmation details
-  const selectedClinic = clinics.find((c) => c.id === selectedClinicId);
-  const selectedSpecialty = specialties.find((s) => s.id === selectedSpecialtyId);
   const selectedDoctor = doctors.find((d) => d.id === selectedDoctorId);
   const selectedSlot = slots.find((s) => s.id === selectedSlotId);
 
@@ -83,13 +82,13 @@ export default function BookAppointmentPage() {
     return (
       <div className="container mx-auto px-4 py-8">
         <AppointmentConfirmation
-          doctorName="Doctor"
-          specialtyName={selectedSpecialty?.name}
-          clinicName={selectedClinic?.name}
+          doctorName={selectedDoctor?.doctor.displayName ?? ""}
+          specialtyName={selectedDoctor?.doctor.specialtyName}
+          clinicName={selectedDoctor?.doctor.clinicName}
           date={selectedDate}
           startTime={selectedSlot?.startTime ?? ""}
           endTime={selectedSlot?.endTime ?? ""}
-          consultationFee={selectedDoctor?.consultationFee ?? 100}
+          consultationFee={selectedDoctor ? Number(selectedDoctor.consultationFee) : 0}
           onViewAppointments={() => router.push("/appointments")}
         />
       </div>
@@ -148,9 +147,6 @@ export default function BookAppointmentPage() {
                 <DoctorCard
                   key={doctor.id}
                   doctor={doctor}
-                  doctorName={`Dr. Specialist (${doctor.experienceYears}y exp)`}
-                  clinicName={selectedClinic?.name}
-                  specialtyName={selectedSpecialty?.name}
                   isSelected={selectedDoctorId === doctor.id}
                   onSelect={() => setSelectedDoctorId(doctor.id)}
                 />

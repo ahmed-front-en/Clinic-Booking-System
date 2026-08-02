@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { Pencil, Plus, Trash2, UserRound } from "lucide-react";
 import type { Column, DataTableProps } from "@/components/data/DataTable";
@@ -33,7 +33,7 @@ import { useClinicsList } from "@/features/clinics";
 import { useSpecialtiesList } from "@/features/specialties";
 import { useUsersAdmin } from "@/features/users";
 import { formatCurrency } from "@/lib/utils";
-import type { DoctorRecord } from "@/types/models/doctor";
+import type { DoctorReadModel } from "@/types/models/doctor";
 import type { CreateDoctorInput, UpdateDoctorInput } from "@/schemas/doctor";
 
 export default function AdminDoctorsPage() {
@@ -51,48 +51,32 @@ export default function AdminDoctorsPage() {
   const { mutate: updateDoctor, isPending: isUpdating } = useUpdateDoctor();
   const { mutate: deleteDoctor, isPending: isDeleting } = useDeleteDoctor();
 
-  const [editing, setEditing] = useState<DoctorRecord | null>(null);
+  const [editing, setEditing] = useState<DoctorReadModel | null>(null);
   const [creating, setCreating] = useState(false);
-  const [deleting, setDeleting] = useState<DoctorRecord | null>(null);
+  const [deleting, setDeleting] = useState<DoctorReadModel | null>(null);
 
   const users = useMemo(() => doctorUsers?.data ?? [], [doctorUsers]);
 
-  const clinicName = useCallback(
-    (id: string) =>
-      clinics?.find((clinic) => clinic.id === id)?.name ?? id.slice(0, 8),
-    [clinics],
-  );
-  const specialtyName = useCallback(
-    (id: string) =>
-      specialties?.find((specialty) => specialty.id === id)?.name ?? id.slice(0, 8),
-    [specialties],
-  );
-  const doctorEmail = useCallback(
-    (id: string) =>
-      users.find((user) => user.id === id)?.email ?? id.slice(0, 8),
-    [users],
-  );
-
-  const columns: Column<DoctorRecord>[] = useMemo(() => [
+  const columns: Column<DoctorReadModel>[] = useMemo(() => [
     {
       key: "userId",
       header: "User",
-      render: (doctor) => doctorEmail(doctor.userId),
+      render: (doctor) => doctor.doctor.displayName,
     },
     {
       key: "clinicId",
       header: "Clinic",
-      render: (doctor) => clinicName(doctor.clinicId),
+      render: (doctor) => doctor.doctor.clinicName,
     },
     {
       key: "specialtyId",
       header: "Specialty",
-      render: (doctor) => specialtyName(doctor.specialtyId),
+      render: (doctor) => doctor.doctor.specialtyName,
     },
     {
       key: "consultationFee",
       header: "Fee",
-      render: (doctor) => formatCurrency(doctor.consultationFee),
+      render: (doctor) => formatCurrency(Number(doctor.consultationFee)),
     },
     {
       key: "experienceYears",
@@ -109,7 +93,8 @@ export default function AdminDoctorsPage() {
             variant="ghost"
             size="xs"
             onClick={() => setEditing(doctor)}
-            aria-label={`Edit doctor ${doctorEmail(doctor.userId)}`}
+            aria-label={`Edit doctor ${doctor.doctor.displayName}`}
+            title={`Edit doctor ${doctor.doctor.displayName}`}
           >
             <Pencil className="size-4" />
           </Button>
@@ -117,14 +102,15 @@ export default function AdminDoctorsPage() {
             variant="ghost"
             size="xs"
             onClick={() => setDeleting(doctor)}
-            aria-label={`Delete doctor ${doctorEmail(doctor.userId)}`}
+            aria-label={`Delete doctor ${doctor.doctor.displayName}`}
+            title={`Delete doctor ${doctor.doctor.displayName}`}
           >
             <Trash2 className="size-4" />
           </Button>
         </div>
       ),
     },
-  ], [clinicName, specialtyName, doctorEmail]);
+  ], []);
 
   if (isError) {
     return <ErrorBanner message="Could not load doctors." onRetry={refetch} />;
@@ -206,7 +192,7 @@ export default function AdminDoctorsPage() {
             deleteDoctor(deleting.id, { onSuccess: () => setDeleting(null) })
           }
           title="Delete doctor"
-          message={`Delete doctor ${doctorEmail(deleting.userId)}? Schedules and slots for this doctor will also be deleted.`}
+          message={`Delete doctor ${deleting.doctor.displayName}? Schedules and slots for this doctor will also be deleted.`}
           confirmLabel="Delete"
           isLoading={isDeleting}
         />

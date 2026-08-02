@@ -3,6 +3,7 @@
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { useRouter } from "next/navigation";
 import { useEffect, type ReactNode } from "react";
+import { getHomePathForRole } from "@/lib/routing";
 
 export function AdminGuard({ children }: { children: ReactNode }) {
   const { user, isAuthenticated, isLoading } = useAuth();
@@ -15,7 +16,7 @@ export function AdminGuard({ children }: { children: ReactNode }) {
       return;
     }
     if (user?.role !== "admin") {
-      router.replace("/");
+      router.replace(getHomePathForRole(user?.role ?? "patient"));
     }
   }, [isAuthenticated, isLoading, user, router]);
 

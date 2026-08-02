@@ -1,4 +1,5 @@
 import type { SlotStatus } from "../enums";
+import type { DoctorSummary } from "./read-models";
 
 export interface AppointmentSlotRecord {
   id: string;
@@ -11,6 +12,10 @@ export interface AppointmentSlotRecord {
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
+}
+
+export interface AppointmentSlotReadModel extends AppointmentSlotRecord {
+  doctor: DoctorSummary;
 }
 
 export interface AppointmentSlotCreateRequest {

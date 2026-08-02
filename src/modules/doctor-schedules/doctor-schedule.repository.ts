@@ -1,6 +1,6 @@
 import { BaseRepository } from "../../shared/repositories/base.repository.js";
 import { pool } from "../../services/database.service.js";
-import type { DoctorScheduleRecord } from "./doctor-schedule.interfaces.js";
+import type { DoctorScheduleRecord, DoctorScheduleReadModel } from "./doctor-schedule.interfaces.js";
 import type { UUID } from "../../shared/types/common.types.js";
 
 interface IdRow {
@@ -15,6 +15,21 @@ export class DoctorScheduleRepository extends BaseRepository {
     start_time AS "startTime",
     end_time AS "endTime",
     slot_duration AS "slotDuration"
+  `;
+
+  private readonly readSelectFields = `
+    ds.id,
+    ds.doctor_id AS "doctorId",
+    ds.weekday,
+    ds.start_time AS "startTime",
+    ds.end_time AS "endTime",
+    ds.slot_duration AS "slotDuration",
+    json_build_object(
+      'id', d.id,
+      'displayName', u.email,
+      'clinicName', cl.name,
+      'specialtyName', sp.name
+    ) AS doctor
   `;
 
   async create(data: {
@@ -33,31 +48,43 @@ export class DoctorScheduleRepository extends BaseRepository {
     return result.rows[0];
   }
 
-  async findAll(): Promise<DoctorScheduleRecord[]> {
-    const result = await this.query<DoctorScheduleRecord>(
-      `SELECT ${this.selectFields}
-       FROM doctor_schedules
-       ORDER BY weekday, start_time`,
+  async findAll(): Promise<DoctorScheduleReadModel[]> {
+    const result = await this.query<DoctorScheduleReadModel>(
+      `SELECT ${this.readSelectFields}
+       FROM doctor_schedules ds
+       JOIN doctors d      ON ds.doctor_id  = d.id
+       JOIN users u        ON d.user_id     = u.id
+       JOIN clinics cl     ON d.clinic_id   = cl.id
+       JOIN specialties sp ON d.specialty_id = sp.id
+       ORDER BY ds.weekday, ds.start_time`,
     );
     return result.rows;
   }
 
-  async findById(id: UUID): Promise<DoctorScheduleRecord | null> {
-    const result = await this.query<DoctorScheduleRecord>(
-      `SELECT ${this.selectFields}
-       FROM doctor_schedules
-       WHERE id = $1`,
+  async findById(id: UUID): Promise<DoctorScheduleReadModel | null> {
+    const result = await this.query<DoctorScheduleReadModel>(
+      `SELECT ${this.readSelectFields}
+       FROM doctor_schedules ds
+       JOIN doctors d      ON ds.doctor_id  = d.id
+       JOIN users u        ON d.user_id     = u.id
+       JOIN clinics cl     ON d.clinic_id   = cl.id
+       JOIN specialties sp ON d.specialty_id = sp.id
+       WHERE ds.id = $1`,
       [id],
     );
     return result.rows[0] ?? null;
   }
 
-  async findByDoctorId(doctorId: UUID): Promise<DoctorScheduleRecord[]> {
-    const result = await this.query<DoctorScheduleRecord>(
-      `SELECT ${this.selectFields}
-       FROM doctor_schedules
-       WHERE doctor_id = $1
-       ORDER BY weekday, start_time`,
+  async findByDoctorId(doctorId: UUID): Promise<DoctorScheduleReadModel[]> {
+    const result = await this.query<DoctorScheduleReadModel>(
+      `SELECT ${this.readSelectFields}
+       FROM doctor_schedules ds
+       JOIN doctors d      ON ds.doctor_id  = d.id
+       JOIN users u        ON d.user_id     = u.id
+       JOIN clinics cl     ON d.clinic_id   = cl.id
+       JOIN specialties sp ON d.specialty_id = sp.id
+       WHERE ds.doctor_id = $1
+       ORDER BY ds.weekday, ds.start_time`,
       [doctorId],
     );
     return result.rows;

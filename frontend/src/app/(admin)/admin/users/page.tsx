@@ -11,6 +11,7 @@ import { ErrorBanner } from "@/components/feedback/ErrorBanner";
 import { EmptyState } from "@/components/feedback/EmptyState";
 import { Skeleton } from "@/components/feedback/Skeleton";
 import { Button } from "@/components/ui/button";
+import { formatDate } from "@/lib/utils";
 
 const DataTable = dynamic(
   () => import("@/components/data/DataTable").then((mod) => mod.DataTable),
@@ -123,7 +124,7 @@ export default function AdminUsersPage() {
     {
       key: "createdAt",
       header: "Created",
-      render: (user) => new Date(user.createdAt).toLocaleDateString(),
+      render: (user) => formatDate(user.createdAt),
     },
     {
       key: "actions",
@@ -136,6 +137,7 @@ export default function AdminUsersPage() {
             size="xs"
             onClick={() => setEditing(user)}
             aria-label={`Edit ${user.email}`}
+            title={`Edit ${user.email}`}
           >
             <Pencil className="size-4" />
           </Button>
@@ -144,6 +146,7 @@ export default function AdminUsersPage() {
             size="xs"
             onClick={() => setDeleting(user)}
             aria-label={`Delete ${user.email}`}
+            title={`Delete ${user.email}`}
           >
             <Trash2 className="size-4" />
           </Button>
