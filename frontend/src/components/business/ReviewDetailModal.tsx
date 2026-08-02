@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { StarRating } from "@/components/business/StarRating";
 import { updateReviewSchema, type UpdateReviewInput } from "@/schemas/review";
+import { formatDateTime } from "@/lib/utils";
 import type { ReviewReadModel } from "@/types/models/review";
 import { useApiError } from "@/hooks/useApiError";
 
@@ -74,7 +75,7 @@ export function ReviewDetailModal({
             <span className="font-medium text-foreground">
               {review.doctor.displayName}
             </span>{" "}
-            · {review.slot.date} at {review.slot.startTime}
+            · {formatDateTime(review.slot.date, review.slot.startTime)}
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-4" noValidate>

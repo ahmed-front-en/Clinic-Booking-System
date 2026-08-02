@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/business/StatusBadge";
 import { ConfirmDialog } from "@/components/business/ConfirmDialog";
 import { useState, memo } from "react";
+import { formatDateTime } from "@/lib/utils";
 import type { AppointmentReadModel } from "@/types/models/appointment";
 
 interface AppointmentCardProps {
@@ -42,8 +43,9 @@ export const AppointmentCard = memo(function AppointmentCard({
 
       <div className="flex items-center justify-between gap-4 sm:justify-end">
         <div className="text-left sm:text-right">
-          <p className="text-sm font-medium text-foreground">{appointment.slot.date}</p>
-          <p className="text-sm text-muted-foreground">{appointment.slot.startTime}</p>
+          <p className="text-sm font-medium text-foreground">
+            {formatDateTime(appointment.slot.date, appointment.slot.startTime)}
+          </p>
         </div>
         <StatusBadge status={appointment.status} />
         {cancellable && (

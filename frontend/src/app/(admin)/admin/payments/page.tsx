@@ -32,7 +32,7 @@ import {
 } from "@/features/payments";
 import { getPaymentsAdmin } from "@/features/payments/api/payments-admin";
 import { usePrefetchAdminPage } from "@/hooks/usePrefetchAdminPage";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, formatDateTime } from "@/lib/utils";
 import { queryKeys } from "@/lib/query-keys";
 import { PAGINATION_DEFAULTS } from "@/config";
 import type { PaymentReadModel } from "@/types/models/payment";
@@ -66,7 +66,7 @@ export default function AdminPaymentsPage() {
       key: "appointmentId",
       header: "Appointment",
       render: (payment) =>
-        `${payment.doctor.displayName} · ${payment.slot.date}`,
+        `${payment.doctor.displayName} · ${formatDateTime(payment.slot.date, payment.slot.startTime)}`,
     },
     {
       key: "amount",
@@ -102,6 +102,7 @@ export default function AdminPaymentsPage() {
             size="xs"
             onClick={() => setEditing(payment)}
             aria-label={`Edit payment for ${payment.doctor.displayName}`}
+            title={`Edit payment for ${payment.doctor.displayName}`}
           >
             <Pencil className="size-4" />
           </Button>
@@ -110,6 +111,7 @@ export default function AdminPaymentsPage() {
             size="xs"
             onClick={() => setDeleting(payment)}
             aria-label={`Delete payment for ${payment.doctor.displayName}`}
+            title={`Delete payment for ${payment.doctor.displayName}`}
           >
             <Trash2 className="size-4" />
           </Button>

@@ -20,6 +20,7 @@ import {
 import { StatusBadge } from "@/components/business/StatusBadge";
 import { updateAppointmentSchema, type UpdateAppointmentInput } from "@/schemas/appointment";
 import { APPOINTMENT_STATUSES } from "@/types/enums";
+import { formatDateTime } from "@/lib/utils";
 import type { AppointmentReadModel } from "@/types/models/appointment";
 import { useApiError } from "@/hooks/useApiError";
 
@@ -83,7 +84,7 @@ export function AppointmentDetailModal({
                 Patient: <span className="font-medium text-foreground">{appointment.patient.fullName}</span>
               </span>
               <span className="text-muted-foreground">
-                Slot: <span className="font-medium text-foreground">{appointment.slot.date} at {appointment.slot.startTime}</span>
+                Slot: <span className="font-medium text-foreground">{formatDateTime(appointment.slot.date, appointment.slot.startTime)}</span>
               </span>
             </div>
             <StatusBadge status={appointment.status} />

@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { CheckCircle2, Calendar, Clock, Building2, User, DollarSign } from "lucide-react";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, formatDate, formatTime } from "@/lib/utils";
 
 interface AppointmentConfirmationProps {
   doctorName: string;
@@ -66,12 +66,12 @@ export function AppointmentConfirmation({
             )}
             <div className="flex items-center gap-3 text-muted-foreground">
               <Calendar className="size-4 text-primary" />
-              <span>{date}</span>
+              <span>{formatDate(date)}</span>
             </div>
             <div className="flex items-center gap-3 text-muted-foreground">
               <Clock className="size-4 text-primary" />
               <span>
-                {startTime} - {endTime}
+                {formatTime(startTime)} - {formatTime(endTime)}
               </span>
             </div>
             <div className="flex items-center justify-between pt-2 border-t border-border font-semibold text-on-surface">

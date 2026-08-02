@@ -24,6 +24,7 @@ import {
   type UpdateAppointmentSlotInput,
 } from "@/schemas/slot";
 import { SLOT_STATUSES } from "@/types/enums";
+import { formatTime } from "@/lib/utils";
 import type { DoctorReadModel } from "@/types/models/doctor";
 import type { DoctorScheduleRecord } from "@/types/models/schedule";
 import type { AppointmentSlotRecord } from "@/types/models/slot";
@@ -156,7 +157,7 @@ export function SlotFormModal({
               <SelectContent>
                 {doctorSchedules.map((schedule) => (
                   <SelectItem key={schedule.id} value={schedule.id}>
-                    {schedule.startTime} - {schedule.endTime} ({schedule.slotDuration} min)
+                    {formatTime(schedule.startTime)} - {formatTime(schedule.endTime)} ({schedule.slotDuration} min)
                   </SelectItem>
                 ))}
               </SelectContent>

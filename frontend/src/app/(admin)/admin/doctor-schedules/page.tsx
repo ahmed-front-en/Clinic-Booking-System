@@ -111,6 +111,7 @@ export default function AdminDoctorSchedulesPage() {
             size="xs"
             onClick={() => setEditing(schedule)}
             aria-label={`Edit schedule for ${schedule.doctor.displayName}`}
+            title={`Edit schedule for ${schedule.doctor.displayName}`}
           >
             <Pencil className="size-4" />
           </Button>
@@ -119,6 +120,7 @@ export default function AdminDoctorSchedulesPage() {
             size="xs"
             onClick={() => setDeleting(schedule)}
             aria-label={`Delete schedule for ${schedule.doctor.displayName}`}
+            title={`Delete schedule for ${schedule.doctor.displayName}`}
           >
             <Trash2 className="size-4" />
           </Button>

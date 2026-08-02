@@ -14,6 +14,7 @@ import { SpecialtySelector } from "@/components/business/SpecialtySelector";
 import { DoctorCard } from "@/components/business/DoctorCard";
 import { AppointmentConfirmation } from "@/components/business/AppointmentConfirmation";
 import { Skeleton } from "@/components/feedback/Skeleton";
+import { toISODateString } from "@/lib/utils";
 import type { AppointmentRecord } from "@/types/models/appointment";
 
 const SlotPicker = dynamic(
@@ -28,7 +29,7 @@ export default function BookAppointmentPage() {
   const [selectedSpecialtyId, setSelectedSpecialtyId] = useState<string | null>(null);
   const [selectedDoctorId, setSelectedDoctorId] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<string>(
-    new Date().toISOString().split("T")[0]
+    toISODateString(new Date())
   );
   const [selectedSlotId, setSelectedSlotId] = useState<string | null>(null);
   const [confirmedAppointment, setConfirmedAppointment] =

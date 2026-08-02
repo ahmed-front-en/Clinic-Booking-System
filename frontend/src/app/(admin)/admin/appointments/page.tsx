@@ -10,6 +10,7 @@ import { EmptyState } from "@/components/feedback/EmptyState";
 import { Skeleton } from "@/components/feedback/Skeleton";
 import { StatusBadge } from "@/components/business/StatusBadge";
 import { Button } from "@/components/ui/button";
+import { formatDateTime } from "@/lib/utils";
 
 const DataTable = dynamic(
   () => import("@/components/data/DataTable").then((mod) => mod.DataTable),
@@ -70,7 +71,7 @@ export default function AdminAppointmentsPage() {
       key: "slotId",
       header: "Slot",
       render: (appointment) =>
-        `${appointment.slot.date} ${appointment.slot.startTime}`,
+        formatDateTime(appointment.slot.date, appointment.slot.startTime),
     },
     {
       key: "status",
@@ -94,6 +95,7 @@ export default function AdminAppointmentsPage() {
             size="xs"
             onClick={() => setEditing(appointment)}
             aria-label={`Edit appointment for ${appointment.patient.fullName}`}
+            title={`Edit appointment for ${appointment.patient.fullName}`}
           >
             <Pencil className="size-4" />
           </Button>
@@ -102,6 +104,7 @@ export default function AdminAppointmentsPage() {
             size="xs"
             onClick={() => setDeleting(appointment)}
             aria-label={`Delete appointment for ${appointment.patient.fullName}`}
+            title={`Delete appointment for ${appointment.patient.fullName}`}
           >
             <Trash2 className="size-4" />
           </Button>

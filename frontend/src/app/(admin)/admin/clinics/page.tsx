@@ -70,6 +70,7 @@ export default function AdminClinicsPage() {
             size="xs"
             onClick={() => setEditing(clinic)}
             aria-label={`Edit ${clinic.name}`}
+            title={`Edit ${clinic.name}`}
           >
             <Pencil className="size-4" />
           </Button>
@@ -78,6 +79,7 @@ export default function AdminClinicsPage() {
             size="xs"
             onClick={() => setDeleting(clinic)}
             aria-label={`Delete ${clinic.name}`}
+            title={`Delete ${clinic.name}`}
           >
             <Trash2 className="size-4" />
           </Button>

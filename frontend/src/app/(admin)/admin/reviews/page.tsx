@@ -10,6 +10,7 @@ import { EmptyState } from "@/components/feedback/EmptyState";
 import { Skeleton } from "@/components/feedback/Skeleton";
 import { StarRating } from "@/components/business/StarRating";
 import { Button } from "@/components/ui/button";
+import { formatDateTime } from "@/lib/utils";
 
 const DataTable = dynamic(
   () => import("@/components/data/DataTable").then((mod) => mod.DataTable),
@@ -68,7 +69,7 @@ export default function AdminReviewsPage() {
       key: "appointmentId",
       header: "Appointment",
       render: (review) =>
-        `${review.doctor.displayName} · ${review.slot.date}`,
+        `${review.doctor.displayName} · ${formatDateTime(review.slot.date, review.slot.startTime)}`,
     },
     {
       key: "rating",
@@ -96,6 +97,7 @@ export default function AdminReviewsPage() {
             size="xs"
             onClick={() => setEditing(review)}
             aria-label={`Edit review for ${review.doctor.displayName}`}
+            title={`Edit review for ${review.doctor.displayName}`}
           >
             <Pencil className="size-4" />
           </Button>
@@ -104,6 +106,7 @@ export default function AdminReviewsPage() {
             size="xs"
             onClick={() => setDeleting(review)}
             aria-label={`Delete review for ${review.doctor.displayName}`}
+            title={`Delete review for ${review.doctor.displayName}`}
           >
             <Trash2 className="size-4" />
           </Button>

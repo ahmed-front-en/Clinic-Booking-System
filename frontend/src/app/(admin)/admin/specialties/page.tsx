@@ -60,6 +60,7 @@ export default function AdminSpecialtiesPage() {
             size="xs"
             onClick={() => setEditing(specialty)}
             aria-label={`Edit ${specialty.name}`}
+            title={`Edit ${specialty.name}`}
           >
             <Pencil className="size-4" />
           </Button>
@@ -68,6 +69,7 @@ export default function AdminSpecialtiesPage() {
             size="xs"
             onClick={() => setDeleting(specialty)}
             aria-label={`Delete ${specialty.name}`}
+            title={`Delete ${specialty.name}`}
           >
             <Trash2 className="size-4" />
           </Button>

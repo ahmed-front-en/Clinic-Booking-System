@@ -4,7 +4,7 @@ import { memo } from "react";
 import { CreditCard, Receipt } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/business/StatusBadge";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, formatDateTime } from "@/lib/utils";
 import type { PaymentReadModel } from "@/types/models/payment";
 
 interface PaymentCardProps {
@@ -32,6 +32,9 @@ export const PaymentCard = memo(function PaymentCard({
           </h3>
           <p className="text-sm text-muted-foreground">
             {payment.method.replace(/_/g, " ")} · {payment.doctor.displayName}
+          </p>
+          <p className="text-xs text-muted-foreground">
+            {formatDateTime(payment.slot.date, payment.slot.startTime)}
           </p>
         </div>
       </div>

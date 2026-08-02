@@ -35,7 +35,7 @@ import { getSlotsAdmin } from "@/features/slots/api/slots-admin";
 import { useDoctorsList } from "@/features/doctors";
 import { useSchedulesAdmin } from "@/features/schedules";
 import { usePrefetchAdminPage } from "@/hooks/usePrefetchAdminPage";
-import { formatTime } from "@/lib/utils";
+import { formatDate, formatTime } from "@/lib/utils";
 import { queryKeys } from "@/lib/query-keys";
 import { PAGINATION_DEFAULTS } from "@/config";
 import type { AppointmentSlotReadModel } from "@/types/models/slot";
@@ -75,7 +75,12 @@ export default function AdminAppointmentSlotsPage() {
 
   const columns: Column<AppointmentSlotReadModel>[] = useMemo(() => [
     { key: "doctorId", header: "Doctor", render: (slot) => slot.doctor.displayName },
-    { key: "slotDate", header: "Date", sortable: true },
+    {
+      key: "slotDate",
+      header: "Date",
+      sortable: true,
+      render: (slot) => formatDate(slot.slotDate),
+    },
     {
       key: "startTime",
       header: "Time",
@@ -96,7 +101,8 @@ export default function AdminAppointmentSlotsPage() {
             variant="ghost"
             size="xs"
             onClick={() => setEditing(slot)}
-            aria-label={`Edit slot for ${slot.doctor.displayName} on ${slot.slotDate}`}
+            aria-label={`Edit slot for ${slot.doctor.displayName} on ${formatDate(slot.slotDate)}`}
+            title={`Edit slot for ${slot.doctor.displayName} on ${formatDate(slot.slotDate)}`}
           >
             <Pencil className="size-4" />
           </Button>
@@ -104,7 +110,8 @@ export default function AdminAppointmentSlotsPage() {
             variant="ghost"
             size="xs"
             onClick={() => setDeleting(slot)}
-            aria-label={`Delete slot for ${slot.doctor.displayName} on ${slot.slotDate}`}
+            aria-label={`Delete slot for ${slot.doctor.displayName} on ${formatDate(slot.slotDate)}`}
+            title={`Delete slot for ${slot.doctor.displayName} on ${formatDate(slot.slotDate)}`}
           >
             <Trash2 className="size-4" />
           </Button>
@@ -196,7 +203,7 @@ export default function AdminAppointmentSlotsPage() {
             deleteSlot(deleting.id, { onSuccess: () => setDeleting(null) })
           }
           title="Delete slot"
-          message={`Delete the appointment slot on ${deleting.slotDate}? The slot will be soft-deleted.`}
+          message={`Delete the appointment slot on ${formatDate(deleting.slotDate)}? The slot will be soft-deleted.`}
           confirmLabel="Delete"
           isLoading={isDeleting}
         />

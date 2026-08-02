@@ -94,6 +94,7 @@ export default function AdminDoctorsPage() {
             size="xs"
             onClick={() => setEditing(doctor)}
             aria-label={`Edit doctor ${doctor.doctor.displayName}`}
+            title={`Edit doctor ${doctor.doctor.displayName}`}
           >
             <Pencil className="size-4" />
           </Button>
@@ -102,6 +103,7 @@ export default function AdminDoctorsPage() {
             size="xs"
             onClick={() => setDeleting(doctor)}
             aria-label={`Delete doctor ${doctor.doctor.displayName}`}
+            title={`Delete doctor ${doctor.doctor.displayName}`}
           >
             <Trash2 className="size-4" />
           </Button>

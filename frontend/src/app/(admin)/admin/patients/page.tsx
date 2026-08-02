@@ -9,6 +9,7 @@ import { ErrorBanner } from "@/components/feedback/ErrorBanner";
 import { EmptyState } from "@/components/feedback/EmptyState";
 import { Skeleton } from "@/components/feedback/Skeleton";
 import { Button } from "@/components/ui/button";
+import { formatDate } from "@/lib/utils";
 
 const DataTable = dynamic(
   () => import("@/components/data/DataTable").then((mod) => mod.DataTable),
@@ -83,7 +84,12 @@ export default function AdminPatientsPage() {
     {
       key: "birthDate",
       header: "Date of birth",
-      render: (patient) => patient.birthDate ?? <span className="text-muted-foreground">—</span>,
+      render: (patient) =>
+        patient.birthDate ? (
+          formatDate(patient.birthDate)
+        ) : (
+          <span className="text-muted-foreground">—</span>
+        ),
     },
     {
       key: "actions",
@@ -96,6 +102,7 @@ export default function AdminPatientsPage() {
             size="xs"
             onClick={() => setEditing(patient)}
             aria-label={`Edit ${patient.fullName}`}
+            title={`Edit ${patient.fullName}`}
           >
             <Pencil className="size-4" />
           </Button>
@@ -104,6 +111,7 @@ export default function AdminPatientsPage() {
             size="xs"
             onClick={() => setDeleting(patient)}
             aria-label={`Delete ${patient.fullName}`}
+            title={`Delete ${patient.fullName}`}
           >
             <Trash2 className="size-4" />
           </Button>

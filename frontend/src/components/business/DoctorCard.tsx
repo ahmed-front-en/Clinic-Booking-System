@@ -5,7 +5,7 @@ import type { DoctorReadModel } from "@/types/models/doctor";
 import { Card, CardContent } from "@/components/ui/card";
 import { StarRating } from "@/components/business/StarRating";
 import { User, Award, DollarSign, Building2, Stethoscope } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, formatCurrency } from "@/lib/utils";
 
 interface DoctorCardProps {
   doctor: DoctorReadModel;
@@ -68,7 +68,7 @@ export const DoctorCard = memo(function DoctorCard({
                 )}
                 <div className="flex items-center font-semibold text-on-surface">
                   <DollarSign className="size-4 text-primary" />
-                  <span>Fee: ${doctor.consultationFee}</span>
+                  <span>{formatCurrency(Number(doctor.consultationFee))}</span>
                 </div>
               </div>
             </div>
