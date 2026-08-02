@@ -17,6 +17,7 @@ export class AuthRepository extends BaseRepository {
   private readonly selectFields = `
 id,
 email,
+full_name AS "fullName",
 password_hash AS "passwordHash",
 role,
 is_verified AS "isVerified",
@@ -27,10 +28,10 @@ deleted_at AS "deletedAt"
 
   async create(data: CreateUserInput): Promise<UserRecord> {
     const result = await this.query<UserRecord>(
-      `INSERT INTO users (email, password_hash, role, is_verified)
-       VALUES ($1, $2, $3, $4)
+      `INSERT INTO users (email, password_hash, role, is_verified, full_name)
+       VALUES ($1, $2, $3, $4, $5)
        RETURNING ${this.selectFields}`,
-      [data.email, data.passwordHash, data.role, data.isVerified ?? false],
+      [data.email, data.passwordHash, data.role, data.isVerified ?? false, data.fullName ?? null],
     );
     return result.rows[0];
   }

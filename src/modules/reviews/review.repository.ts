@@ -37,7 +37,7 @@ export class ReviewRepository extends BaseRepository {
     json_build_object('id', s.id, 'date', s.slot_date, 'startTime', s.start_time, 'endTime', s.end_time) AS slot,
     json_build_object(
       'id', d.id,
-      'displayName', u.email,
+      'displayName', COALESCE(u.full_name, u.email),
       'clinicName', cl.name,
       'specialtyName', sp.name
     ) AS doctor
