@@ -2,7 +2,7 @@ import { appointmentRepository } from "./appointment.repository.js";
 import { AppError } from "../../shared/errors/app-error.js";
 import { HttpStatus } from "../../shared/constants/http-status.js";
 import type { CreateAppointmentDto, UpdateAppointmentDto } from "./appointment.types.js";
-import type { AppointmentRecord } from "./appointment.interfaces.js";
+import type { AppointmentRecord, AppointmentReadModel } from "./appointment.interfaces.js";
 import type { UUID } from "../../shared/types/common.types.js";
 import type { UserRole } from "../../shared/types/user.types.js";
 
@@ -15,7 +15,7 @@ export class AppointmentService {
     return this.create({ ...dto, patientId: patient.id });
   }
 
-  async findMyAppointments(userId: UUID, role: UserRole): Promise<AppointmentRecord[]> {
+  async findMyAppointments(userId: UUID, role: UserRole): Promise<AppointmentReadModel[]> {
     if (role === "patient") {
       const patient = await appointmentRepository.findPatientByUserId(userId);
       if (!patient) return [];
@@ -102,11 +102,11 @@ export class AppointmentService {
     });
   }
 
-  async findAll(): Promise<AppointmentRecord[]> {
+  async findAll(): Promise<AppointmentReadModel[]> {
     return appointmentRepository.findAll();
   }
 
-  async findById(id: UUID): Promise<AppointmentRecord> {
+  async findById(id: UUID): Promise<AppointmentReadModel> {
     const appointment = await appointmentRepository.findById(id);
     if (!appointment) {
       throw AppError.notFound("Appointment not found");
@@ -114,7 +114,7 @@ export class AppointmentService {
     return appointment;
   }
 
-  async findByPatientId(patientId: UUID): Promise<AppointmentRecord[]> {
+  async findByPatientId(patientId: UUID): Promise<AppointmentReadModel[]> {
     const patient = await appointmentRepository.findPatientById(patientId);
     if (!patient) {
       throw AppError.notFound("Patient not found");
@@ -122,7 +122,7 @@ export class AppointmentService {
     return appointmentRepository.findByPatientId(patientId);
   }
 
-  async findByDoctorId(doctorId: UUID): Promise<AppointmentRecord[]> {
+  async findByDoctorId(doctorId: UUID): Promise<AppointmentReadModel[]> {
     return appointmentRepository.findByDoctorId(doctorId);
   }
 

@@ -2,7 +2,7 @@ import { paymentRepository } from "./payment.repository.js";
 import { AppError } from "../../shared/errors/app-error.js";
 import { HttpStatus } from "../../shared/constants/http-status.js";
 import type { CreatePaymentDto, UpdatePaymentDto } from "./payment.types.js";
-import type { PaymentRecord } from "./payment.interfaces.js";
+import type { PaymentRecord, PaymentReadModel } from "./payment.interfaces.js";
 import type { UUID } from "../../shared/types/common.types.js";
 
 export class PaymentService {
@@ -29,7 +29,7 @@ export class PaymentService {
     return this.create(dto);
   }
 
-  async findMyPayments(userId: UUID): Promise<PaymentRecord[]> {
+  async findMyPayments(userId: UUID): Promise<PaymentReadModel[]> {
     const patient = await paymentRepository.findPatientByUserId(userId);
     if (!patient) return [];
 
@@ -56,11 +56,11 @@ export class PaymentService {
     });
   }
 
-  async findAll(): Promise<PaymentRecord[]> {
+  async findAll(): Promise<PaymentReadModel[]> {
     return paymentRepository.findAll();
   }
 
-  async findById(id: UUID): Promise<PaymentRecord> {
+  async findById(id: UUID): Promise<PaymentReadModel> {
     const payment = await paymentRepository.findById(id);
     if (!payment) {
       throw AppError.notFound("Payment not found");
@@ -68,7 +68,7 @@ export class PaymentService {
     return payment;
   }
 
-  async findByAppointmentId(appointmentId: UUID): Promise<PaymentRecord> {
+  async findByAppointmentId(appointmentId: UUID): Promise<PaymentReadModel> {
     const appointment = await paymentRepository.findAppointmentById(appointmentId);
     if (!appointment) {
       throw AppError.notFound("Appointment not found");

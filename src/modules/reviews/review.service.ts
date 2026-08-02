@@ -2,7 +2,7 @@ import { reviewRepository } from "./review.repository.js";
 import { AppError } from "../../shared/errors/app-error.js";
 import { HttpStatus } from "../../shared/constants/http-status.js";
 import type { CreateReviewDto, UpdateReviewDto } from "./review.types.js";
-import type { ReviewRecord } from "./review.interfaces.js";
+import type { ReviewRecord, ReviewReadModel } from "./review.interfaces.js";
 import type { UUID } from "../../shared/types/common.types.js";
 import type { UserRole } from "../../shared/types/user.types.js";
 
@@ -27,7 +27,7 @@ export class ReviewService {
     return this.create(dto);
   }
 
-  async findMyReviews(userId: UUID, role: UserRole): Promise<ReviewRecord[]> {
+  async findMyReviews(userId: UUID, role: UserRole): Promise<ReviewReadModel[]> {
     if (role === "patient") {
       const patient = await reviewRepository.findPatientByUserId(userId);
       if (!patient) return [];
@@ -59,11 +59,11 @@ export class ReviewService {
     });
   }
 
-  async findAll(): Promise<ReviewRecord[]> {
+  async findAll(): Promise<ReviewReadModel[]> {
     return reviewRepository.findAll();
   }
 
-  async findById(id: UUID): Promise<ReviewRecord> {
+  async findById(id: UUID): Promise<ReviewReadModel> {
     const review = await reviewRepository.findById(id);
     if (!review) {
       throw AppError.notFound("Review not found");
@@ -71,7 +71,7 @@ export class ReviewService {
     return review;
   }
 
-  async findByAppointmentId(appointmentId: UUID): Promise<ReviewRecord> {
+  async findByAppointmentId(appointmentId: UUID): Promise<ReviewReadModel> {
     const appointment = await reviewRepository.findAppointmentById(appointmentId);
     if (!appointment) {
       throw AppError.notFound("Appointment not found");

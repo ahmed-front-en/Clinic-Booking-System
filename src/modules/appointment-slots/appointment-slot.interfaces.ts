@@ -1,4 +1,5 @@
 import type { UUID } from "../../shared/types/common.types.js";
+import type { DoctorSummary } from "../../shared/types/read-models.js";
 
 export interface AppointmentSlotRecord {
   id: UUID;
@@ -11,4 +12,8 @@ export interface AppointmentSlotRecord {
   createdAt: Date;
   updatedAt: Date;
   deletedAt: Date | null;
+}
+
+export interface AppointmentSlotReadModel extends AppointmentSlotRecord {
+  doctor: DoctorSummary;
 }

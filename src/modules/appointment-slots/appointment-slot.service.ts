@@ -2,7 +2,7 @@ import { appointmentSlotRepository } from "./appointment-slot.repository.js";
 import { AppError } from "../../shared/errors/app-error.js";
 import { HttpStatus } from "../../shared/constants/http-status.js";
 import type { CreateAppointmentSlotDto, UpdateAppointmentSlotDto, AppointmentSlotQueryParams } from "./appointment-slot.types.js";
-import type { AppointmentSlotRecord } from "./appointment-slot.interfaces.js";
+import type { AppointmentSlotRecord, AppointmentSlotReadModel } from "./appointment-slot.interfaces.js";
 import type { UUID } from "../../shared/types/common.types.js";
 
 export class AppointmentSlotService {
@@ -46,11 +46,11 @@ export class AppointmentSlotService {
     });
   }
 
-  async findAll(): Promise<AppointmentSlotRecord[]> {
+  async findAll(): Promise<AppointmentSlotReadModel[]> {
     return appointmentSlotRepository.findAll();
   }
 
-  async findById(id: UUID): Promise<AppointmentSlotRecord> {
+  async findById(id: UUID): Promise<AppointmentSlotReadModel> {
     const slot = await appointmentSlotRepository.findById(id);
     if (!slot) {
       throw AppError.notFound("Appointment slot not found");
@@ -58,7 +58,7 @@ export class AppointmentSlotService {
     return slot;
   }
 
-  async findByDoctorId(doctorId: UUID): Promise<AppointmentSlotRecord[]> {
+  async findByDoctorId(doctorId: UUID): Promise<AppointmentSlotReadModel[]> {
     const doctor = await appointmentSlotRepository.findDoctorById(doctorId);
     if (!doctor) {
       throw AppError.notFound("Doctor not found");
@@ -66,11 +66,11 @@ export class AppointmentSlotService {
     return appointmentSlotRepository.findByDoctorId(doctorId);
   }
 
-  async findByDate(slotDate: string): Promise<AppointmentSlotRecord[]> {
+  async findByDate(slotDate: string): Promise<AppointmentSlotReadModel[]> {
     return appointmentSlotRepository.findByDate(slotDate);
   }
 
-  async findAvailable(query: AppointmentSlotQueryParams): Promise<AppointmentSlotRecord[]> {
+  async findAvailable(query: AppointmentSlotQueryParams): Promise<AppointmentSlotReadModel[]> {
     const filters: { doctorId?: UUID; date?: string } = {};
 
     if (query.doctorId) {

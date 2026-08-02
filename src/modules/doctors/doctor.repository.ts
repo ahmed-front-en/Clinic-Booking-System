@@ -1,6 +1,6 @@
 import { BaseRepository } from "../../shared/repositories/base.repository.js";
 import { pool } from "../../services/database.service.js";
-import type { DoctorRecord } from "./doctor.interfaces.js";
+import type { DoctorRecord, DoctorReadModel } from "./doctor.interfaces.js";
 import type { UUID } from "../../shared/types/common.types.js";
 
 interface UserRow {
@@ -23,6 +23,22 @@ export class DoctorRepository extends BaseRepository {
     experience_years AS "experienceYears"
   `;
 
+  private readonly readSelectFields = `
+    d.id,
+    d.user_id AS "userId",
+    d.clinic_id AS "clinicId",
+    d.specialty_id AS "specialtyId",
+    d.consultation_fee AS "consultationFee",
+    d.bio,
+    d.experience_years AS "experienceYears",
+    json_build_object(
+      'id', d.id,
+      'displayName', u.email,
+      'clinicName', cl.name,
+      'specialtyName', sp.name
+    ) AS doctor
+  `;
+
   async create(data: {
     userId: UUID;
     clinicId: UUID;
@@ -40,30 +56,39 @@ export class DoctorRepository extends BaseRepository {
     return result.rows[0];
   }
 
-  async findAll(): Promise<DoctorRecord[]> {
-    const result = await this.query<DoctorRecord>(
-      `SELECT ${this.selectFields}
-       FROM doctors
-       ORDER BY experience_years DESC, id ASC`,
+  async findAll(): Promise<DoctorReadModel[]> {
+    const result = await this.query<DoctorReadModel>(
+      `SELECT ${this.readSelectFields}
+       FROM doctors d
+       JOIN users u        ON d.user_id      = u.id
+       JOIN clinics cl     ON d.clinic_id    = cl.id
+       JOIN specialties sp ON d.specialty_id = sp.id
+       ORDER BY d.experience_years DESC, d.id ASC`,
     );
     return result.rows;
   }
 
-  async findById(id: UUID): Promise<DoctorRecord | null> {
-    const result = await this.query<DoctorRecord>(
-      `SELECT ${this.selectFields}
-       FROM doctors
-       WHERE id = $1`,
+  async findById(id: UUID): Promise<DoctorReadModel | null> {
+    const result = await this.query<DoctorReadModel>(
+      `SELECT ${this.readSelectFields}
+       FROM doctors d
+       JOIN users u        ON d.user_id      = u.id
+       JOIN clinics cl     ON d.clinic_id    = cl.id
+       JOIN specialties sp ON d.specialty_id = sp.id
+       WHERE d.id = $1`,
       [id],
     );
     return result.rows[0] ?? null;
   }
 
-  async findByUserId(userId: UUID): Promise<DoctorRecord | null> {
-    const result = await this.query<DoctorRecord>(
-      `SELECT ${this.selectFields}
-       FROM doctors
-       WHERE user_id = $1`,
+  async findByUserId(userId: UUID): Promise<DoctorReadModel | null> {
+    const result = await this.query<DoctorReadModel>(
+      `SELECT ${this.readSelectFields}
+       FROM doctors d
+       JOIN users u        ON d.user_id      = u.id
+       JOIN clinics cl     ON d.clinic_id    = cl.id
+       JOIN specialties sp ON d.specialty_id = sp.id
+       WHERE d.user_id = $1`,
       [userId],
     );
     return result.rows[0] ?? null;

@@ -2,11 +2,11 @@ import { doctorScheduleRepository } from "./doctor-schedule.repository.js";
 import { AppError } from "../../shared/errors/app-error.js";
 import { HttpStatus } from "../../shared/constants/http-status.js";
 import type { CreateDoctorScheduleDto, UpdateDoctorScheduleDto } from "./doctor-schedule.types.js";
-import type { DoctorScheduleRecord } from "./doctor-schedule.interfaces.js";
+import type { DoctorScheduleRecord, DoctorScheduleReadModel } from "./doctor-schedule.interfaces.js";
 import type { UUID } from "../../shared/types/common.types.js";
 
 export class DoctorScheduleService {
-  async findMySchedule(userId: UUID): Promise<DoctorScheduleRecord[]> {
+  async findMySchedule(userId: UUID): Promise<DoctorScheduleReadModel[]> {
     const doctor = await doctorScheduleRepository.findDoctorByUserId(userId);
     if (!doctor) {
       throw AppError.notFound("Doctor profile not found");
@@ -38,11 +38,11 @@ export class DoctorScheduleService {
     });
   }
 
-  async findAll(): Promise<DoctorScheduleRecord[]> {
+  async findAll(): Promise<DoctorScheduleReadModel[]> {
     return doctorScheduleRepository.findAll();
   }
 
-  async findById(id: UUID): Promise<DoctorScheduleRecord> {
+  async findById(id: UUID): Promise<DoctorScheduleReadModel> {
     const schedule = await doctorScheduleRepository.findById(id);
     if (!schedule) {
       throw AppError.notFound("Schedule not found");
@@ -50,7 +50,7 @@ export class DoctorScheduleService {
     return schedule;
   }
 
-  async findByDoctorId(doctorId: UUID): Promise<DoctorScheduleRecord[]> {
+  async findByDoctorId(doctorId: UUID): Promise<DoctorScheduleReadModel[]> {
     const doctor = await doctorScheduleRepository.findDoctorById(doctorId);
     if (!doctor) {
       throw AppError.notFound("Doctor not found");

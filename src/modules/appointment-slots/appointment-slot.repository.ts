@@ -1,6 +1,6 @@
 import { BaseRepository } from "../../shared/repositories/base.repository.js";
 import { pool } from "../../services/database.service.js";
-import type { AppointmentSlotRecord } from "./appointment-slot.interfaces.js";
+import type { AppointmentSlotRecord, AppointmentSlotReadModel } from "./appointment-slot.interfaces.js";
 import type { UUID } from "../../shared/types/common.types.js";
 
 interface IdRow {
@@ -21,6 +21,25 @@ export class AppointmentSlotRepository extends BaseRepository {
     deleted_at AS "deletedAt"
   `;
 
+  private readonly readSelectFields = `
+    s.id,
+    s.doctor_id AS "doctorId",
+    s.doctor_schedule_id AS "doctorScheduleId",
+    s.slot_date AS "slotDate",
+    s.start_time AS "startTime",
+    s.end_time AS "endTime",
+    s.status,
+    s.created_at AS "createdAt",
+    s.updated_at AS "updatedAt",
+    s.deleted_at AS "deletedAt",
+    json_build_object(
+      'id', d.id,
+      'displayName', u.email,
+      'clinicName', cl.name,
+      'specialtyName', sp.name
+    ) AS doctor
+  `;
+
   async create(data: {
     doctorId: UUID;
     doctorScheduleId: UUID;
@@ -38,67 +57,87 @@ export class AppointmentSlotRepository extends BaseRepository {
     return result.rows[0];
   }
 
-  async findAll(): Promise<AppointmentSlotRecord[]> {
-    const result = await this.query<AppointmentSlotRecord>(
-      `SELECT ${this.selectFields}
-       FROM appointment_slots
-       WHERE deleted_at IS NULL
-       ORDER BY slot_date, start_time`,
+  async findAll(): Promise<AppointmentSlotReadModel[]> {
+    const result = await this.query<AppointmentSlotReadModel>(
+      `SELECT ${this.readSelectFields}
+       FROM appointment_slots s
+       JOIN doctors d    ON s.doctor_id    = d.id
+       JOIN users u      ON d.user_id      = u.id
+       JOIN clinics cl   ON d.clinic_id    = cl.id
+       JOIN specialties sp ON d.specialty_id = sp.id
+       WHERE s.deleted_at IS NULL
+       ORDER BY s.slot_date, s.start_time`,
     );
     return result.rows;
   }
 
-  async findById(id: UUID): Promise<AppointmentSlotRecord | null> {
-    const result = await this.query<AppointmentSlotRecord>(
-      `SELECT ${this.selectFields}
-       FROM appointment_slots
-       WHERE id = $1 AND deleted_at IS NULL`,
+  async findById(id: UUID): Promise<AppointmentSlotReadModel | null> {
+    const result = await this.query<AppointmentSlotReadModel>(
+      `SELECT ${this.readSelectFields}
+       FROM appointment_slots s
+       JOIN doctors d    ON s.doctor_id    = d.id
+       JOIN users u      ON d.user_id      = u.id
+       JOIN clinics cl   ON d.clinic_id    = cl.id
+       JOIN specialties sp ON d.specialty_id = sp.id
+       WHERE s.id = $1 AND s.deleted_at IS NULL`,
       [id],
     );
     return result.rows[0] ?? null;
   }
 
-  async findByDoctorId(doctorId: UUID): Promise<AppointmentSlotRecord[]> {
-    const result = await this.query<AppointmentSlotRecord>(
-      `SELECT ${this.selectFields}
-       FROM appointment_slots
-       WHERE doctor_id = $1 AND deleted_at IS NULL
-       ORDER BY slot_date, start_time`,
+  async findByDoctorId(doctorId: UUID): Promise<AppointmentSlotReadModel[]> {
+    const result = await this.query<AppointmentSlotReadModel>(
+      `SELECT ${this.readSelectFields}
+       FROM appointment_slots s
+       JOIN doctors d    ON s.doctor_id    = d.id
+       JOIN users u      ON d.user_id      = u.id
+       JOIN clinics cl   ON d.clinic_id    = cl.id
+       JOIN specialties sp ON d.specialty_id = sp.id
+       WHERE s.doctor_id = $1 AND s.deleted_at IS NULL
+       ORDER BY s.slot_date, s.start_time`,
       [doctorId],
     );
     return result.rows;
   }
 
-  async findByDate(slotDate: string): Promise<AppointmentSlotRecord[]> {
-    const result = await this.query<AppointmentSlotRecord>(
-      `SELECT ${this.selectFields}
-       FROM appointment_slots
-       WHERE slot_date = $1::date AND deleted_at IS NULL
-       ORDER BY start_time`,
+  async findByDate(slotDate: string): Promise<AppointmentSlotReadModel[]> {
+    const result = await this.query<AppointmentSlotReadModel>(
+      `SELECT ${this.readSelectFields}
+       FROM appointment_slots s
+       JOIN doctors d    ON s.doctor_id    = d.id
+       JOIN users u      ON d.user_id      = u.id
+       JOIN clinics cl   ON d.clinic_id    = cl.id
+       JOIN specialties sp ON d.specialty_id = sp.id
+       WHERE s.slot_date = $1::date AND s.deleted_at IS NULL
+       ORDER BY s.start_time`,
       [slotDate],
     );
     return result.rows;
   }
 
-  async findAvailable(filters?: { doctorId?: UUID; date?: string }): Promise<AppointmentSlotRecord[]> {
-    const conditions: string[] = ["status = 'available'", "deleted_at IS NULL"];
+  async findAvailable(filters?: { doctorId?: UUID; date?: string }): Promise<AppointmentSlotReadModel[]> {
+    const conditions: string[] = ["s.status = 'available'", "s.deleted_at IS NULL"];
     const values: unknown[] = [];
     let paramIndex = 1;
 
     if (filters?.doctorId) {
-      conditions.push(`doctor_id = $${paramIndex++}`);
+      conditions.push(`s.doctor_id = $${paramIndex++}`);
       values.push(filters.doctorId);
     }
     if (filters?.date) {
-      conditions.push(`slot_date = $${paramIndex++}::date`);
+      conditions.push(`s.slot_date = $${paramIndex++}::date`);
       values.push(filters.date);
     }
 
-    const result = await this.query<AppointmentSlotRecord>(
-      `SELECT ${this.selectFields}
-       FROM appointment_slots
+    const result = await this.query<AppointmentSlotReadModel>(
+      `SELECT ${this.readSelectFields}
+       FROM appointment_slots s
+       JOIN doctors d    ON s.doctor_id    = d.id
+       JOIN users u      ON d.user_id      = u.id
+       JOIN clinics cl   ON d.clinic_id    = cl.id
+       JOIN specialties sp ON d.specialty_id = sp.id
        WHERE ${conditions.join(" AND ")}
-       ORDER BY slot_date, start_time`,
+       ORDER BY s.slot_date, s.start_time`,
       values,
     );
     return result.rows;
