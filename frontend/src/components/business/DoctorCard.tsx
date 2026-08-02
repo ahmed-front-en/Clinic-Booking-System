@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import type { DoctorRecord } from "@/types/models/doctor";
 import { Card, CardContent } from "@/components/ui/card";
 import { StarRating } from "@/components/business/StarRating";
@@ -16,7 +17,7 @@ interface DoctorCardProps {
   onSelect: () => void;
 }
 
-export function DoctorCard({
+export const DoctorCard = memo(function DoctorCard({
   doctor,
   doctorName = "Dr. Doctor",
   clinicName,
@@ -90,4 +91,4 @@ export function DoctorCard({
       </CardContent>
     </Card>
   );
-}
+});

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, type ReactNode } from "react";
+import { useState, useMemo, memo, type ReactNode } from "react";
 import {
   ChevronUp,
   ChevronDown,
@@ -25,6 +25,38 @@ export interface DataTableProps<T> {
   emptyState?: React.ReactNode;
   className?: string;
 }
+
+interface DataTableRowProps<T> {
+  item: T;
+  columns: Column<T>[];
+  onRowClick?: (item: T) => void;
+}
+
+function DataTableRowInner<T extends object>({
+  item,
+  columns,
+  onRowClick,
+}: DataTableRowProps<T>) {
+  return (
+    <tr
+      onClick={() => onRowClick?.(item)}
+      className={cn(
+        "border-b border-border last:border-0 transition-colors",
+        onRowClick && "cursor-pointer hover:bg-muted/50",
+      )}
+    >
+      {columns.map((col) => (
+        <td key={col.key} className={cn("px-4 py-3 text-sm text-foreground", col.className)}>
+          {col.render
+            ? col.render(item)
+            : String((item as Record<string, unknown>)[col.key] ?? "")}
+        </td>
+      ))}
+    </tr>
+  );
+}
+
+const DataTableRow = memo(DataTableRowInner) as typeof DataTableRowInner;
 
 export function DataTable<T extends object>({
   columns,
@@ -133,22 +165,12 @@ export function DataTable<T extends object>({
         </thead>
         <tbody>
           {sorted.map((item, i) => (
-            <tr
+            <DataTableRow
               key={String((item as Record<string, unknown>).id ?? i)}
-              onClick={() => onRowClick?.(item)}
-              className={cn(
-                "border-b border-border last:border-0 transition-colors",
-                onRowClick && "cursor-pointer hover:bg-muted/50",
-              )}
-            >
-              {columns.map((col) => (
-                <td key={col.key} className={cn("px-4 py-3 text-sm text-foreground", col.className)}>
-                  {col.render
-                    ? col.render(item)
-                    : String((item as Record<string, unknown>)[col.key] ?? "")}
-                </td>
-              ))}
-            </tr>
+              item={item}
+              columns={columns}
+              onRowClick={onRowClick}
+            />
           ))}
         </tbody>
       </table>

@@ -4,7 +4,7 @@ import { CalendarClock, Stethoscope, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/business/StatusBadge";
 import { ConfirmDialog } from "@/components/business/ConfirmDialog";
-import { useState } from "react";
+import { useState, memo } from "react";
 import type { AppointmentRecord } from "@/types/models/appointment";
 
 interface AppointmentCardProps {
@@ -19,7 +19,7 @@ interface AppointmentCardProps {
 
 const CANCELLABLE_STATUSES = new Set(["scheduled", "confirmed"]);
 
-export function AppointmentCard({
+export const AppointmentCard = memo(function AppointmentCard({
   appointment,
   doctorName,
   specialtyName,
@@ -92,4 +92,4 @@ export function AppointmentCard({
       />
     </div>
   );
-}
+});

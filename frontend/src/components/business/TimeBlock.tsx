@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import { Clock } from "lucide-react";
 import { cn, formatTime } from "@/lib/utils";
 
@@ -9,7 +10,11 @@ interface TimeBlockProps {
   className?: string;
 }
 
-export function TimeBlock({ startTime, endTime, className }: TimeBlockProps) {
+export const TimeBlock = memo(function TimeBlock({
+  startTime,
+  endTime,
+  className,
+}: TimeBlockProps) {
   return (
     <div
       className={cn(
@@ -23,4 +28,4 @@ export function TimeBlock({ startTime, endTime, className }: TimeBlockProps) {
       </span>
     </div>
   );
-}
+});

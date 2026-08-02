@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import { MessageSquareQuote } from "lucide-react";
 import { StarRating } from "@/components/business/StarRating";
 import type { ReviewRecord } from "@/types/models/review";
@@ -8,7 +9,7 @@ interface ReviewCardProps {
   review: ReviewRecord;
 }
 
-export function ReviewCard({ review }: ReviewCardProps) {
+export const ReviewCard = memo(function ReviewCard({ review }: ReviewCardProps) {
   return (
     <div className="flex flex-col gap-3 rounded-xl border border-border bg-card p-4 transition-colors hover:border-outline-variant">
       <div className="flex items-center justify-between gap-4">
@@ -25,4 +26,4 @@ export function ReviewCard({ review }: ReviewCardProps) {
       )}
     </div>
   );
-}
+});
