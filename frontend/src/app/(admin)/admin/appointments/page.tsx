@@ -30,6 +30,9 @@ import {
   useUpdateAppointment,
   useDeleteAppointment,
 } from "@/features/appointments";
+import { getAppointmentsAdmin } from "@/features/appointments/api/appointments-admin";
+import { usePrefetchAdminPage } from "@/hooks/usePrefetchAdminPage";
+import { queryKeys } from "@/lib/query-keys";
 import { PAGINATION_DEFAULTS } from "@/config";
 import type { AppointmentRecord } from "@/types/models/appointment";
 import type { UpdateAppointmentInput } from "@/schemas/appointment";
@@ -51,6 +54,14 @@ export default function AdminAppointmentsPage() {
 
   const appointments = data?.data ?? [];
   const totalPages = data?.pagination?.totalPages ?? 1;
+
+  const prefetchPage = usePrefetchAdminPage({
+    queryKey: queryKeys.appointments.admin,
+    queryFn: getAppointmentsAdmin,
+    params: { page, limit: PAGINATION_DEFAULTS.limit },
+    page,
+    totalPages,
+  });
 
   const columns: Column<AppointmentRecord>[] = useMemo(() => [
     {
@@ -129,7 +140,12 @@ export default function AdminAppointmentsPage() {
               />
             }
           />
-          <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+          <Pagination
+            page={page}
+            totalPages={totalPages}
+            onPageChange={setPage}
+            onPagePrefetch={prefetchPage}
+          />
         </>
       )}
 

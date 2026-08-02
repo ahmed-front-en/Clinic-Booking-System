@@ -30,7 +30,10 @@ import {
   useUpdatePatient,
   useDeletePatient,
 } from "@/features/patients";
+import { getPatientsAdmin } from "@/features/patients/api/patients-admin";
 import { useUsersAdmin } from "@/features/users";
+import { usePrefetchAdminPage } from "@/hooks/usePrefetchAdminPage";
+import { queryKeys } from "@/lib/query-keys";
 import { PAGINATION_DEFAULTS } from "@/config";
 import type { PatientRecord } from "@/types/models/patient";
 import type { CreatePatientInput, UpdatePatientInput } from "@/schemas/patient";
@@ -54,6 +57,14 @@ export default function AdminPatientsPage() {
   const patients = data?.data ?? [];
   const totalPages = data?.pagination?.totalPages ?? 1;
   const users = patientUsers?.data ?? [];
+
+  const prefetchPage = usePrefetchAdminPage({
+    queryKey: queryKeys.patients.all,
+    queryFn: getPatientsAdmin,
+    params: { page, limit: PAGINATION_DEFAULTS.limit },
+    page,
+    totalPages,
+  });
 
   const columns: Column<PatientRecord>[] = useMemo(
     () => [
@@ -135,7 +146,12 @@ export default function AdminPatientsPage() {
               />
             }
           />
-          <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+          <Pagination
+            page={page}
+            totalPages={totalPages}
+            onPageChange={setPage}
+            onPagePrefetch={prefetchPage}
+          />
         </>
       )}
 

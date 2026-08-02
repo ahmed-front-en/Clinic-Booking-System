@@ -5,6 +5,7 @@ import Link from "next/link";
 import { CalendarPlus, CalendarDays, Inbox } from "lucide-react";
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { useMyAppointments, useCancelAppointment } from "@/features/appointments";
+import { usePrefetchBookingData } from "@/hooks/usePrefetchBookingData";
 import { AppointmentCard } from "@/components/business/AppointmentCard";
 import { Skeleton } from "@/components/feedback/Skeleton";
 import { ErrorBanner } from "@/components/feedback/ErrorBanner";
@@ -24,6 +25,7 @@ function PatientAppointmentsContent() {
   const { data: appointments, isPending, isError, refetch } = useMyAppointments();
   const { mutate: cancelAppointment, isPending: isCancelling } =
     useCancelAppointment();
+  const prefetchBooking = usePrefetchBookingData();
 
   const upcoming = useMemo(
     () =>
@@ -75,7 +77,11 @@ function PatientAppointmentsContent() {
             View and manage all of your appointments.
           </p>
         </div>
-        <Link href="/book">
+        <Link
+          href="/book"
+          onMouseEnter={prefetchBooking}
+          onFocus={prefetchBooking}
+        >
           <Button>
             <CalendarPlus />
             Book Appointment
@@ -90,7 +96,11 @@ function PatientAppointmentsContent() {
             title="No appointments yet"
             description="Book your first appointment to get started."
             action={
-              <Link href="/book">
+              <Link
+                href="/book"
+                onMouseEnter={prefetchBooking}
+                onFocus={prefetchBooking}
+              >
                 <Button>
                   <CalendarPlus />
                   Book Appointment

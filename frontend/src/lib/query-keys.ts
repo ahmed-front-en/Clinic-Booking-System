@@ -2,6 +2,8 @@ import type { PaginationParams } from "../types/api";
 import type { AvailableSlotsParams } from "../types/models/slot";
 import type { UserFilters } from "../types/models/user";
 
+type UserListParams = UserFilters & PaginationParams;
+
 export const queryKeys = {
   auth: {
     me: ["auth", "me"] as const,
@@ -59,7 +61,7 @@ export const queryKeys = {
     admin: (params?: PaginationParams) => ["reviews", "admin", params] as const,
   },
   users: {
-    all: (params?: UserFilters) => ["users", params] as const,
+    all: (params?: UserListParams) => ["users", params] as const,
     byId: (id: string) => ["users", id] as const,
   },
 };

@@ -30,6 +30,9 @@ import {
   useUpdateReview,
   useDeleteReview,
 } from "@/features/reviews";
+import { getReviewsAdmin } from "@/features/reviews/api/reviews-admin";
+import { usePrefetchAdminPage } from "@/hooks/usePrefetchAdminPage";
+import { queryKeys } from "@/lib/query-keys";
 import { PAGINATION_DEFAULTS } from "@/config";
 import type { ReviewRecord } from "@/types/models/review";
 import type { UpdateReviewInput } from "@/schemas/review";
@@ -51,6 +54,14 @@ export default function AdminReviewsPage() {
 
   const reviews = data?.data ?? [];
   const totalPages = data?.pagination?.totalPages ?? 1;
+
+  const prefetchPage = usePrefetchAdminPage({
+    queryKey: queryKeys.reviews.admin,
+    queryFn: getReviewsAdmin,
+    params: { page, limit: PAGINATION_DEFAULTS.limit },
+    page,
+    totalPages,
+  });
 
   const columns: Column<ReviewRecord>[] = useMemo(() => [
     {
@@ -126,7 +137,12 @@ export default function AdminReviewsPage() {
               />
             }
           />
-          <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+          <Pagination
+            page={page}
+            totalPages={totalPages}
+            onPageChange={setPage}
+            onPagePrefetch={prefetchPage}
+          />
         </>
       )}
 

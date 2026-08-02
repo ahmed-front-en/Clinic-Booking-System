@@ -31,9 +31,12 @@ import {
   useUpdateSlot,
   useDeleteSlot,
 } from "@/features/slots";
+import { getSlotsAdmin } from "@/features/slots/api/slots-admin";
 import { useDoctorsList } from "@/features/doctors";
 import { useSchedulesAdmin } from "@/features/schedules";
+import { usePrefetchAdminPage } from "@/hooks/usePrefetchAdminPage";
 import { formatTime } from "@/lib/utils";
+import { queryKeys } from "@/lib/query-keys";
 import { PAGINATION_DEFAULTS } from "@/config";
 import type { AppointmentSlotRecord } from "@/types/models/slot";
 import type {
@@ -61,6 +64,14 @@ export default function AdminAppointmentSlotsPage() {
   const slots = data?.data ?? [];
   const totalPages = data?.pagination?.totalPages ?? 1;
   const schedules = schedulesData?.data ?? [];
+
+  const prefetchPage = usePrefetchAdminPage({
+    queryKey: queryKeys.slots.admin,
+    queryFn: getSlotsAdmin,
+    params: { page, limit: PAGINATION_DEFAULTS.limit },
+    page,
+    totalPages,
+  });
 
   const doctorLabel = useCallback(
     (id: string) =>
@@ -142,7 +153,12 @@ export default function AdminAppointmentSlotsPage() {
               />
             }
           />
-          <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+          <Pagination
+            page={page}
+            totalPages={totalPages}
+            onPageChange={setPage}
+            onPagePrefetch={prefetchPage}
+          />
         </>
       )}
 

@@ -31,6 +31,9 @@ import {
   useUpdateUserAdmin,
   useDeleteUserAdmin,
 } from "@/features/users";
+import { getUsersAdmin } from "@/features/users/api/users-admin";
+import { usePrefetchAdminPage } from "@/hooks/usePrefetchAdminPage";
+import { queryKeys } from "@/lib/query-keys";
 import { PAGINATION_DEFAULTS } from "@/config";
 import type { UserRecord } from "@/types/models/user";
 import type { UpdateUserInput } from "@/schemas/user";
@@ -66,6 +69,20 @@ export default function AdminUsersPage() {
 
   const users = data?.data ?? [];
   const totalPages = data?.pagination?.totalPages ?? 1;
+
+  const prefetchPage = usePrefetchAdminPage({
+    queryKey: queryKeys.users.all,
+    queryFn: getUsersAdmin,
+    params: {
+      page,
+      limit: PAGINATION_DEFAULTS.limit,
+      search: search || undefined,
+      role: role as UserRecord["role"],
+      isVerified,
+    },
+    page,
+    totalPages,
+  });
 
   function handleSearch(value: string) {
     setSearch(value);
@@ -186,7 +203,12 @@ export default function AdminUsersPage() {
             }
           />
 
-          <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+          <Pagination
+            page={page}
+            totalPages={totalPages}
+            onPageChange={setPage}
+            onPagePrefetch={prefetchPage}
+          />
         </>
       )}
 

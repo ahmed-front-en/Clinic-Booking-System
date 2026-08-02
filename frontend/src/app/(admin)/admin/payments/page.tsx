@@ -30,7 +30,10 @@ import {
   useUpdatePayment,
   useDeletePayment,
 } from "@/features/payments";
+import { getPaymentsAdmin } from "@/features/payments/api/payments-admin";
+import { usePrefetchAdminPage } from "@/hooks/usePrefetchAdminPage";
 import { formatCurrency } from "@/lib/utils";
+import { queryKeys } from "@/lib/query-keys";
 import { PAGINATION_DEFAULTS } from "@/config";
 import type { PaymentRecord } from "@/types/models/payment";
 import type { UpdatePaymentInput } from "@/schemas/payment";
@@ -52,6 +55,14 @@ export default function AdminPaymentsPage() {
 
   const payments = data?.data ?? [];
   const totalPages = data?.pagination?.totalPages ?? 1;
+
+  const prefetchPage = usePrefetchAdminPage({
+    queryKey: queryKeys.payments.admin,
+    queryFn: getPaymentsAdmin,
+    params: { page, limit: PAGINATION_DEFAULTS.limit },
+    page,
+    totalPages,
+  });
 
   const columns: Column<PaymentRecord>[] = useMemo(() => [
     {
@@ -135,7 +146,12 @@ export default function AdminPaymentsPage() {
               />
             }
           />
-          <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+          <Pagination
+            page={page}
+            totalPages={totalPages}
+            onPageChange={setPage}
+            onPagePrefetch={prefetchPage}
+          />
         </>
       )}
 
