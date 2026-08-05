@@ -57,6 +57,14 @@ frontend/playwright-report/
 frontend/test-results/
 .playwright-mcp/
 
+# AI / runtime tooling artifacts
+.opencode/
+.opencode-cache/
+*.session
+*.transcript
+playwright-report/
+test-results/
+
 # Misc
 *.pid
 
