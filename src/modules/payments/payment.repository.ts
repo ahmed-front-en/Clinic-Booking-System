@@ -156,6 +156,16 @@ export class PaymentRepository extends BaseRepository {
     return result.rows.length > 0;
   }
 
+  async hasLinkedPayment(appointmentId: UUID): Promise<boolean> {
+    const result = await this.query<{ exists: boolean }>(
+      `SELECT EXISTS(
+         SELECT 1 FROM payments WHERE appointment_id = $1
+       ) AS "exists"`,
+      [appointmentId],
+    );
+    return result.rows[0]?.exists ?? false;
+  }
+
   async update(
     id: UUID,
     data: {

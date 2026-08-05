@@ -1,10 +1,21 @@
 import { appointmentRepository } from "./appointment.repository.js";
+import { paymentRepository } from "../payments/payment.repository.js";
 import { AppError } from "../../shared/errors/app-error.js";
 import { HttpStatus } from "../../shared/constants/http-status.js";
 import type { CreateAppointmentDto, UpdateAppointmentDto } from "./appointment.types.js";
 import type { AppointmentRecord, AppointmentReadModel } from "./appointment.interfaces.js";
 import type { UUID } from "../../shared/types/common.types.js";
 import type { UserRole } from "../../shared/types/user.types.js";
+
+const PAYMENT_CONFLICT_MESSAGE = "This appointment has a payment and cannot be deleted.";
+
+function isForeignKeyViolation(error: unknown): boolean {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    (error as { code?: string }).code === "23503"
+  );
+}
 
 export class AppointmentService {
   async createAsPatient(userId: UUID, dto: CreateAppointmentDto): Promise<AppointmentRecord> {
@@ -169,10 +180,22 @@ export class AppointmentService {
       throw AppError.notFound("Appointment not found");
     }
 
-    await appointmentRepository.transaction(async () => {
-      await appointmentRepository.delete(id);
-      await appointmentRepository.updateSlotStatus(appointment.slotId, "available");
-    });
+    try {
+      await appointmentRepository.transaction(async () => {
+        const hasPayment = await paymentRepository.hasLinkedPayment(id);
+        if (hasPayment) {
+          throw AppError.conflict(PAYMENT_CONFLICT_MESSAGE);
+        }
+
+        await appointmentRepository.delete(id);
+        await appointmentRepository.updateSlotStatus(appointment.slotId, "available");
+      });
+    } catch (error) {
+      if (isForeignKeyViolation(error)) {
+        throw AppError.conflict(PAYMENT_CONFLICT_MESSAGE);
+      }
+      throw error;
+    }
   }
 
 }

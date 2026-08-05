@@ -46,6 +46,25 @@ temp/
 *.sqlite
 *.db
 
+# Workplan (temporary, single source of truth for current task only)
+docs/workplan.md
+prompt.md
+
+# Frontend audit harness (temporary, never committed)
+frontend/audit/
+frontend/playwright.config.ts
+frontend/playwright-report/
+frontend/test-results/
+.playwright-mcp/
+
+# AI / runtime tooling artifacts
+.opencode/
+.opencode-cache/
+*.session
+*.transcript
+playwright-report/
+test-results/
+
 # Misc
 *.pid
 
