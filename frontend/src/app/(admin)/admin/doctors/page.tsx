@@ -47,8 +47,8 @@ export default function AdminDoctorsPage() {
   const { data: specialties } = useSpecialtiesList();
   const { data: doctorUsers } = useUsersAdmin({ role: "doctor", limit: 100 });
 
-  const { mutate: createDoctor, isPending: isCreating } = useCreateDoctor();
-  const { mutate: updateDoctor, isPending: isUpdating } = useUpdateDoctor();
+  const { mutateAsync: createDoctor, isPending: isCreating } = useCreateDoctor();
+  const { mutateAsync: updateDoctor, isPending: isUpdating } = useUpdateDoctor();
   const { mutate: deleteDoctor, isPending: isDeleting } = useDeleteDoctor();
 
   const [editing, setEditing] = useState<DoctorReadModel | null>(null);
@@ -160,8 +160,9 @@ export default function AdminDoctorsPage() {
           clinics={clinics ?? []}
           specialties={specialties ?? []}
           isSubmitting={isCreating}
-          onSubmit={(data) => {
-            createDoctor(data as CreateDoctorInput, { onSuccess: () => setCreating(false) });
+          onSubmit={async (data) => {
+            await createDoctor(data as CreateDoctorInput);
+            setCreating(false);
           }}
         />
       )}
@@ -175,11 +176,9 @@ export default function AdminDoctorsPage() {
           clinics={clinics ?? []}
           specialties={specialties ?? []}
           isSubmitting={isUpdating}
-          onSubmit={(data) => {
-            updateDoctor(
-              { id: editing.id, data: data as UpdateDoctorInput },
-              { onSuccess: () => setEditing(null) },
-            );
+          onSubmit={async (data) => {
+            await updateDoctor({ id: editing.id, data: data as UpdateDoctorInput });
+            setEditing(null);
           }}
         />
       )}

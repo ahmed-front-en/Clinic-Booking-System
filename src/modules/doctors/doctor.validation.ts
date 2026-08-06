@@ -18,3 +18,10 @@ export const updateDoctorSchema = z.object({
   experienceYears: z.number().int().min(0).optional(),
   fullName: z.string().trim().min(1).max(255).optional(),
 });
+
+export const updateMyDoctorSchema = z.object({
+  fullName: z.string().trim().min(1).max(255).optional(),
+  consultationFee: z.number().min(0).optional(),
+  bio: z.string().trim().nullable().optional(),
+  experienceYears: z.number().int().min(0).optional(),
+});

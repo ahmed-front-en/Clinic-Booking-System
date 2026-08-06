@@ -39,7 +39,9 @@ function LoginForm() {
   useEffect(() => {
     if (!isAuthenticated || !user) return;
     const target =
-      redirectParam && isAllowedRedirect(user.role, redirectParam)
+      redirectParam &&
+      redirectParam !== "/login" &&
+      isAllowedRedirect(user.role, redirectParam)
         ? redirectParam
         : getHomePathForRole(user.role);
     router.replace(target);

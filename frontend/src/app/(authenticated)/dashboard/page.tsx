@@ -223,6 +223,7 @@ function DoctorDashboardContent() {
                   appointment={appointment}
                   onCancel={handleCancel}
                   isCancelling={isCancelling}
+                  viewer="doctor"
                 />
               ))}
             </div>

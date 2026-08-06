@@ -11,20 +11,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { createPaymentSchema, type CreatePaymentInput } from "@/schemas/payment";
+import { updatePaymentSchema, type UpdatePaymentInput } from "@/schemas/payment";
 import { PAYMENT_METHODS } from "@/types/enums";
 import type { PaymentRecord } from "@/types/models/payment";
 import { useApiError } from "@/hooks/useApiError";
 
 interface PaymentFormProps {
   payment: PaymentRecord;
-  onSubmit: (data: CreatePaymentInput) => Promise<void> | void;
+  onSubmit: (data: UpdatePaymentInput) => Promise<void> | void;
   isSubmitting?: boolean;
 }
 
 export function PaymentForm({ payment, onSubmit, isSubmitting }: PaymentFormProps) {
   const { parse } = useApiError();
-  const [amount, setAmount] = useState(String(payment.amount));
   const [method, setMethod] = useState(payment.method);
   const [transactionReference, setTransactionReference] = useState(
     payment.transactionReference ?? "",
@@ -37,12 +36,11 @@ export function PaymentForm({ payment, onSubmit, isSubmitting }: PaymentFormProp
     setFieldErrors({});
     setFormError(null);
 
-    const result = createPaymentSchema.safeParse({
-      appointmentId: payment.appointmentId,
-      amount: Number(amount),
+    const result = updatePaymentSchema.safeParse({
       method,
       transactionReference:
         transactionReference.trim() === "" ? null : transactionReference.trim(),
+      status: "paid",
     });
 
     if (!result.success) {
@@ -72,24 +70,16 @@ export function PaymentForm({ payment, onSubmit, isSubmitting }: PaymentFormProp
         </div>
       )}
 
-      <input type="hidden" name="appointmentId" value={payment.appointmentId} />
-
       <div className="space-y-2">
         <Label htmlFor="amount">Amount</Label>
         <Input
           id="amount"
           name="amount"
           type="number"
-          min="0.01"
-          step="0.01"
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
-          hasError={Boolean(fieldErrors.amount)}
-          disabled={isSubmitting}
+          value={payment.amount}
+          readOnly
+          aria-readonly="true"
         />
-        {fieldErrors.amount && (
-          <p className="text-xs text-destructive">{fieldErrors.amount}</p>
-        )}
       </div>
 
       <div className="space-y-2">

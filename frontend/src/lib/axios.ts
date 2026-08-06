@@ -5,6 +5,12 @@ import { API_BASE_URL } from "../config";
 
 let refreshPromise: Promise<string> | null = null;
 
+const AUTH_ENDPOINTS = ["/auth/login", "/auth/register", "/auth/refresh"];
+
+function isAuthEndpoint(url: string | undefined): boolean {
+  return !!url && AUTH_ENDPOINTS.some((endpoint) => url.includes(endpoint));
+}
+
 export function refreshAccessToken(): Promise<string> {
   if (refreshPromise) {
     return refreshPromise;
@@ -57,6 +63,10 @@ api.interceptors.response.use(
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
 
     if (error.response?.status !== 401 || originalRequest._retry) {
+      return Promise.reject(error);
+    }
+
+    if (isAuthEndpoint(originalRequest.url)) {
       return Promise.reject(error);
     }
 

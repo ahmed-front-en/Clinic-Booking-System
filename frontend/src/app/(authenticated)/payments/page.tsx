@@ -3,7 +3,7 @@
 import { useState } from "react";
 import dynamic from "next/dynamic";
 import { Wallet } from "lucide-react";
-import { useMyPayments, useCreatePayment } from "@/features/payments";
+import { useMyPayments, useUpdateMyPayment } from "@/features/payments";
 import { PaymentCard } from "@/components/business/PaymentCard";
 import { Skeleton } from "@/components/feedback/Skeleton";
 import { ErrorBanner } from "@/components/feedback/ErrorBanner";
@@ -15,7 +15,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import type { PaymentRecord } from "@/types/models/payment";
-import type { CreatePaymentInput } from "@/schemas/payment";
+import type { UpdatePaymentInput } from "@/schemas/payment";
 
 const PaymentForm = dynamic(
   () => import("@/components/business/PaymentForm").then((mod) => mod.PaymentForm),
@@ -24,7 +24,7 @@ const PaymentForm = dynamic(
 
 export default function PatientPaymentsPage() {
   const { data: payments, isPending, isError, refetch } = useMyPayments();
-  const { mutate: createPayment, isPending: isPaying } = useCreatePayment();
+  const { mutate: updateMyPayment, isPending: isPaying } = useUpdateMyPayment();
   const [selected, setSelected] = useState<PaymentRecord | null>(null);
 
   if (isError) {
@@ -89,10 +89,11 @@ export default function PatientPaymentsPage() {
               <PaymentForm
                 payment={selected}
                 isSubmitting={isPaying}
-                onSubmit={(data: CreatePaymentInput) => {
-                  createPayment(data, {
-                    onSuccess: () => setSelected(null),
-                  });
+                onSubmit={(data: UpdatePaymentInput) => {
+                  updateMyPayment(
+                    { id: selected.id, data },
+                    { onSuccess: () => setSelected(null) },
+                  );
                 }}
               />
             </div>

@@ -21,6 +21,15 @@ export class PaymentController extends BaseController {
     }
   };
 
+  payAsPatient = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const payment = await paymentService.payAsPatient(req.user!.sub, req.params.id as string, req.body);
+      this.ok(res, payment, "Payment completed successfully");
+    } catch (error) {
+      next(error);
+    }
+  };
+
   create = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const payment = await paymentService.create(req.body);

@@ -183,7 +183,7 @@ function DoctorReviewsContent() {
         ) : (
           <div className="flex flex-col gap-3">
             {reviews?.map((review) => (
-              <ReviewCard key={review.id} review={review} />
+              <ReviewCard key={review.id} review={review} viewer="doctor" />
             ))}
           </div>
         )}

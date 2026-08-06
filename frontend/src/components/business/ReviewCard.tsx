@@ -5,12 +5,17 @@ import { CalendarDays, MessageSquareQuote } from "lucide-react";
 import { StarRating } from "@/components/business/StarRating";
 import { formatDateTime } from "@/lib/utils";
 import type { ReviewReadModel } from "@/types/models/review";
+import type { UserRole } from "@/types/enums";
 
 interface ReviewCardProps {
   review: ReviewReadModel;
+  viewer?: UserRole;
 }
 
-export const ReviewCard = memo(function ReviewCard({ review }: ReviewCardProps) {
+export const ReviewCard = memo(function ReviewCard({
+  review,
+  viewer = "patient",
+}: ReviewCardProps) {
   return (
     <div className="flex flex-col gap-3 rounded-xl border border-border bg-card p-4 transition-colors hover:border-outline-variant">
       <div className="flex items-center justify-between gap-4">
@@ -20,7 +25,9 @@ export const ReviewCard = memo(function ReviewCard({ review }: ReviewCardProps) 
           </div>
           <div className="min-w-0">
             <p className="truncate text-sm font-medium text-foreground">
-              {review.doctor.displayName}
+              {viewer === "doctor"
+                ? review.patient.fullName
+                : review.doctor.displayName}
             </p>
             <p className="flex items-center gap-1 text-xs text-muted-foreground">
               <CalendarDays className="size-3" aria-hidden="true" />

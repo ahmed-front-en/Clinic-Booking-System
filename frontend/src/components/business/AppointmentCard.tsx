@@ -7,11 +7,13 @@ import { ConfirmDialog } from "@/components/business/ConfirmDialog";
 import { useState, memo } from "react";
 import { formatDateTime } from "@/lib/utils";
 import type { AppointmentReadModel } from "@/types/models/appointment";
+import type { UserRole } from "@/types/enums";
 
 interface AppointmentCardProps {
   appointment: AppointmentReadModel;
   onCancel?: (id: string) => void;
   isCancelling?: boolean;
+  viewer?: UserRole;
 }
 
 const CANCELLABLE_STATUSES = new Set(["scheduled", "confirmed"]);
@@ -20,6 +22,7 @@ export const AppointmentCard = memo(function AppointmentCard({
   appointment,
   onCancel,
   isCancelling,
+  viewer = "patient",
 }: AppointmentCardProps) {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const cancellable =
@@ -33,7 +36,9 @@ export const AppointmentCard = memo(function AppointmentCard({
         </div>
         <div className="min-w-0">
           <h3 className="truncate text-sm font-medium text-foreground">
-            {appointment.doctor.displayName}
+            {viewer === "doctor"
+              ? appointment.patient.fullName
+              : appointment.doctor.displayName}
           </h3>
           <p className="text-sm text-muted-foreground">
             {appointment.doctor.specialtyName}

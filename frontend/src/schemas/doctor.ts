@@ -17,5 +17,13 @@ export const updateDoctorSchema = z.object({
   experienceYears: z.number().int().min(0).optional(),
 });
 
+export const updateMyDoctorSchema = z.object({
+  fullName: z.string().trim().min(1).max(255).optional(),
+  consultationFee: z.number().min(0).optional(),
+  bio: z.string().trim().nullable().optional(),
+  experienceYears: z.number().int().min(0).optional(),
+});
+
 export type CreateDoctorInput = z.infer<typeof createDoctorSchema>;
 export type UpdateDoctorInput = z.infer<typeof updateDoctorSchema>;
+export type UpdateMyDoctorInput = z.infer<typeof updateMyDoctorSchema>;

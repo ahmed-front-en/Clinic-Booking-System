@@ -1,6 +1,7 @@
 import { BaseRepository } from "../../shared/repositories/base.repository.js";
 import { pool } from "../../services/database.service.js";
 import type { UserRecord, UpdateUserInput } from "./users.interfaces.js";
+import type { UserFilter } from "./users.types.js";
 import type { UUID } from "../../shared/types/common.types.js";
 
 export class UsersRepository extends BaseRepository {
@@ -14,12 +15,45 @@ export class UsersRepository extends BaseRepository {
     deleted_at AS "deletedAt"
   `;
 
-  async findAll(): Promise<UserRecord[]> {
+  private buildWhere(filter: UserFilter): { clause: string; params: unknown[] } {
+    const conditions: string[] = ["deleted_at IS NULL"];
+    const params: unknown[] = [];
+
+    if (filter.role) {
+      params.push(filter.role);
+      conditions.push(`role = $${params.length}`);
+    }
+    if (filter.isVerified !== undefined) {
+      params.push(filter.isVerified);
+      conditions.push(`is_verified = $${params.length}`);
+    }
+    if (filter.search) {
+      params.push(`%${filter.search}%`);
+      conditions.push(`email ILIKE $${params.length}`);
+    }
+
+    return { clause: conditions.join(" AND "), params };
+  }
+
+  async count(filter: UserFilter): Promise<number> {
+    const { clause, params } = this.buildWhere(filter);
+    const result = await this.query<{ count: string }>(
+      `SELECT COUNT(*)::int AS count FROM users WHERE ${clause}`,
+      params,
+    );
+    return Number(result.rows[0]?.count ?? 0);
+  }
+
+  async findPage(filter: UserFilter, limit: number, offset: number): Promise<UserRecord[]> {
+    const { clause, params } = this.buildWhere(filter);
+    params.push(limit, offset);
     const result = await this.query<UserRecord>(
       `SELECT ${this.selectFields}
        FROM users
-       WHERE deleted_at IS NULL
-       ORDER BY created_at DESC`,
+       WHERE ${clause}
+       ORDER BY created_at DESC
+       LIMIT $${params.length - 1} OFFSET $${params.length}`,
+      params,
     );
     return result.rows;
   }
