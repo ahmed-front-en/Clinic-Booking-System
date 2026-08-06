@@ -24,7 +24,7 @@ import {
   type UpdateAppointmentSlotInput,
 } from "@/schemas/slot";
 import { SLOT_STATUSES } from "@/types/enums";
-import { formatTime } from "@/lib/utils";
+import { formatTime, toHHmm } from "@/lib/utils";
 import type { DoctorReadModel } from "@/types/models/doctor";
 import type { DoctorScheduleRecord } from "@/types/models/schedule";
 import type { AppointmentSlotRecord } from "@/types/models/slot";
@@ -55,8 +55,8 @@ export function SlotFormModal({
     slot?.doctorScheduleId ?? "",
   );
   const [slotDate, setSlotDate] = useState(slot?.slotDate ?? "");
-  const [startTime, setStartTime] = useState(slot?.startTime ?? "");
-  const [endTime, setEndTime] = useState(slot?.endTime ?? "");
+  const [startTime, setStartTime] = useState(toHHmm(slot?.startTime ?? ""));
+  const [endTime, setEndTime] = useState(toHHmm(slot?.endTime ?? ""));
   const [status, setStatus] = useState(slot?.status ?? "available");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [formError, setFormError] = useState<string | null>(null);

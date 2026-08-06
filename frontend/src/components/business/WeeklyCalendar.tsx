@@ -14,7 +14,7 @@ export function WeeklyCalendar({ schedules, className }: WeeklyCalendarProps) {
   return (
     <div
       className={
-        "grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-7" +
+        "grid grid-cols-1 gap-4 @container @lg:grid-cols-2 @4xl:grid-cols-7" +
         (className ? ` ${className}` : "")
       }
     >

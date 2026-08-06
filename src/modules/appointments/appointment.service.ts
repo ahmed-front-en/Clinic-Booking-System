@@ -1,4 +1,5 @@
 import { appointmentRepository } from "./appointment.repository.js";
+import { ACTIVE_APPOINTMENT_STATUSES } from "./appointment.constants.js";
 import { paymentRepository } from "../payments/payment.repository.js";
 import { AppError } from "../../shared/errors/app-error.js";
 import { HttpStatus } from "../../shared/constants/http-status.js";
@@ -155,9 +156,19 @@ export class AppointmentService {
         if (newStatus === "cancelled" && currentStatus !== "cancelled") {
           await appointmentRepository.updateSlotStatus(appointment.slotId, "available");
         } else if (
-          (newStatus === "scheduled" || newStatus === "confirmed") &&
+          (ACTIVE_APPOINTMENT_STATUSES as readonly string[]).includes(newStatus) &&
           currentStatus === "cancelled"
         ) {
+          const conflicting = await appointmentRepository.existsActiveForSlotExcluding(
+            appointment.slotId,
+            id,
+          );
+          if (conflicting) {
+            throw new AppError(
+              HttpStatus.CONFLICT,
+              "This slot already has an active appointment",
+            );
+          }
           await appointmentRepository.updateSlotStatus(appointment.slotId, "booked");
         }
       }

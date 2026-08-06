@@ -42,6 +42,10 @@ export function formatTime(time: string): string {
   return `${hour12}:${minutes} ${ampm}`;
 }
 
+export function toHHmm(time: string): string {
+  return time.slice(0, 5);
+}
+
 export function toISODateString(date: Date, timeZone = APP_TIMEZONE): string {
   const parts = new Intl.DateTimeFormat("en-CA", {
     timeZone,

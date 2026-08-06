@@ -1,12 +1,18 @@
 import type { Request, Response, NextFunction } from "express";
 import { BaseController } from "../../shared/controllers/base.controller.js";
+import { AppError } from "../../shared/errors/app-error.js";
+import { userFilterSchema } from "./users.validation.js";
 import { usersService } from "./users.service.js";
 
 export class UsersController extends BaseController {
-  findAll = async (_req: Request, res: Response, next: NextFunction): Promise<void> => {
+  findAll = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const users = await usersService.findAll(_req.query as any);
-      this.ok(res, users);
+      const parsed = userFilterSchema.safeParse(req.query);
+      if (!parsed.success) {
+        throw AppError.badRequest("Validation failed", parsed.error.issues);
+      }
+      const { data, pagination } = await usersService.findAll(parsed.data);
+      this.paginated(res, data, pagination);
     } catch (error) {
       next(error);
     }

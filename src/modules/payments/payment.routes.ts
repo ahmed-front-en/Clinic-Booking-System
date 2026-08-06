@@ -9,6 +9,7 @@ const router = Router();
 
 router.post("/", authenticate, authorize(Permissions.PAY_APPOINTMENT, Permissions.MANAGE_PAYMENTS), validate(createPaymentSchema), paymentController.createAsPatient);
 router.get("/mine", authenticate, authorize(Permissions.PAY_APPOINTMENT), paymentController.findMyPayments);
+router.patch("/mine/:id", authenticate, authorize(Permissions.PAY_APPOINTMENT), validate(updatePaymentSchema), paymentController.payAsPatient);
 
 router.get("/appointment/:appointmentId", authenticate, authorize(Permissions.MANAGE_PAYMENTS), paymentController.findByAppointmentId);
 router.get("/", authenticate, authorize(Permissions.MANAGE_PAYMENTS), paymentController.findAll);

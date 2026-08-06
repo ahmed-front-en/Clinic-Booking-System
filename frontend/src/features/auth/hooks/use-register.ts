@@ -2,9 +2,11 @@
 
 import { useState } from "react";
 import { useAuth } from "./use-auth";
+import { useApiError } from "@/hooks/useApiError";
 
 export function useRegister() {
   const { register } = useAuth();
+  const { parse } = useApiError();
   const [isPending, setIsPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -14,8 +16,7 @@ export function useRegister() {
     try {
       await register(email, password, fullName);
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Registration failed";
-      setError(message);
+      setError(parse(err).message);
       throw err;
     } finally {
       setIsPending(false);

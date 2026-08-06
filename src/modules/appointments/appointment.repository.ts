@@ -1,5 +1,6 @@
 import { BaseRepository } from "../../shared/repositories/base.repository.js";
 import { pool } from "../../services/database.service.js";
+import { ACTIVE_APPOINTMENT_STATUSES } from "./appointment.constants.js";
 import type { AppointmentRecord, AppointmentReadModel } from "./appointment.interfaces.js";
 import type { UUID } from "../../shared/types/common.types.js";
 
@@ -127,8 +128,18 @@ export class AppointmentRepository extends BaseRepository {
 
   async existsForSlot(slotId: UUID): Promise<boolean> {
     const result = await this.query<IdRow>(
-      `SELECT id FROM appointments WHERE slot_id = $1`,
-      [slotId],
+      `SELECT id FROM appointments
+       WHERE slot_id = $1 AND status = ANY($2::appointment_status[])`,
+      [slotId, [...ACTIVE_APPOINTMENT_STATUSES]],
+    );
+    return result.rows.length > 0;
+  }
+
+  async existsActiveForSlotExcluding(slotId: UUID, excludeId: UUID): Promise<boolean> {
+    const result = await this.query<IdRow>(
+      `SELECT id FROM appointments
+       WHERE slot_id = $1 AND status = ANY($2::appointment_status[]) AND id != $3`,
+      [slotId, [...ACTIVE_APPOINTMENT_STATUSES], excludeId],
     );
     return result.rows.length > 0;
   }
@@ -222,9 +233,9 @@ export class AppointmentRepository extends BaseRepository {
       const result = await this.query<AppointmentRecord>(
         `UPDATE appointments
          SET status = 'cancelled'
-         WHERE id = $1 AND status IN ('scheduled', 'confirmed')
+         WHERE id = $1 AND status = ANY($2::appointment_status[])
          RETURNING ${this.selectFields}`,
-        [id],
+        [id, [...ACTIVE_APPOINTMENT_STATUSES]],
       );
       const appointment = result.rows[0] ?? null;
       if (appointment) {

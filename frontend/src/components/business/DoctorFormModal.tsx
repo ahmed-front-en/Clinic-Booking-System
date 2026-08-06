@@ -37,7 +37,7 @@ interface DoctorFormModalProps {
   users: UserRecord[];
   clinics: ClinicRecord[];
   specialties: SpecialtyRecord[];
-  onSubmit: (data: CreateDoctorInput | UpdateDoctorInput) => void;
+  onSubmit: (data: CreateDoctorInput | UpdateDoctorInput) => void | Promise<void>;
   isSubmitting?: boolean;
 }
 
@@ -65,7 +65,7 @@ export function DoctorFormModal({
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [formError, setFormError] = useState<string | null>(null);
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setFieldErrors({});
     setFormError(null);
@@ -92,10 +92,15 @@ export function DoctorFormModal({
       return;
     }
 
-    Promise.resolve(onSubmit(result.data)).catch((err: unknown) => {
+    try {
+      await onSubmit(result.data);
+    } catch (err: unknown) {
       const { message } = parse(err);
       setFormError(message);
-    });
+      if (!doctor) {
+        setFieldErrors((prev) => ({ ...prev, userId: message }));
+      }
+    }
   }
 
   return (

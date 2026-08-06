@@ -924,7 +924,71 @@ Rate limiting is **not yet implemented**. The `429 TOO_MANY_REQUESTS` status cod
 
 ---
 
-#### 13.22 Create Doctor (Admin)
+#### 13.22 Get My Doctor Profile
+
+| Property | Value |
+|----------|-------|
+| **Feature** | Get My Profile |
+| **Method** | `GET` |
+| **Route** | `/doctors/me` |
+| **Description** | Returns the authenticated doctor's profile |
+| **Auth required** | Yes |
+| **Required Role(s)** | `doctor` (VIEW_OWN_PROFILE) |
+
+**Response Body (200):**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "uuid",
+    "userId": "uuid",
+    "clinicId": "uuid",
+    "specialtyId": "uuid",
+    "consultationFee": "string (numeric)",
+    "bio": "string | null",
+    "experienceYears": 0,
+    "doctor": {
+      "id": "uuid",
+      "displayName": "string",
+      "clinicName": "string",
+      "specialtyName": "string"
+    }
+  }
+}
+```
+
+**Error Codes:** `404` (no doctor profile for this user)
+
+---
+
+#### 13.23 Update My Doctor Profile
+
+| Property | Value |
+|----------|-------|
+| **Feature** | Update My Profile |
+| **Method** | `PATCH` |
+| **Route** | `/doctors/me` |
+| **Description** | Updates the authenticated doctor's profile |
+| **Auth required** | Yes |
+| **Required Role(s)** | `doctor` (MANAGE_OWN_PROFILE) |
+
+**Request Body:**
+```json
+{
+  "fullName": "string (min 1, max 255, optional)",
+  "consultationFee": "number (>= 0, optional)",
+  "bio": "string (nullable, optional)",
+  "experienceYears": "integer (>= 0, optional)"
+}
+```
+
+**Response Body (200):** Updated doctor read model (same shape as 13.22).
+
+**Error Codes:** `400`, `401`, `403`, `404`
+
+---
+
+#### 13.24 Create Doctor (Admin)
 
 | Property | Value |
 |----------|-------|
@@ -962,7 +1026,7 @@ Rate limiting is **not yet implemented**. The `429 TOO_MANY_REQUESTS` status cod
 
 ---
 
-#### 13.23 Update Doctor (Admin)
+#### 13.25 Update Doctor (Admin)
 
 | Property | Value |
 |----------|-------|
@@ -983,7 +1047,7 @@ Rate limiting is **not yet implemented**. The `429 TOO_MANY_REQUESTS` status cod
 
 ---
 
-#### 13.24 Delete Doctor (Admin)
+#### 13.26 Delete Doctor (Admin)
 
 | Property | Value |
 |----------|-------|
@@ -1004,7 +1068,7 @@ Rate limiting is **not yet implemented**. The `429 TOO_MANY_REQUESTS` status cod
 
 ### Doctor Schedules
 
-#### 13.25 Get My Schedule (Doctor)
+#### 13.27 Get My Schedule (Doctor)
 
 | Property | Value |
 |----------|-------|
@@ -1036,7 +1100,7 @@ Rate limiting is **not yet implemented**. The `429 TOO_MANY_REQUESTS` status cod
 
 ---
 
-#### 13.26 Get Schedule by Doctor ID
+#### 13.28 Get Schedule by Doctor ID
 
 | Property | Value |
 |----------|-------|
@@ -1053,7 +1117,7 @@ Rate limiting is **not yet implemented**. The `429 TOO_MANY_REQUESTS` status cod
 
 ---
 
-#### 13.27 List All Schedules
+#### 13.29 List All Schedules
 
 | Property | Value |
 |----------|-------|
@@ -1068,7 +1132,7 @@ Rate limiting is **not yet implemented**. The `429 TOO_MANY_REQUESTS` status cod
 
 ---
 
-#### 13.28 Get Schedule by ID
+#### 13.30 Get Schedule by ID
 
 | Property | Value |
 |----------|-------|
@@ -1085,7 +1149,7 @@ Rate limiting is **not yet implemented**. The `429 TOO_MANY_REQUESTS` status cod
 
 ---
 
-#### 13.29 Create Schedule
+#### 13.31 Create Schedule
 
 | Property | Value |
 |----------|-------|
@@ -1122,7 +1186,7 @@ Rate limiting is **not yet implemented**. The `429 TOO_MANY_REQUESTS` status cod
 
 ---
 
-#### 13.30 Update Schedule
+#### 13.32 Update Schedule
 
 | Property | Value |
 |----------|-------|
@@ -1143,7 +1207,7 @@ Rate limiting is **not yet implemented**. The `429 TOO_MANY_REQUESTS` status cod
 
 ---
 
-#### 13.31 Delete Schedule
+#### 13.33 Delete Schedule
 
 | Property | Value |
 |----------|-------|
@@ -1164,7 +1228,7 @@ Rate limiting is **not yet implemented**. The `429 TOO_MANY_REQUESTS` status cod
 
 ### Appointment Slots
 
-#### 13.32 Find Available Slots
+#### 13.34 Find Available Slots
 
 | Property | Value |
 |----------|-------|
@@ -1205,7 +1269,7 @@ Rate limiting is **not yet implemented**. The `429 TOO_MANY_REQUESTS` status cod
 
 ---
 
-#### 13.33 Get Slots by Doctor
+#### 13.35 Get Slots by Doctor
 
 | Property | Value |
 |----------|-------|
@@ -1220,7 +1284,7 @@ Rate limiting is **not yet implemented**. The `429 TOO_MANY_REQUESTS` status cod
 
 ---
 
-#### 13.34 Get Slots by Date
+#### 13.36 Get Slots by Date
 
 | Property | Value |
 |----------|-------|
@@ -1235,7 +1299,7 @@ Rate limiting is **not yet implemented**. The `429 TOO_MANY_REQUESTS` status cod
 
 ---
 
-#### 13.35 List All Slots (Admin)
+#### 13.37 List All Slots (Admin)
 
 | Property | Value |
 |----------|-------|
@@ -1248,7 +1312,7 @@ Rate limiting is **not yet implemented**. The `429 TOO_MANY_REQUESTS` status cod
 
 ---
 
-#### 13.36 Get Slot by ID (Admin)
+#### 13.38 Get Slot by ID (Admin)
 
 | Property | Value |
 |----------|-------|
@@ -1263,7 +1327,7 @@ Rate limiting is **not yet implemented**. The `429 TOO_MANY_REQUESTS` status cod
 
 ---
 
-#### 13.37 Create Slot (Admin)
+#### 13.39 Create Slot (Admin)
 
 | Property | Value |
 |----------|-------|
@@ -1302,7 +1366,7 @@ Rate limiting is **not yet implemented**. The `429 TOO_MANY_REQUESTS` status cod
 
 ---
 
-#### 13.38 Update Slot (Admin)
+#### 13.40 Update Slot (Admin)
 
 | Property | Value |
 |----------|-------|
@@ -1323,7 +1387,7 @@ Rate limiting is **not yet implemented**. The `429 TOO_MANY_REQUESTS` status cod
 
 ---
 
-#### 13.39 Delete Slot (Admin)
+#### 13.41 Delete Slot (Admin)
 
 | Property | Value |
 |----------|-------|
@@ -1344,7 +1408,7 @@ Rate limiting is **not yet implemented**. The `429 TOO_MANY_REQUESTS` status cod
 
 ### Appointments
 
-#### 13.40 Book Appointment (Self)
+#### 13.42 Book Appointment (Self)
 
 | Property | Value |
 |----------|-------|
@@ -1381,7 +1445,7 @@ Rate limiting is **not yet implemented**. The `429 TOO_MANY_REQUESTS` status cod
 
 ---
 
-#### 13.41 Get My Appointments
+#### 13.43 Get My Appointments
 
 | Property | Value |
 |----------|-------|
@@ -1396,7 +1460,7 @@ Rate limiting is **not yet implemented**. The `429 TOO_MANY_REQUESTS` status cod
 
 ---
 
-#### 13.42 Cancel My Appointment
+#### 13.44 Cancel My Appointment
 
 | Property | Value |
 |----------|-------|
@@ -1422,7 +1486,7 @@ Rate limiting is **not yet implemented**. The `429 TOO_MANY_REQUESTS` status cod
 
 ---
 
-#### 13.43 Get Appointments by Patient (Admin)
+#### 13.45 Get Appointments by Patient (Admin)
 
 | Property | Value |
 |----------|-------|
@@ -1437,7 +1501,7 @@ Rate limiting is **not yet implemented**. The `429 TOO_MANY_REQUESTS` status cod
 
 ---
 
-#### 13.44 Get Appointments by Doctor (Admin)
+#### 13.46 Get Appointments by Doctor (Admin)
 
 | Property | Value |
 |----------|-------|
@@ -1452,7 +1516,7 @@ Rate limiting is **not yet implemented**. The `429 TOO_MANY_REQUESTS` status cod
 
 ---
 
-#### 13.45 List All Appointments (Admin)
+#### 13.47 List All Appointments (Admin)
 
 | Property | Value |
 |----------|-------|
@@ -1465,7 +1529,7 @@ Rate limiting is **not yet implemented**. The `429 TOO_MANY_REQUESTS` status cod
 
 ---
 
-#### 13.46 Get Appointment by ID (Admin)
+#### 13.48 Get Appointment by ID (Admin)
 
 | Property | Value |
 |----------|-------|
@@ -1480,7 +1544,7 @@ Rate limiting is **not yet implemented**. The `429 TOO_MANY_REQUESTS` status cod
 
 ---
 
-#### 13.47 Update Appointment (Admin)
+#### 13.49 Update Appointment (Admin)
 
 | Property | Value |
 |----------|-------|
@@ -1505,7 +1569,7 @@ Rate limiting is **not yet implemented**. The `429 TOO_MANY_REQUESTS` status cod
 
 ---
 
-#### 13.48 Delete Appointment (Admin)
+#### 13.50 Delete Appointment (Admin)
 
 | Property | Value |
 |----------|-------|
@@ -1524,7 +1588,7 @@ Rate limiting is **not yet implemented**. The `429 TOO_MANY_REQUESTS` status cod
 
 ### Patients
 
-#### 13.49 Get My Patient Profile
+#### 13.51 Get My Patient Profile
 
 | Property | Value |
 |----------|-------|
@@ -1552,7 +1616,7 @@ Rate limiting is **not yet implemented**. The `429 TOO_MANY_REQUESTS` status cod
 
 ---
 
-#### 13.50 Update My Patient Profile
+#### 13.52 Update My Patient Profile
 
 | Property | Value |
 |----------|-------|
@@ -1577,7 +1641,7 @@ Rate limiting is **not yet implemented**. The `429 TOO_MANY_REQUESTS` status cod
 
 ---
 
-#### 13.51 Create Patient (Admin)
+#### 13.53 Create Patient (Admin)
 
 | Property | Value |
 |----------|-------|
@@ -1603,7 +1667,7 @@ Rate limiting is **not yet implemented**. The `429 TOO_MANY_REQUESTS` status cod
 
 ---
 
-#### 13.52 Get Patient by User ID (Admin)
+#### 13.54 Get Patient by User ID (Admin)
 
 | Property | Value |
 |----------|-------|
@@ -1618,7 +1682,7 @@ Rate limiting is **not yet implemented**. The `429 TOO_MANY_REQUESTS` status cod
 
 ---
 
-#### 13.53 Update Patient (Admin)
+#### 13.55 Update Patient (Admin)
 
 | Property | Value |
 |----------|-------|
@@ -1635,7 +1699,7 @@ Rate limiting is **not yet implemented**. The `429 TOO_MANY_REQUESTS` status cod
 
 ---
 
-#### 13.54 List All Patients (Admin)
+#### 13.56 List All Patients (Admin)
 
 | Property | Value |
 |----------|-------|
@@ -1648,7 +1712,7 @@ Rate limiting is **not yet implemented**. The `429 TOO_MANY_REQUESTS` status cod
 
 ---
 
-#### 13.55 Get Patient by ID (Admin)
+#### 13.57 Get Patient by ID (Admin)
 
 | Property | Value |
 |----------|-------|
@@ -1663,7 +1727,7 @@ Rate limiting is **not yet implemented**. The `429 TOO_MANY_REQUESTS` status cod
 
 ---
 
-#### 13.56 Delete Patient (Admin)
+#### 13.58 Delete Patient (Admin)
 
 | Property | Value |
 |----------|-------|
@@ -1682,7 +1746,7 @@ Rate limiting is **not yet implemented**. The `429 TOO_MANY_REQUESTS` status cod
 
 ### Payments
 
-#### 13.57 Create Payment (Self)
+#### 13.59 Create Payment (Self)
 
 | Property | Value |
 |----------|-------|
@@ -1718,7 +1782,7 @@ Rate limiting is **not yet implemented**. The `429 TOO_MANY_REQUESTS` status cod
 
 ---
 
-#### 13.58 Get My Payments
+#### 13.60 Get My Payments
 
 | Property | Value |
 |----------|-------|
@@ -1748,7 +1812,7 @@ Rate limiting is **not yet implemented**. The `429 TOO_MANY_REQUESTS` status cod
 
 ---
 
-#### 13.59 Get Payment by Appointment (Admin)
+#### 13.61 Get Payment by Appointment (Admin)
 
 | Property | Value |
 |----------|-------|
@@ -1763,7 +1827,7 @@ Rate limiting is **not yet implemented**. The `429 TOO_MANY_REQUESTS` status cod
 
 ---
 
-#### 13.60 List All Payments (Admin)
+#### 13.62 List All Payments (Admin)
 
 | Property | Value |
 |----------|-------|
@@ -1776,7 +1840,7 @@ Rate limiting is **not yet implemented**. The `429 TOO_MANY_REQUESTS` status cod
 
 ---
 
-#### 13.61 Get Payment by ID (Admin)
+#### 13.63 Get Payment by ID (Admin)
 
 | Property | Value |
 |----------|-------|
@@ -1791,7 +1855,7 @@ Rate limiting is **not yet implemented**. The `429 TOO_MANY_REQUESTS` status cod
 
 ---
 
-#### 13.62 Update Payment (Admin)
+#### 13.64 Update Payment (Admin)
 
 | Property | Value |
 |----------|-------|
@@ -1810,7 +1874,7 @@ Rate limiting is **not yet implemented**. The `429 TOO_MANY_REQUESTS` status cod
 
 ---
 
-#### 13.63 Delete Payment (Admin)
+#### 13.65 Delete Payment (Admin)
 
 | Property | Value |
 |----------|-------|
@@ -1829,7 +1893,7 @@ Rate limiting is **not yet implemented**. The `429 TOO_MANY_REQUESTS` status cod
 
 ### Reviews
 
-#### 13.64 Create Review (Self)
+#### 13.66 Create Review (Self)
 
 | Property | Value |
 |----------|-------|
@@ -1862,7 +1926,7 @@ Rate limiting is **not yet implemented**. The `429 TOO_MANY_REQUESTS` status cod
 
 ---
 
-#### 13.65 Get My Reviews
+#### 13.67 Get My Reviews
 
 | Property | Value |
 |----------|-------|
@@ -1890,7 +1954,7 @@ Rate limiting is **not yet implemented**. The `429 TOO_MANY_REQUESTS` status cod
 
 ---
 
-#### 13.66 Get Review by Appointment (Admin)
+#### 13.68 Get Review by Appointment (Admin)
 
 | Property | Value |
 |----------|-------|
@@ -1905,7 +1969,7 @@ Rate limiting is **not yet implemented**. The `429 TOO_MANY_REQUESTS` status cod
 
 ---
 
-#### 13.67 List All Reviews (Admin)
+#### 13.69 List All Reviews (Admin)
 
 | Property | Value |
 |----------|-------|
@@ -1918,7 +1982,7 @@ Rate limiting is **not yet implemented**. The `429 TOO_MANY_REQUESTS` status cod
 
 ---
 
-#### 13.68 Get Review by ID (Admin)
+#### 13.70 Get Review by ID (Admin)
 
 | Property | Value |
 |----------|-------|
@@ -1933,7 +1997,7 @@ Rate limiting is **not yet implemented**. The `429 TOO_MANY_REQUESTS` status cod
 
 ---
 
-#### 13.69 Update Review (Admin)
+#### 13.71 Update Review (Admin)
 
 | Property | Value |
 |----------|-------|
@@ -1958,7 +2022,7 @@ Rate limiting is **not yet implemented**. The `429 TOO_MANY_REQUESTS` status cod
 
 ---
 
-#### 13.70 Delete Review (Admin)
+#### 13.72 Delete Review (Admin)
 
 | Property | Value |
 |----------|-------|
@@ -1989,30 +2053,32 @@ Rate limiting is **not yet implemented**. The `429 TOO_MANY_REQUESTS` status cod
 | 13.16 | GET | `/specialties/:id` |
 | 13.20 | GET | `/doctors` |
 | 13.21 | GET | `/doctors/:id` |
-| 13.32 | GET | `/appointment-slots/available` |
-| 13.33 | GET | `/appointment-slots/doctor/:doctorId` |
-| 13.34 | GET | `/appointment-slots/date/:slotDate` |
+| 13.34 | GET | `/appointment-slots/available` |
+| 13.35 | GET | `/appointment-slots/doctor/:doctorId` |
+| 13.36 | GET | `/appointment-slots/date/:slotDate` |
 
 ### Patient Endpoints (Auth + Patient Role)
 | # | Method | Route |
 |---|--------|-------|
-| 13.40 | POST | `/appointments` |
-| 13.41 | GET | `/appointments/mine` |
-| 13.42 | PATCH | `/appointments/mine/:id` |
-| 13.49 | GET | `/patients/me` |
-| 13.50 | PATCH | `/patients/me` |
-| 13.57 | POST | `/payments` |
-| 13.58 | GET | `/payments/mine` |
-| 13.64 | POST | `/reviews` |
-| 13.65 | GET | `/reviews/mine` |
+| 13.42 | POST | `/appointments` |
+| 13.43 | GET | `/appointments/mine` |
+| 13.44 | PATCH | `/appointments/mine/:id` |
+| 13.51 | GET | `/patients/me` |
+| 13.52 | PATCH | `/patients/me` |
+| 13.59 | POST | `/payments` |
+| 13.60 | GET | `/payments/mine` |
+| 13.66 | POST | `/reviews` |
+| 13.67 | GET | `/reviews/mine` |
 
 ### Doctor Endpoints (Auth + Doctor Role)
 | # | Method | Route |
 |---|--------|-------|
-| 13.25 | GET | `/doctor-schedules/me` |
-| 13.41 | GET | `/appointments/mine` |
-| 13.42 | PATCH | `/appointments/mine/:id` |
-| 13.65 | GET | `/reviews/mine` |
+| 13.22 | GET | `/doctors/me` |
+| 13.23 | PATCH | `/doctors/me` |
+| 13.27 | GET | `/doctor-schedules/me` |
+| 13.43 | GET | `/appointments/mine` |
+| 13.44 | PATCH | `/appointments/mine/:id` |
+| 13.67 | GET | `/reviews/mine` |
 
 ### Admin Endpoints (Auth + Admin Role)
 | # | Method | Route |
@@ -2027,15 +2093,15 @@ Rate limiting is **not yet implemented**. The `429 TOO_MANY_REQUESTS` status cod
 | 13.17 | POST | `/admin/specialties` |
 | 13.18 | PATCH | `/admin/specialties/:id` |
 | 13.19 | DELETE | `/admin/specialties/:id` |
-| 13.22 | POST | `/admin/doctors` |
-| 13.23 | PATCH | `/admin/doctors/:id` |
-| 13.24 | DELETE | `/admin/doctors/:id` |
-| 13.26–31 | All | `/doctor-schedules/*`, `/doctor-schedules/doctor/:doctorId` |
-| 13.35–39 | All | `/admin/appointment-slots/*` |
-| 13.43–48 | All | `/appointments/*` (admin-scoped) |
-| 13.51–56 | All | `/patients/*` (admin-scoped) |
-| 13.59–63 | All | `/payments/*` (admin-scoped) |
-| 13.66–70 | All | `/reviews/*` (admin-scoped) |
+| 13.24 | POST | `/admin/doctors` |
+| 13.25 | PATCH | `/admin/doctors/:id` |
+| 13.26 | DELETE | `/admin/doctors/:id` |
+| 13.28–33 | All | `/doctor-schedules/*`, `/doctor-schedules/doctor/:doctorId` |
+| 13.37–41 | All | `/admin/appointment-slots/*` |
+| 13.45–50 | All | `/appointments/*` (admin-scoped) |
+| 13.53–58 | All | `/patients/*` (admin-scoped) |
+| 13.61–65 | All | `/payments/*` (admin-scoped) |
+| 13.68–72 | All | `/reviews/*` (admin-scoped) |
 
 ---
 

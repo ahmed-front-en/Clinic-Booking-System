@@ -26,6 +26,7 @@ import {
 import type { DoctorReadModel } from "@/types/models/doctor";
 import type { DoctorScheduleRecord } from "@/types/models/schedule";
 import { useApiError } from "@/hooks/useApiError";
+import { toHHmm } from "@/lib/utils";
 
 const DAYS = [
   "Sunday",
@@ -59,8 +60,8 @@ export function ScheduleFormModal({
   const [weekday, setWeekday] = useState(
     schedule ? String(schedule.weekday) : "",
   );
-  const [startTime, setStartTime] = useState(schedule?.startTime ?? "");
-  const [endTime, setEndTime] = useState(schedule?.endTime ?? "");
+  const [startTime, setStartTime] = useState(toHHmm(schedule?.startTime ?? ""));
+  const [endTime, setEndTime] = useState(toHHmm(schedule?.endTime ?? ""));
   const [slotDuration, setSlotDuration] = useState(
     schedule ? String(schedule.slotDuration) : "30",
   );

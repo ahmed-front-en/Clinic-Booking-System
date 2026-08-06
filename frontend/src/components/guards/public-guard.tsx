@@ -1,19 +1,30 @@
 "use client";
 
 import { useAuth } from "@/features/auth/hooks/use-auth";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, type ReactNode } from "react";
 import { getHomePathForRole } from "@/lib/routing";
 
-export function PublicGuard({ children }: { children: ReactNode }) {
+interface PublicGuardProps {
+  children: ReactNode;
+  selfManagedRedirectPaths?: string[];
+}
+
+export function PublicGuard({
+  children,
+  selfManagedRedirectPaths = [],
+}: PublicGuardProps) {
   const { user, isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
+
+  const selfManagesRedirect = selfManagedRedirectPaths.some((path) => pathname === path);
 
   useEffect(() => {
-    if (!isLoading && isAuthenticated && user) {
+    if (!isLoading && isAuthenticated && user && !selfManagesRedirect) {
       router.replace(getHomePathForRole(user.role));
     }
-  }, [isAuthenticated, isLoading, router, user]);
+  }, [isAuthenticated, isLoading, router, selfManagesRedirect, user]);
 
   if (isLoading) {
     return (
@@ -23,7 +34,7 @@ export function PublicGuard({ children }: { children: ReactNode }) {
     );
   }
 
-  if (isAuthenticated) {
+  if (isAuthenticated && !selfManagesRedirect) {
     return null;
   }
 

@@ -247,6 +247,7 @@ function DoctorAppointmentsContent() {
                     appointment={appointment}
                     onCancel={handleCancel}
                     isCancelling={isCancelling}
+                    viewer="doctor"
                   />
                 ))}
               </div>
@@ -263,7 +264,7 @@ function DoctorAppointmentsContent() {
             ) : (
               <div className="flex flex-col gap-3">
                 {past.map((appointment) => (
-                  <AppointmentCard key={appointment.id} appointment={appointment} />
+                  <AppointmentCard key={appointment.id} appointment={appointment} viewer="doctor" />
                 ))}
               </div>
             )}

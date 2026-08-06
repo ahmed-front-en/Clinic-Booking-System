@@ -4,7 +4,7 @@ import { PublicGuardWrapper } from "./public-guard-wrapper";
 
 export default function PublicLayout({ children }: { children: ReactNode }) {
   return (
-    <PublicGuardWrapper>
+    <PublicGuardWrapper selfManagedRedirectPaths={["/login"]}>
       <AuthLayout>{children}</AuthLayout>
     </PublicGuardWrapper>
   );

@@ -16,3 +16,10 @@ export interface UpdateDoctorDto {
   experienceYears?: number;
   fullName?: string;
 }
+
+export interface UpdateMyDoctorDto {
+  fullName?: string;
+  consultationFee?: number;
+  bio?: string | null;
+  experienceYears?: number;
+}

@@ -3,11 +3,27 @@ import { AppError } from "../../shared/errors/app-error.js";
 import { HttpStatus } from "../../shared/constants/http-status.js";
 import type { UpdateUserDto, UserFilter } from "./users.types.js";
 import type { UserRecord } from "./users.interfaces.js";
+import type { PaginationMeta } from "../../shared/types/pagination.types.js";
 import type { UUID } from "../../shared/types/common.types.js";
 
 export class UsersService {
-  async findAll(_filter: UserFilter): Promise<UserRecord[]> {
-    return usersRepository.findAll();
+  async findAll(filter: UserFilter): Promise<{ data: UserRecord[]; pagination: PaginationMeta }> {
+    const page = filter.page ?? 1;
+    const limit = filter.limit ?? 20;
+    const offset = (page - 1) * limit;
+
+    const total = await usersRepository.count(filter);
+    const data = await usersRepository.findPage(filter, limit, offset);
+
+    return {
+      data,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
   }
 
   async findById(id: UUID): Promise<UserRecord> {

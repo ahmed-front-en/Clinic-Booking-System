@@ -46,9 +46,18 @@ export function ClinicSelector({
         return (
           <Card
             key={clinic.id}
+            role="button"
+            tabIndex={0}
+            aria-pressed={isSelected}
             onClick={() => onSelect(clinic.id)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                onSelect(clinic.id);
+              }
+            }}
             className={cn(
-              "cursor-pointer transition-all hover:border-primary",
+              "cursor-pointer transition-all hover:border-primary focus-visible:ring-2 focus-visible:ring-ring",
               isSelected
                 ? "border-2 border-primary bg-primary/5 shadow-md"
                 : "border-border bg-surface-container-lowest",

@@ -1,11 +1,47 @@
 import { doctorRepository } from "./doctor.repository.js";
 import { AppError } from "../../shared/errors/app-error.js";
 import { HttpStatus } from "../../shared/constants/http-status.js";
-import type { CreateDoctorDto, UpdateDoctorDto } from "./doctor.types.js";
+import type { CreateDoctorDto, UpdateDoctorDto, UpdateMyDoctorDto } from "./doctor.types.js";
 import type { DoctorRecord, DoctorReadModel } from "./doctor.interfaces.js";
 import type { UUID } from "../../shared/types/common.types.js";
 
 export class DoctorService {
+  async findMyProfile(userId: UUID): Promise<DoctorReadModel> {
+    const doctor = await doctorRepository.findByUserId(userId);
+    if (!doctor) {
+      throw AppError.notFound("Doctor profile not found");
+    }
+    return doctor;
+  }
+
+  async updateMyProfile(userId: UUID, dto: UpdateMyDoctorDto): Promise<DoctorReadModel> {
+    const doctor = await doctorRepository.findByUserId(userId);
+    if (!doctor) {
+      throw AppError.notFound("Doctor profile not found");
+    }
+
+    if (
+      dto.fullName === undefined &&
+      dto.consultationFee === undefined &&
+      dto.bio === undefined &&
+      dto.experienceYears === undefined
+    ) {
+      throw new AppError(HttpStatus.BAD_REQUEST, "No fields provided for update");
+    }
+
+    if (dto.fullName !== undefined) {
+      await doctorRepository.updateUserFullName(userId, dto.fullName);
+    }
+
+    await doctorRepository.update(doctor.id, {
+      consultationFee: dto.consultationFee !== undefined ? String(dto.consultationFee) : undefined,
+      bio: dto.bio,
+      experienceYears: dto.experienceYears,
+    });
+
+    return this.findMyProfile(userId);
+  }
+
   async create(dto: CreateDoctorDto): Promise<DoctorRecord> {
     const user = await doctorRepository.findUserById(dto.userId);
     if (!user) {

@@ -35,6 +35,7 @@ const doctorLinks: NavItem[] = [
   { label: "Appointments", href: "/appointments", icon: Calendar },
   { label: "Schedule", href: "/schedule", icon: CalendarPlus },
   { label: "Reviews", href: "/reviews", icon: Star },
+  { label: "Profile", href: "/profile", icon: User },
 ];
 
 export function RoleBasedSidebar({ className }: { className?: string }) {

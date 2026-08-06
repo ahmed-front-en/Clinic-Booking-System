@@ -36,6 +36,50 @@ export class PaymentService {
     return paymentRepository.findByPatientId(patient.id);
   }
 
+  async payAsPatient(userId: UUID, id: UUID, dto: UpdatePaymentDto): Promise<PaymentRecord> {
+    const payment = await paymentRepository.findById(id);
+    if (!payment) {
+      throw AppError.notFound("Payment not found");
+    }
+
+    const patient = await paymentRepository.findPatientByUserId(userId);
+    if (!patient) {
+      throw AppError.notFound("Patient profile not found");
+    }
+    if (payment.patient.id !== patient.id) {
+      throw AppError.forbidden("You can only pay for your own payments");
+    }
+
+    if (payment.status !== "pending") {
+      throw new AppError(HttpStatus.CONFLICT, "Only pending payments can be paid");
+    }
+
+    const appointment = await paymentRepository.findAppointmentPatientId(payment.appointmentId);
+    if (appointment?.status === "cancelled") {
+      throw new AppError(HttpStatus.BAD_REQUEST, "Cannot pay for a cancelled appointment");
+    }
+    if (appointment?.status === "completed") {
+      throw new AppError(HttpStatus.BAD_REQUEST, "Cannot pay for a completed appointment");
+    }
+
+    if (dto.amount !== undefined) {
+      throw new AppError(HttpStatus.BAD_REQUEST, "Patients cannot change the payment amount");
+    }
+    if (dto.status !== undefined && dto.status !== "paid") {
+      throw new AppError(HttpStatus.BAD_REQUEST, "Patients can only mark a payment as paid");
+    }
+
+    const updated = await paymentRepository.update(id, {
+      status: "paid",
+      method: dto.method,
+      transactionReference: dto.transactionReference,
+    });
+    if (!updated) {
+      throw AppError.notFound("Payment not found");
+    }
+    return updated;
+  }
+
   async create(dto: CreatePaymentDto): Promise<PaymentRecord> {
     const appointment = await paymentRepository.findAppointmentById(dto.appointmentId);
     if (!appointment) {
